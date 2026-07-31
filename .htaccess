@@ -1,0 +1,22 @@
+# ==========================================================================
+#  .htaccess
+# ==========================================================================
+#  Le dice al servidor Apache: "cualquier petición que NO sea un archivo
+#  o carpeta real que exista en el disco, mándala a index.php". Esto es
+#  lo que permite que URLs como /api/auth/login funcionen sin necesidad
+#  de escribir /index.php?ruta=api/auth/login a mano.
+#
+#  REQUISITO: el módulo "mod_rewrite" de Apache debe estar activado
+#  (en XAMPP normalmente ya viene activado por defecto).
+# ==========================================================================
+
+RewriteEngine On
+
+# Si la URL pedida SÍ corresponde a un archivo real (ej. una imagen,
+# un .css, un .js), Apache lo sirve directamente, sin pasar por index.php.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Para cualquier otra URL, se redirige internamente a index.php,
+# conservando la cadena de consulta (?parametros=...) si la hubiera.
+RewriteRule ^ index.php [QSA,L]
