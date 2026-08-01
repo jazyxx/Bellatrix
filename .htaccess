@@ -10,13 +10,25 @@
 #  (en XAMPP normalmente ya viene activado por defecto).
 # ==========================================================================
 
+# NUEVO EN LA FASE 5: le decimos a Apache que, cuando alguien visite la
+# raíz del sitio (ej. http://localhost/bellatrix/), sirva PRIMERO
+# index.html (la Landing Page pública) si existe, y solo si no existiera,
+# caiga de vuelta a index.php (la API). Sin esta línea, algunos servidores
+# muestran index.php por defecto y el visitante vería el JSON de la API
+# en vez de la página de inicio.
+DirectoryIndex index.html index.php
+
 RewriteEngine On
 
 # Si la URL pedida SÍ corresponde a un archivo real (ej. una imagen,
-# un .css, un .js), Apache lo sirve directamente, sin pasar por index.php.
+# un .css, un .js, o una página como catalogo.html), Apache lo sirve
+# directamente, sin pasar por index.php. Esto es lo que permite que
+# las páginas estáticas de la Fase 5 (catalogo.html, login.html, etc.)
+# convivan sin conflicto con las rutas /api/... de la Fase 2-4.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Para cualquier otra URL, se redirige internamente a index.php,
-# conservando la cadena de consulta (?parametros=...) si la hubiera.
+# Para cualquier otra URL (las que empiezan con /api/...), se redirige
+# internamente a index.php, conservando la cadena de consulta si la hubiera.
 RewriteRule ^ index.php [QSA,L]
+
