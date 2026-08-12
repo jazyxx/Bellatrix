@@ -1,0 +1,530 @@
+/* ============================================================================
+   estilos.css — Sistema de diseño de Ambrosía
+   ============================================================================
+   Este archivo es la ÚNICA hoja de estilos personalizada de todo el sitio
+   público (Landing, Catálogo, Login, Registro, Carrito). Bootstrap 5 (CDN)
+   ya trae la grilla, los botones base y las utilidades responsivas; este
+   archivo SOLO define la identidad visual propia de Ambrosía encima de eso.
+
+   ESTRUCTURA DE ESTE ARCHIVO:
+     1. Variables de diseño (paleta de colores, tipografía, espaciados)
+     2. Reset ligero y tipografía base
+     3. Componentes reutilizables (botones, tarjetas, badges, formularios)
+     4. El elemento de "firma" del sitio: el borde festoneado
+     5. Layout de cada página (header, hero, secciones, footer)
+     6. Ajustes responsivos (mobile-first ya viene de Bootstrap; aquí solo
+        los ajustes finos que Bootstrap no cubre)
+   ============================================================================ */
+
+
+/* ============================================================
+   1. VARIABLES DE DISEÑO
+   ============================================================
+   Paleta basada en la referencia pastel que compartiste (rosa
+   polvo, rosa pálido, menta y salvia) — pensada para transmitir
+   dulzura sin empalagar: rosados para Pastelería, verdes menta
+   para Heladería. El café/espresso reemplaza al negro puro para
+   que hasta el color del texto tenga "sabor" a la marca.
+   ============================================================ */
+:root {
+  /* --- Paleta principal (de tu imagen de referencia) --- */
+  --rosa: #EDAFB8;          /* Rosa polvo — CTA primario, acentos de Pastelería */
+  --rosa-oscuro: #D48A96;   /* Variante oscura para hover/pressed */
+  --blush: #F3CFDC;         /* Rosa pálido — fondos suaves, secciones */
+  --menta: #D2EECF;         /* Menta — acentos de Heladería, badges frescos */
+  --salvia: #B0C4B1;        /* Salvia — CTA secundario, footer, profundidad */
+  --salvia-oscuro: #7C9885; /* Salvia oscuro — texto sobre fondos menta/salvia */
+
+  /* --- Neutros con calidez (nunca negro/blanco puros) --- */
+  --crema: #FDF8F5;         /* Fondo general del sitio */
+  --crema-borde: #F1E4DD;   /* Bordes y separadores suaves */
+  --espresso: #4A332E;      /* Texto principal — café oscuro, no negro */
+  --espresso-suave: #7A645D;/* Texto secundario */
+  --blanco: #FFFFFF;
+
+  /* --- Tipografía --- */
+  --fuente-display: 'Fraunces', Georgia, serif;       /* Titulares con carácter */
+  --fuente-cuerpo: 'Nunito Sans', 'Segoe UI', sans-serif; /* Texto de lectura */
+
+  /* --- Espaciado y forma --- */
+  --radio-suave: 18px;
+  --radio-chico: 10px;
+  --sombra-suave: 0 10px 30px -12px rgba(74, 51, 46, 0.18);
+  --sombra-chica: 0 4px 14px -6px rgba(74, 51, 46, 0.15);
+}
+
+/* ============================================================
+   2. RESET LIGERO Y TIPOGRAFÍA BASE
+   ============================================================ */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--crema);
+  color: var(--espresso);
+  font-family: var(--fuente-cuerpo);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, .fuente-display {
+  font-family: var(--fuente-display);
+  color: var(--espresso);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--rosa-oscuro);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--espresso);
+}
+
+/* "Ojo" tipográfico: etiquetas pequeñas en mayúsculas, usadas como
+   antetítulo (ej. "PASTELERÍA" antes de "Tortas hechas a mano"). */
+.eyebrow {
+  font-family: var(--fuente-cuerpo);
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rosa-oscuro);
+}
+
+/* Respeta la preferencia del usuario de reducir animaciones. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Foco de teclado visible en todo el sitio (accesibilidad). */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--rosa-oscuro);
+  outline-offset: 2px;
+}
+
+
+/* ============================================================
+   3. COMPONENTES REUTILIZABLES
+   ============================================================ */
+
+/* --- Botones de marca (encima de los .btn base de Bootstrap) --- */
+.btn-ambrosia {
+  background-color: var(--rosa);
+  border: none;
+  color: var(--espresso);
+  font-weight: 700;
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: var(--sombra-chica);
+}
+.btn-ambrosia:hover {
+  background-color: var(--rosa-oscuro);
+  color: var(--blanco);
+  transform: translateY(-2px);
+}
+.btn-ambrosia:disabled {
+  background-color: var(--crema-borde);
+  color: var(--espresso-suave);
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.btn-ambrosia-outline {
+  background-color: transparent;
+  border: 2px solid var(--espresso);
+  color: var(--espresso);
+  font-weight: 700;
+  padding: 0.65rem 1.5rem;
+  border-radius: 999px;
+  transition: all 0.15s ease;
+}
+.btn-ambrosia-outline:hover {
+  background-color: var(--espresso);
+  color: var(--crema);
+}
+
+.btn-ambrosia-sage {
+  background-color: var(--salvia);
+  border: none;
+  color: var(--espresso);
+  font-weight: 700;
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  transition: all 0.15s ease;
+}
+.btn-ambrosia-sage:hover {
+  background-color: var(--salvia-oscuro);
+  color: var(--blanco);
+}
+
+/* --- Tarjetas de producto --- */
+.tarjeta-producto {
+  background: var(--blanco);
+  border-radius: var(--radio-suave);
+  overflow: hidden;
+  box-shadow: var(--sombra-chica);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.tarjeta-producto:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sombra-suave);
+}
+
+.tarjeta-producto__imagen {
+  aspect-ratio: 4 / 3;
+  background: linear-gradient(135deg, var(--blush), var(--menta));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fuente-display);
+  font-size: 2.2rem;
+  color: var(--espresso-suave);
+}
+
+.tarjeta-producto__cuerpo {
+  padding: 1.1rem 1.2rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.tarjeta-producto__precio {
+  font-family: var(--fuente-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: auto;
+}
+
+/* --- Insignias de unidad de negocio (codifican información con color) --- */
+.badge-pasteleria {
+  background-color: var(--blush);
+  color: var(--rosa-oscuro);
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.3em 0.85em;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+.badge-heladeria {
+  background-color: var(--menta);
+  color: var(--salvia-oscuro);
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.3em 0.85em;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+.badge-agotado {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  background-color: var(--espresso);
+  color: var(--crema);
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.3em 0.9em;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  z-index: 2;
+}
+
+/* --- Formularios --- */
+.formulario-ambrosia {
+  background: var(--blanco);
+  border-radius: var(--radio-suave);
+  box-shadow: var(--sombra-suave);
+  padding: 2.5rem;
+}
+.formulario-ambrosia .form-control,
+.formulario-ambrosia .form-select {
+  border-radius: var(--radio-chico);
+  border: 1.5px solid var(--crema-borde);
+  padding: 0.7rem 1rem;
+}
+.formulario-ambrosia .form-control:focus,
+.formulario-ambrosia .form-select:focus {
+  border-color: var(--rosa);
+  box-shadow: 0 0 0 0.2rem rgba(237, 175, 184, 0.35);
+}
+.formulario-ambrosia label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+/* Mensaje de error/éxito dentro de un formulario (evita usar alert()) */
+.mensaje-formulario {
+  border-radius: var(--radio-chico);
+  padding: 0.85rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+  display: none; /* Se muestra vía JS solo cuando hay algo que decir */
+}
+.mensaje-formulario--error {
+  background-color: #FBE2DF;
+  color: #8A3B2E;
+}
+.mensaje-formulario--exito {
+  background-color: var(--menta);
+  color: var(--salvia-oscuro);
+}
+
+/* --- Estado vacío (carrito vacío, catálogo sin resultados, etc.) --- */
+.estado-vacio {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  color: var(--espresso-suave);
+}
+.estado-vacio__icono {
+  font-family: var(--fuente-display);
+  font-size: 2.6rem;
+  margin-bottom: 0.6rem;
+  color: var(--rosa);
+}
+
+
+/* ============================================================
+   4. ELEMENTO DE FIRMA: el borde festoneado (manga pastelera)
+   ============================================================
+   Una fila de "conchas" repetidas, como el borde que deja una
+   manga pastelera al decorar una torta. Se usa para separar
+   secciones en vez de una simple línea recta — es el detalle
+   por el que este sitio se reconoce como el de una pastelería.
+   Técnica: gradiente radial repetido, sin necesidad de imágenes.
+   ============================================================ */
+.festoneado {
+  height: 26px;
+  width: 100%;
+}
+.festoneado--sobre-crema {
+  background-image: radial-gradient(circle at 13px 0, transparent 13px, var(--crema) 14px);
+  background-size: 26px 26px;
+  background-repeat: repeat-x;
+}
+.festoneado--sobre-blush {
+  background-image: radial-gradient(circle at 13px 0, transparent 13px, var(--blush) 14px);
+  background-size: 26px 26px;
+  background-repeat: repeat-x;
+}
+.festoneado--voltear {
+  transform: rotate(180deg);
+}
+
+
+/* ============================================================
+   5. LAYOUT DE PÁGINA
+   ============================================================ */
+
+/* --- Header / Navegación --- */
+.header-ambrosia {
+  background-color: var(--crema);
+  border-bottom: 1px solid var(--crema-borde);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.marca-ambrosia {
+  font-family: var(--fuente-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.7rem;
+  color: var(--espresso);
+}
+.nav-ambrosia .nav-link {
+  color: var(--espresso);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin: 0 0.5rem;
+}
+.nav-ambrosia .nav-link:hover,
+.nav-ambrosia .nav-link.activo {
+  color: var(--rosa-oscuro);
+}
+.icono-accion {
+  color: var(--espresso);
+  position: relative;
+  font-size: 1.2rem;
+}
+.icono-accion:hover { color: var(--rosa-oscuro); }
+.contador-carrito {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background: var(--rosa-oscuro);
+  color: var(--blanco);
+  font-size: 0.65rem;
+  font-weight: 800;
+  border-radius: 999px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+/* --- Hero de la Landing --- */
+.hero-ambrosia {
+  background: linear-gradient(180deg, var(--blush) 0%, var(--crema) 100%);
+  padding: 4.5rem 0 3rem;
+  overflow: hidden;
+}
+.hero-ambrosia h1 {
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  line-height: 1.05;
+}
+.hero-mancha {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border-radius: 42% 58% 63% 37% / 45% 40% 60% 55%;
+  background: radial-gradient(circle at 32% 28%, var(--menta), var(--salvia) 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--sombra-suave);
+}
+.hero-mancha__texto {
+  font-family: var(--fuente-display);
+  font-style: italic;
+  color: var(--blanco);
+  font-size: 1.3rem;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+/* --- Secciones generales --- */
+.seccion {
+  padding: 4rem 0;
+}
+.seccion--blush { background-color: var(--blush); }
+.seccion--crema { background-color: var(--crema); }
+
+.icono-promesa {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--menta);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  margin-bottom: 0.9rem;
+}
+
+/* --- Sección "Salón de Onces" (contenido propio de Ambrosía) --- */
+.onces-panel {
+  background: var(--espresso);
+  color: var(--crema);
+  border-radius: var(--radio-suave);
+  padding: 3rem;
+  box-shadow: var(--sombra-suave);
+}
+.onces-panel h2 { color: var(--crema); }
+.onces-panel .eyebrow { color: var(--menta); }
+
+/* --- Footer --- */
+.footer-ambrosia {
+  background-color: var(--espresso);
+  color: var(--crema);
+  padding: 3rem 0 1.5rem;
+}
+.footer-ambrosia a { color: var(--crema); opacity: 0.85; }
+.footer-ambrosia a:hover { opacity: 1; color: var(--menta); }
+.footer-ambrosia h6 {
+  color: var(--menta);
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+/* --- Barra de filtros del catálogo --- */
+.barra-filtros {
+  background: var(--blanco);
+  border-radius: var(--radio-suave);
+  box-shadow: var(--sombra-chica);
+  padding: 1.2rem;
+}
+.chip-filtro {
+  border: 1.5px solid var(--crema-borde);
+  background: var(--crema);
+  color: var(--espresso);
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  font-weight: 700;
+  font-size: 0.88rem;
+  transition: all 0.15s ease;
+}
+.chip-filtro.activo {
+  background: var(--espresso);
+  color: var(--crema);
+  border-color: var(--espresso);
+}
+.chip-filtro:hover:not(.activo) {
+  border-color: var(--rosa);
+}
+
+/* --- Fila de un producto dentro del Carrito --- */
+.fila-carrito {
+  background: var(--blanco);
+  border-radius: var(--radio-chico);
+  padding: 1rem 1.2rem;
+  box-shadow: var(--sombra-chica);
+}
+.control-cantidad {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid var(--crema-borde);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.control-cantidad button {
+  border: none;
+  background: var(--crema);
+  width: 32px;
+  height: 32px;
+  font-weight: 800;
+  color: var(--espresso);
+}
+.control-cantidad button:hover { background: var(--blush); }
+.control-cantidad span {
+  width: 34px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.resumen-carrito {
+  background: var(--espresso);
+  color: var(--crema);
+  border-radius: var(--radio-suave);
+  padding: 1.8rem;
+}
+.resumen-carrito .btn-ambrosia { width: 100%; }
+
+
+/* ============================================================
+   6. AJUSTES RESPONSIVOS FINOS
+   ============================================================ */
+@media (max-width: 767.98px) {
+  .seccion { padding: 2.75rem 0; }
+  .onces-panel { padding: 2rem 1.5rem; }
+  .formulario-ambrosia { padding: 1.75rem 1.4rem; }
+}
