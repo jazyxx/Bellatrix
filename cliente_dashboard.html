@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Panel de Cliente — Ambrosía</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+<body>
+
+  <!-- Contenido inicial que será inyectado por injectDashboardLayout -->
+  <div class="row">
+    <div class="col-12 mb-4">
+      <h1 class="fuente-display">✨ Mi Cuenta</h1>
+      <p class="text-muted">Bienvenido a tu panel de Ambrosía. Sigue tus pedidos en tiempo real y revisa tus notificaciones.</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Perfil y Notificaciones -->
+    <div class="col-lg-4">
+      <div class="db-card mb-4">
+        <h3 class="h5 mb-3 fuente-display">👤 Mis Datos</h3>
+        <hr class="my-2">
+        <div class="mb-3">
+          <label class="small text-muted d-block">Nombre completo</label>
+          <strong id="perfil-nombre">-</strong>
+        </div>
+        <div class="mb-3">
+          <label class="small text-muted d-block">Correo electrónico</label>
+          <strong id="perfil-correo">-</strong>
+        </div>
+        <div class="mb-3">
+          <label class="small text-muted d-block">Rol de Usuario</label>
+          <span class="badge-pastel badge-pastel-primary">Cliente Registrado</span>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <h3 class="h5 mb-3 fuente-display">🔔 Notificaciones</h3>
+        <hr class="my-2">
+        <div id="lista-notificaciones" style="max-height: 250px; overflow-y: auto;">
+          <p class="text-muted small text-center my-4">Cargando notificaciones…</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historial y Tracking de Pedidos -->
+    <div class="col-lg-8">
+      <!-- Sección de Tracking Detallado (Se activa al dar clic en un pedido) -->
+      <div id="tracking-card" class="db-card mb-4" style="display: none;">
+        <div class="d-flex align-items-center justify-content-between">
+          <h3 class="h5 mb-0 fuente-display" id="tracking-titulo">📦 Seguimiento de Pedido #</h3>
+          <button class="btn btn-sm btn-close" onclick="cerrarTracking()"></button>
+        </div>
+        <hr class="my-3">
+        
+        <!-- Barra de progreso visual (Stepper) -->
+        <div class="tracking-steps">
+          <div class="step-item" id="step-pendiente">
+            <div class="step-dot">1</div>
+            <div class="step-label">Pendiente</div>
+          </div>
+          <div class="step-item" id="step-confirmado">
+            <div class="step-dot">2</div>
+            <div class="step-label">Confirmado</div>
+          </div>
+          <div class="step-item" id="step-preparacion">
+            <div class="step-dot">3</div>
+            <div class="step-label">Preparación</div>
+          </div>
+          <div class="step-item" id="step-recoger">
+            <div class="step-dot">4</div>
+            <div class="step-label">Listo</div>
+          </div>
+          <div class="step-item" id="step-entregado">
+            <div class="step-dot">5</div>
+            <div class="step-label">Entregado</div>
+          </div>
+        </div>
+
+        <div class="mt-4 p-3 rounded bg-light">
+          <div class="row small">
+            <div class="col-sm-6 mb-2">
+              <span class="text-muted">Dirección de Entrega:</span><br>
+              <strong id="tracking-direccion">-</strong>
+            </div>
+            <div class="col-sm-6">
+              <span class="text-muted">Total:</span><br>
+              <strong class="text-success" id="tracking-total" style="font-size: 1.1rem;">-</strong>
+            </div>
+          </div>
+          <div class="mt-3">
+            <span class="text-muted">Detalle del Pedido:</span>
+            <ul id="tracking-items" class="list-unstyled mb-0 mt-1 pl-0"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="db-card">
+        <h3 class="h5 mb-3 fuente-display">🛍️ Mis Pedidos</h3>
+        <hr class="my-2">
+        <div class="table-responsive">
+          <table class="db-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-pedidos">
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">No tienes pedidos registrados.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/dashboard_components.js"></script>
+  <script src="assets/js/cliente_dashboard.js"></script>
+</body>
+</html>
