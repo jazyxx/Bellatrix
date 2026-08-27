@@ -181,7 +181,7 @@ async function confirmarPedido() {
 
   document.getElementById('carrito-contenido').innerHTML = `
     <div class="col-12 estado-vacio">
-      <div class="estado-vacio__icono">✓</div>
+      <div class="estado-vacio__icono"><i class="bi bi-check-lg"></i></div>
       <h2 class="h4 fuente-display">¡Pedido #${respuesta.datos.id_pedido} confirmado!</h2>
       <p class="text-muted">Te avisaremos por notificación en cuanto cambie de estado.</p>
       <a href="catalogo.html" class="btn-ambrosia mt-2">Seguir explorando</a>

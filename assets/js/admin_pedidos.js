@@ -53,18 +53,18 @@ async function cargarPedidosBandeja() {
 
     if (p.estado === 'Confirmado') {
       botonesGestion = `
-        <button class="btn btn-sm btn-db-primary me-1 py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'En preparación')">👨‍🍳 Preparar</button>
-        <button class="btn btn-sm btn-db-danger py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')">❌ Cancelar</button>
+        <button class="btn btn-sm btn-db-primary me-1 py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'En preparación')"><i class="bi bi-fire me-1"></i>Preparar</button>
+        <button class="btn btn-sm btn-db-danger py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
       `;
     } else if (p.estado === 'En preparación') {
       botonesGestion = `
-        <button class="btn btn-sm btn-db-success me-1 py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Listo para recoger')">📦 Marcar Listo</button>
-        <button class="btn btn-sm btn-db-danger py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')">❌ Cancelar</button>
+        <button class="btn btn-sm btn-db-success me-1 py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Listo para recoger')"><i class="bi bi-check2-square me-1"></i>Marcar Listo</button>
+        <button class="btn btn-sm btn-db-danger py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
       `;
     } else if (p.estado === 'Listo para recoger') {
       botonesGestion = `
-        <button class="btn btn-sm btn-db-success me-1 py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Entregado')">🚚 Despachar/Entregar</button>
-        <button class="btn btn-sm btn-db-danger py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')">❌ Cancelar</button>
+        <button class="btn btn-sm btn-db-success me-1 py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Entregado')"><i class="bi bi-truck me-1"></i>Despachar/Entregar</button>
+        <button class="btn btn-sm btn-db-danger py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
       `;
     } else if (p.estado === 'Pendiente de pago') {
       botonesGestion = `

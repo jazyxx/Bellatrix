@@ -62,19 +62,19 @@ function renderizarVentasTabla(ventas) {
     let badgeClass = 'badge-pastel-success';
     if (v.estado === 'Anulada') badgeClass = 'badge-pastel-danger';
 
-    const canalIcon = v.canal === 'Presencial' ? '🏪' : '🌐';
+    const canalIcon = v.canal === 'Presencial' ? 'bi-shop' : 'bi-globe2';
     const unidadColor = v.unidad_negocio === 'Pastelería' ? 'badge-pastel-danger' : 'badge-pastel-success';
 
     return `
       <tr style="cursor: pointer;" onclick="verDetalleVenta(${v.id_venta})">
         <td><strong>#${v.id_venta}</strong></td>
         <td>${formatearFecha(v.fecha || '')}</td>
-        <td>${canalIcon} ${v.canal}</td>
+        <td><i class="bi ${canalIcon} me-1 text-muted"></i>${v.canal}</td>
         <td><span class="badge-pastel ${unidadColor}" style="font-size:0.65rem;">${v.unidad_negocio}</span></td>
         <td><strong class="text-success">${formatearPrecioCOP(v.total)}</strong></td>
         <td><span class="badge-pastel ${badgeClass}">${v.estado}</span></td>
         <td class="text-center">
-          <button class="btn btn-sm btn-light border py-1" onclick="event.stopPropagation(); verDetalleVenta(${v.id_venta})">📄 Ver</button>
+          <button class="btn btn-sm btn-light border py-1" onclick="event.stopPropagation(); verDetalleVenta(${v.id_venta})"><i class="bi bi-eye-fill me-1"></i>Ver</button>
         </td>
       </tr>
     `;
@@ -105,7 +105,7 @@ async function verDetalleVenta(idVenta) {
   const detailCard = document.getElementById('venta-detalle-card');
   detailCard.style.display = 'block';
 
-  document.getElementById('detalle-id-titulo').textContent = `📄 Detalle de Venta #${v.id_venta}`;
+  document.getElementById('detalle-id-titulo').textContent = `Detalle de Venta #${v.id_venta}`;
   document.getElementById('detalle-fecha').textContent = formatearFecha(v.fecha);
   document.getElementById('detalle-canal').textContent = v.canal;
   document.getElementById('detalle-unidad').textContent = v.unidad_negocio;
@@ -138,7 +138,7 @@ async function verDetalleVenta(idVenta) {
 }
 
 async function anularTransaccionVenta(idVenta) {
-  if (confirm(`⚠ ATENCIÓN: ¿Estás seguro de que deseas ANULAR la venta #${idVenta}? Se revertirán las cantidades vendidas al stock de productos y materias primas, y se descontará el dinero de la caja del día. Esta acción no se puede deshacer.`)) {
+  if (confirm(`ATENCIÓN: ¿Estás seguro de que deseas ANULAR la venta #${idVenta}? Se revertirán las cantidades vendidas al stock de productos y materias primas, y se descontará el dinero de la caja del día. Esta acción no se puede deshacer.`)) {
     const btn = document.getElementById('btn-anular-venta');
     btn.disabled = true;
     btn.textContent = 'Anulando transacción…';

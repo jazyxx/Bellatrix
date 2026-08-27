@@ -61,7 +61,7 @@ async function cargarProductosVitrina() {
     const selector = document.getElementById('receta-producto-selector');
     if (selector) {
       selector.innerHTML = `<option value="">-- Selecciona un Producto --</option>` + 
-        todosProductosVitrina.map(p => `<option value="${p.id_producto}">🍰 ${escaparHtml(p.nombre)}</option>`).join('');
+        todosProductosVitrina.map(p => `<option value="${p.id_producto}">${escaparHtml(p.nombre)}</option>`).join('');
     }
   }
 }
@@ -96,12 +96,12 @@ function renderizarProductosVitrina(productos) {
         </td>
         <td class="text-end">
           <div class="dropdown">
-            <button class="btn btn-sm btn-db-outline py-1 px-2" type="button" data-bs-toggle="dropdown">⚙️</button>
+            <button class="btn btn-sm btn-db-outline py-1 px-2" type="button" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
             <ul class="dropdown-menu dropdown-menu-end small shadow border-0" style="border-radius: var(--db-radius-sm);">
-              <li><a class="dropdown-item fw-bold" href="#" onclick="abrirEditarProducto(${p.id_producto}); return false;">✏️ Editar</a></li>
+              <li><a class="dropdown-item fw-bold" href="#" onclick="abrirEditarProducto(${p.id_producto}); return false;"><i class="bi bi-pencil-fill me-1"></i>Editar</a></li>
               ${esAdministrador ? `
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="eliminarProducto(${p.id_producto}); return false;">🗑️ Eliminar</a></li>
+                <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="eliminarProducto(${p.id_producto}); return false;"><i class="bi bi-trash-fill me-1"></i>Eliminar</a></li>
               ` : ''}
             </ul>
           </div>
@@ -134,7 +134,7 @@ async function ajustarStockRapido(idProducto, cantidad) {
 function abrirModalProducto() {
   document.getElementById('form-modal-producto').reset();
   document.getElementById('prod-id').value = '';
-  document.getElementById('modal-producto-titulo').textContent = '🍰 Crear Nuevo Producto';
+  document.getElementById('modal-producto-titulo').textContent = 'Crear Nuevo Producto';
   document.getElementById('prod-stock-container').style.display = 'block';
   modalProductoBs.show();
 }
@@ -156,7 +156,7 @@ async function abrirEditarProducto(idProducto) {
   
   // Ocultamos el stock inicial al editar, ya que el stock se ajusta mediante +/- en la tabla
   document.getElementById('prod-stock-container').style.display = 'none';
-  document.getElementById('modal-producto-titulo').textContent = '✏️ Editar Producto';
+  document.getElementById('modal-producto-titulo').textContent = 'Editar Producto';
   modalProductoBs.show();
 }
 
@@ -241,7 +241,7 @@ async function cargarMateriasPrimas() {
         </td>
         <td class="text-center text-muted fw-bold">${m.stock_minimo}</td>
         <td class="text-end">
-          <button class="btn btn-sm btn-db-danger py-0 px-2" style="font-size: 0.75rem;" onclick="eliminarMateriaPrima(${m.id_materia})">🗑️</button>
+          <button class="btn btn-sm btn-db-danger py-0 px-2" style="font-size: 0.75rem;" onclick="eliminarMateriaPrima(${m.id_materia})"><i class="bi bi-trash-fill"></i></button>
         </td>
       </tr>
     `;
@@ -332,7 +332,7 @@ async function cargarRecetaDeProducto() {
       <td><strong>${escaparHtml(r.nombre_materia || r.id_materia)}</strong></td>
       <td class="text-center fw-bold text-dark">${r.cantidad} ${r.unidad_medida || ''}</td>
       <td class="text-end">
-        <button class="btn btn-sm btn-light text-danger py-0 px-2" onclick="eliminarLineaReceta(${r.id_receta})">🗑️</button>
+        <button class="btn btn-sm btn-light text-danger py-0 px-2" onclick="eliminarLineaReceta(${r.id_receta})"><i class="bi bi-trash-fill"></i></button>
       </td>
     </tr>
   `).join('');
@@ -386,7 +386,7 @@ async function cargarAlertasAbastecimiento() {
   if (!tbody) return;
 
   if (!resp.exito || !resp.datos || resp.datos.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-muted">🎉 No hay alertas de stock bajo activas ahora mismo. ¡Excelente control!</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-muted"><i class="bi bi-check-circle-fill me-1"></i>No hay alertas de stock bajo activas ahora mismo. ¡Excelente control!</td></tr>`;
     return;
   }
 
@@ -397,7 +397,7 @@ async function cargarAlertasAbastecimiento() {
       <td><span class="text-dark small">${escaparHtml(a.mensaje)}</span></td>
       <td><span class="badge-pastel badge-pastel-danger">${a.estado}</span></td>
       <td class="text-center">
-        <button class="btn btn-sm btn-db-success py-1 px-3 font-weight-bold" onclick="atenderAlertaStock(${a.id_alerta})">✓ Atender</button>
+        <button class="btn btn-sm btn-db-success py-1 px-3 font-weight-bold" onclick="atenderAlertaStock(${a.id_alerta})"><i class="bi bi-check2 me-1"></i>Atender</button>
       </td>
     </tr>
   `).join('');

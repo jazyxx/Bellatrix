@@ -23,18 +23,6 @@ async function inicializarHeader() {
 
   const usuario = await obtenerSesionActual();
 
-<<<<<<< HEAD
-  if (usuario && usuario.tipo === 'cliente') {
-    zonaCuenta.innerHTML = `
-      <span class="me-3 d-none d-md-inline" style="font-weight:700;">Hola, ${escaparHtml(primerNombre(usuario.nombre))}</span>
-      <button id="boton-cerrar-sesion" class="btn-ambrosia-outline btn-sm">Cerrar sesión</button>
-    `;
-    document.getElementById('boton-cerrar-sesion').addEventListener('click', cerrarSesion);
-    await actualizarContadorCarrito();
-  } else {
-    // Sin sesión, o sesión de empleado (el sitio público es para clientes).
-    zonaCuenta.innerHTML = `
-=======
   if (usuario) {
     if (usuario.tipo === 'cliente') {
       zonaCuenta.innerHTML = `
@@ -57,7 +45,6 @@ async function inicializarHeader() {
     // Sin sesión
     zonaCuenta.innerHTML = `
       <a href="login_empleado.html" class="btn-sm me-3 text-muted text-decoration-none" style="font-weight:700; font-size: 0.9rem;">Portal Empleados</a>
->>>>>>> fase-6-si
       <a href="login.html" class="btn-ambrosia-outline btn-sm me-2">Iniciar sesión</a>
       <a href="registro.html" class="btn-ambrosia btn-sm">Crear cuenta</a>
     `;
@@ -159,7 +146,7 @@ function activarBotonesAgregarCarrito(contenedor) {
       });
 
       if (respuesta.exito) {
-        boton.textContent = '¡Agregado! ✓';
+        boton.innerHTML = '<i class="bi bi-check-lg me-1"></i>¡Agregado!';
         await actualizarContadorCarrito();
         setTimeout(() => {
           boton.textContent = textoOriginal;
