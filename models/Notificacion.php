@@ -1,5 +1,11 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../libs/PHPMailer/src/Exception.php';
+require_once __DIR__ . '/../libs/PHPMailer/src/PHPMailer.php';
+require_once __DIR__ . '/../libs/PHPMailer/src/SMTP.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception as PHPMailerException;
 
 /**
  * ==========================================================================
@@ -81,17 +87,47 @@ class Notificacion
     /**
      * enviarCorreo($destinatario, $cuerpo)
      * ------------------------------------------------------------
-     * Punto de integración con el envío real de correo. En esta
-     * Fase 1 se deja como un "stub" (simulación) que registra en el
-     * log del servidor, para no acoplar el Modelo a una librería
-     * externa todavía. La implementación real (PHPMailer/SMTP) se
-     * conecta en la Fase 4 sin necesidad de cambiar esta firma.
+     * Envía el correo REAL vía SMTP usando PHPMailer, con la
+     * configuración de config/Mail.php. Si el envío falla (SMTP mal
+     * configurado, sin internet, etc.), NO lanza excepción hacia
+     * arriba: registra el error en el log y devuelve false, para que
+     * el flujo de recuperación de contraseña nunca se rompa por un
+     * problema de correo (el token ya quedó guardado en la BD de
+     * todas formas).
      */
     public function enviarCorreo(string $destinatario, string $cuerpo): bool
     {
-        // TODO (Fase 4): reemplazar por integración real con PHPMailer/SMTP.
-        error_log("[SIMULACIÓN DE CORREO] Para: {$destinatario} | Mensaje: {$cuerpo}");
-        return $this->registrarEnvio();
+        $config = require __DIR__ . '/../config/Mail.php';
+
+        $mail = new PHPMailer(true);
+        try {
+            // --- Configuración del servidor SMTP ---
+            $mail->isSMTP();
+            $mail->Host       = $config['MAIL_HOST'];
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $config['MAIL_USUARIO'];
+            $mail->Password   = $config['MAIL_CLAVE'];
+            $mail->SMTPSecure = $config['MAIL_CIFRADO']; // 'tls' o 'ssl'
+            $mail->Port       = $config['MAIL_PUERTO'];
+            $mail->CharSet    = 'UTF-8';
+            $mail->SMTPDebug  = $config['MAIL_DEBUG'] ? 2 : 0;
+
+            // --- Remitente y destinatario ---
+            $mail->setFrom($config['MAIL_DESDE'], $config['MAIL_DESDE_NOMBRE']);
+            $mail->addAddress($destinatario);
+
+            // --- Contenido del mensaje ---
+            $mail->Subject = $this->tipo !== '' ? $this->tipo : 'Notificación de Ambrosía';
+            $mail->Body    = nl2br(htmlspecialchars($cuerpo));   // versión HTML
+            $mail->AltBody = $cuerpo;                            // versión texto plano
+            $mail->isHTML(true);
+
+            $mail->send();
+            return $this->registrarEnvio();
+        } catch (PHPMailerException $e) {
+            error_log("[ERROR DE CORREO] No se pudo enviar a {$destinatario}: {$mail->ErrorInfo}");
+            return false;
+        }
     }
 
     /**
