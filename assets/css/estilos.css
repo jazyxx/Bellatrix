@@ -850,3 +850,403 @@ textarea:focus-visible, select:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .estado-vacio { animation: none; }
 }
+
+/* ============================================================
+   1. RESET Y BASE DEL DASHBOARD
+   ============================================================ */
+body {
+  background: 
+    radial-gradient(at 92% 0%, rgba(243, 207, 220, 0.28) 0%, transparent 40%),
+    radial-gradient(at 4% 92%, rgba(210, 238, 207, 0.28) 0%, transparent 40%),
+    var(--crema);
+  color: var(--espresso);
+  font-family: var(--fuente-cuerpo);
+  font-size: 0.95rem;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6, .fuente-display {
+  font-family: var(--fuente-display);
+  color: var(--espresso);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ============================================================
+   2. LAYOUT MAESTRO (Sidebar & Main Content)
+   ============================================================ */
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.dashboard-sidebar {
+  width: 260px;
+  background-color: var(--blanco);
+  border-right: 1px solid var(--borde-suave);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  box-shadow: 2px 0 15px rgba(59, 42, 38, 0.03);
+  transition: transform 0.3s var(--ease-out);
+}
+
+.dashboard-brand {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--borde-suave);
+  font-family: var(--fuente-display);
+  font-size: 1.6rem;
+  font-weight: bold;
+  font-style: italic;
+  color: var(--espresso);
+  text-decoration: none;
+}
+
+.dashboard-brand span {
+  font-size: 0.75rem;
+  font-family: var(--fuente-cuerpo);
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--espresso-suave);
+  display: block;
+  margin-top: -2px;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 1.5rem 0;
+  margin: 0;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.sidebar-item a {
+  display: flex;
+  align-items: center;
+  padding: 0.85rem 1.75rem;
+  color: var(--espresso-suave);
+  text-decoration: none;
+  font-weight: 600;
+  border-left: 4px solid transparent;
+  transition: var(--transicion-base);
+}
+
+.sidebar-item a:hover {
+  background-color: var(--rosa-suave);
+  color: var(--rosa-fuerte);
+  padding-left: 2rem;
+}
+
+.sidebar-item.active a {
+  background-color: var(--rosa-suave);
+  color: var(--espresso);
+  border-left-color: var(--rosa-fuerte);
+  font-weight: 700;
+}
+
+.sidebar-user {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--borde-suave);
+  background-color: var(--blanco);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dashboard-main {
+  flex-grow: 1;
+  margin-left: 260px;
+  padding: 2rem;
+  min-height: 100vh;
+  transition: transform 0.3s var(--ease-out);
+}
+
+@media (max-width: 991.98px) {
+  .dashboard-sidebar { transform: translateX(-100%); }
+  .dashboard-sidebar.active { transform: translateX(0); }
+  .dashboard-main { margin-left: 0; padding: 1.25rem; }
+}
+
+/* ============================================================
+   3. TARJETAS Y CONTENEDORES (Estética Ambrosía)
+   ============================================================ */
+.db-card {
+  background-color: var(--blanco);
+  border-radius: var(--radio-suave);
+  border: 1px solid var(--borde-suave);
+  box-shadow: var(--sombra-chica);
+  transition: var(--transicion-base);
+}
+
+.db-card:hover {
+  box-shadow: var(--sombra-suave);
+  border-color: var(--rosa-suave);
+}
+
+.db-card-icono {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  color: var(--blanco);
+}
+
+.db-card-icono--primary {
+  background: linear-gradient(155deg, var(--rosa-fuerte), #D6768A);
+  box-shadow: var(--sombra-rosa);
+}
+
+.db-card-icono--success {
+  background: linear-gradient(155deg, var(--menta-fuerte), #5A9678);
+  box-shadow: var(--sombra-menta);
+}
+
+/* ============================================================
+   4. FORMULARIOS Y CONTROLES (POS)
+   ============================================================ */
+.form-db {
+  border: 1.5px solid var(--borde-suave);
+  border-radius: var(--radio-chico);
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  background-color: var(--blanco);
+  color: var(--espresso);
+  transition: var(--transicion-base);
+}
+
+.form-db:focus {
+  border-color: var(--rosa-fuerte);
+  box-shadow: 0 0 0 0.2rem rgba(226, 137, 155, 0.15);
+  outline: none;
+}
+
+.pos-search-icono {
+  background: var(--blanco);
+  border: 1.5px solid var(--borde-suave);
+  border-right: none;
+  color: var(--espresso-suave);
+  border-radius: var(--radio-chico) 0 0 var(--radio-chico);
+  transition: var(--transicion-base);
+}
+
+.input-group:focus-within .pos-search-icono {
+  border-color: var(--rosa-fuerte);
+  color: var(--rosa-fuerte);
+}
+
+.input-group .form-db.border-start-0 {
+  border-left: none;
+  border-radius: 0 var(--radio-chico) var(--radio-chico) 0;
+}
+
+/* ============================================================
+   5. BOTONES (Reutilizando ADN visual de Ambrosía)
+   ============================================================ */
+.btn-db-success {
+  background: linear-gradient(155deg, var(--menta-fuerte) 0%, #5A9678 100%);
+  color: var(--blanco);
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radio-chico);
+  padding: 0.75rem 1.5rem;
+  box-shadow: var(--sombra-menta), inset 0 1px 0 rgba(255,255,255,0.3);
+  transition: var(--transicion-base);
+}
+
+.btn-db-success:hover:not(:disabled) {
+  background: linear-gradient(155deg, var(--espresso) 0%, #2A1E1B 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-suave);
+}
+
+.btn-db-success:disabled {
+  background: var(--borde-suave);
+  color: var(--espresso-suave);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   6. PUNTO DE VENTA (POS) - GRID Y CATEGORÍAS
+   ============================================================ */
+.pos-categories {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none; /* Firefox */
+}
+.pos-categories::-webkit-scrollbar { display: none; } /* Chrome */
+
+.pos-category-btn {
+  background-color: var(--blanco);
+  border: 1.5px solid var(--borde-suave);
+  border-radius: 999px;
+  padding: 0.45rem 1.4rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--espresso);
+  white-space: nowrap;
+  transition: var(--transicion-base);
+  cursor: pointer;
+  box-shadow: var(--sombra-chica);
+}
+
+.pos-category-btn:hover:not(.active) {
+  border-color: var(--rosa-fuerte);
+  color: var(--rosa-fuerte);
+  transform: translateY(-2px);
+}
+
+.pos-category-btn.active {
+  background: var(--espresso);
+  border-color: var(--espresso);
+  color: var(--crema);
+  box-shadow: var(--sombra-suave);
+}
+
+/* Grilla de productos (Izquierda) */
+.pos-item-card {
+  background-color: var(--blanco);
+  border: 1.5px solid var(--borde-suave);
+  border-radius: var(--radio-chico);
+  padding: 1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: var(--transicion-base);
+  cursor: pointer;
+}
+
+.pos-item-card:hover {
+  border-color: var(--rosa-suave);
+  box-shadow: var(--sombra-suave);
+  transform: translateY(-4px);
+  background-color: var(--rosa-suave);
+}
+
+.pos-item-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  font-family: var(--fuente-cuerpo);
+  color: var(--espresso);
+}
+
+.pos-item-price {
+  font-weight: 800;
+  color: var(--rosa-fuerte);
+  font-size: 1.05rem;
+  font-family: var(--fuente-display);
+}
+
+/* ============================================================
+   7. PUNTO DE VENTA (POS) - CARRITO Y TICKET
+   ============================================================ */
+.pos-cart-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 5rem);
+  background: var(--blanco);
+  border: 1px solid var(--borde-suave);
+  border-radius: var(--radio-suave);
+  box-shadow: var(--sombra-chica);
+}
+
+.cart-items {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  border-bottom: 1px dashed var(--borde-suave);
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--borde-suave);
+}
+
+.pos-icono-vacio {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  background: linear-gradient(155deg, var(--menta-fuerte), #5A9678);
+  font-size: 1.6rem;
+  color: var(--blanco);
+  box-shadow: var(--sombra-menta);
+}
+
+.cart-summary {
+  background: radial-gradient(at 90% 0%, rgba(210, 238, 207, 0.35) 0%, transparent 45%), var(--crema);
+  border-radius: var(--radio-chico);
+  padding: 1.25rem;
+  border: 1px solid var(--borde-suave);
+}
+
+.dashed {
+  border-top: 1px dashed var(--borde-suave);
+  opacity: 1;
+}
+
+/* Scrollbars estilizadas para el POS */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--borde-suave);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--rosa-fuerte);
+}
+
+/* ============================================================
+   FIX RESPONSIVE: HEADER LANDING PAGE 
+   ============================================================ */
+@media (max-width: 767.98px) {
+  
+  /* 1. Obligamos al contenedor del header a hacer "wrap" (salto de línea) */
+  .header-ambrosia > div,
+  .header-ambrosia nav {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    padding-bottom: 10px;
+  }
+
+  /* 2. Centramos el logo para que sea el protagonista arriba */
+  .header-ambrosia {
+    text-align: center;
+  }
+
+  /* 3. Achicamos sutilmente los botones para que quepan lado a lado */
+  .header-ambrosia .btn,
+  .header-ambrosia a.btn {
+    font-size: 0.85rem !important;
+    padding: 0.4rem 0.8rem !important;
+    margin-top: 5px;
+  }
+}

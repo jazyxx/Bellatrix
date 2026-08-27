@@ -67,13 +67,13 @@ function renderizarVentasTabla(ventas) {
 
     return `
       <tr style="cursor: pointer;" onclick="verDetalleVenta(${v.id_venta})">
-        <td><strong>#${v.id_venta}</strong></td>
-        <td>${formatearFecha(v.fecha || '')}</td>
-        <td><i class="bi ${canalIcon} me-1 text-muted"></i>${v.canal}</td>
-        <td><span class="badge-pastel ${unidadColor}" style="font-size:0.65rem;">${v.unidad_negocio}</span></td>
-        <td><strong class="text-success">${formatearPrecioCOP(v.total)}</strong></td>
-        <td><span class="badge-pastel ${badgeClass}">${v.estado}</span></td>
-        <td class="text-center">
+        <td data-label="ID"><strong>#${v.id_venta}</strong></td>
+        <td data-label="FECHA/HORA">${formatearFecha(v.fecha || '')}</td>
+        <td data-label="CANAL"><i class="bi ${canalIcon} me-1 text-muted"></i>${v.canal}</td>
+        <td data-label="UNIDAD"><span class="badge-pastel ${unidadColor}" style="font-size:0.65rem;">${v.unidad_negocio}</span></td>
+        <td data-label="TOTAL"><strong class="text-success">${formatearPrecioCOP(v.total)}</strong></td>
+        <td data-label="ESTADO"><span class="badge-pastel ${badgeClass}">${v.estado}</span></td>
+        <td data-label="DETALLE" class="text-center">
           <button class="btn btn-sm btn-light border py-1" onclick="event.stopPropagation(); verDetalleVenta(${v.id_venta})"><i class="bi bi-eye-fill me-1"></i>Ver</button>
         </td>
       </tr>

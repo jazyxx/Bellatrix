@@ -89,7 +89,7 @@ function tarjetaProductoHTML(producto) {
   const inicial = producto.nombre ? producto.nombre.charAt(0).toUpperCase() : '?';
 
   return `
-    <div class="col-6 col-md-4 col-lg-3">
+    <div class="col-12 col-md-6 col-lg-3">
       <div class="tarjeta-producto">
         ${producto.agotado ? '<span class="badge-agotado">Agotado</span>' : ''}
         <div class="tarjeta-producto__imagen" aria-hidden="true">${escaparHtml(inicial)}</div>

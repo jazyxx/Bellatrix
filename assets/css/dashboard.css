@@ -42,6 +42,26 @@
   --db-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
+/* ============================================================
+   FIX GLOBAL: CANDADO DE ANCHO PARA MÓVILES (FLEXBOX)
+   ============================================================ */
+
+/* 1. Evita que la página entera cree una barra de desplazamiento inferior */
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100vw;
+}
+
+/* 2. La magia negra de Flexbox: Obliga a las columnas a respetar el ancho de la pantalla y no estirarse por culpa del contenido */
+.row > * {
+  min-width: 0 !important; 
+}
+
+/* 3. Evita que las tarjetas blancas se salgan de los bordes */
+.db-card {
+  max-width: 100%;
+}
+
 /* Base resets */
 body {
   background:
@@ -625,5 +645,124 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 @media (max-width: 991.98px) {
   .menu-toggle {
     display: block;
+  }
+}
+
+/* ============================================================
+   RESPONSIVIDAD PUNTO DE VENTA (POS)
+   ============================================================ */
+
+/* Estilos base para pantallas de escritorio (Laptop / PC) */
+@media (min-width: 992px) {
+  .pos-cart-container {
+    height: calc(100vh - 100px);
+  }
+  .pos-product-grid {
+    max-height: calc(100vh - 320px);
+    overflow-y: auto;
+    padding: 4px;
+  }
+}
+
+/* Estilos para móviles y tablets (Dispositivos pequeños) */
+@media (max-width: 991.98px) {
+  .pos-cart-container {
+    height: auto !important; /* Permite que el carrito crezca según su contenido */
+    min-height: auto;
+    margin-top: 1.5rem;
+  }
+
+  .pos-product-grid {
+    max-height: 400px; /* Limita la grilla en celular para que no sea infinita */
+    overflow-y: auto;
+    padding: 4px;
+  }
+
+  .cart-items {
+    max-height: 250px; /* Hace la lista de productos del carrito escroleable en celular */
+    overflow-y: auto;
+  }
+}
+
+/* ============================================================
+   RESPONSIVIDAD PARA TABLAS (HISTORIAL Y PEDIDOS - MODO TARJETA)
+   ============================================================ */
+
+@media (max-width: 767.98px) {
+  /* Al usar .tabla-tarjetas blindamos el código para que NO afecte al inventario */
+  
+  .tabla-tarjetas tbody tr {
+    display: block !important;
+    margin-bottom: 1rem;
+    border: 1px solid var(--db-border, #e5e7eb) !important;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  
+  .tabla-tarjetas thead {
+    display: none !important;
+  }
+
+  .tabla-tarjetas tbody td {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.75rem 0.5rem !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+    text-align: right !important;
+    width: 100% !important; 
+  }
+
+  /* Etiqueta que aparecerá a la izquierda en celular */
+  .tabla-tarjetas tbody td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-align: left;
+    margin-right: 15px; 
+  }
+
+  .tabla-tarjetas tbody td:last-child {
+    border-bottom: none !important;
+    justify-content: center !important;
+  }
+}
+
+/* ============================================================
+   RESETEO DEL LAYOUT PRINCIPAL PARA MÓVILES (FIX DEL MARGEN)
+   ============================================================ */
+@media (max-width: 991.98px) {
+  
+  .dashboard-main, 
+  #dashboard-main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+  
+  /* 1. Le quitamos el !important al left para no bloquearlo para siempre */
+  .dashboard-sidebar {
+    position: fixed !important;
+    left: -250px; /* Lo escondemos justo fuera del borde izquierdo */
+    z-index: 1040;
+    transition: left 0.3s ease !important; /* Le damos una animación suave */
+  }
+  
+  /* 2. Cuando el botón (JS) active el menú, esta regla lo trae a la pantalla */
+  .dashboard-sidebar.show,
+  .dashboard-sidebar.active,
+  .dashboard-sidebar.toggled {
+    left: 0 !important;
+  }
+  
+  .dashboard-layout {
+    display: block !important;
+    width: 100vw;
+    overflow-x: hidden;
   }
 }
