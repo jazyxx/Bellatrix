@@ -33,7 +33,11 @@
     </div>
   </header>
 
+<<<<<<< HEAD
   <section class="py-5" style="background-color: var(--blush);">
+=======
+  <section class="seccion-catalogo-hero reveal">
+>>>>>>> fase-6-si
     <div class="container">
       <span class="eyebrow">Todo lo que horneamos</span>
       <h1 class="fuente-display mt-1 mb-0">Catálogo</h1>
@@ -46,7 +50,11 @@
       <!-- ============================================================
            BARRA DE FILTROS
            ============================================================ -->
+<<<<<<< HEAD
       <div class="barra-filtros d-flex flex-wrap align-items-center gap-3 mb-4">
+=======
+      <div class="barra-filtros barra-filtros--sticky d-flex flex-wrap align-items-center gap-3 mb-4">
+>>>>>>> fase-6-si
         <div class="d-flex gap-2 flex-wrap" id="chips-unidad">
           <button class="chip-filtro activo" data-unidad="">Todo</button>
           <button class="chip-filtro" data-unidad="Pastelería">Pastelería</button>
@@ -60,7 +68,11 @@
             class="form-control"
             placeholder="Buscar un producto…"
             aria-label="Buscar producto"
+<<<<<<< HEAD
             style="border-radius: 999px 0 0 999px; border-color: var(--crema-borde);"
+=======
+            style="border-radius: 999px 0 0 999px; border-color: var(--borde-suave); border-right: none;"
+>>>>>>> fase-6-si
           >
           <button type="submit" class="btn-ambrosia" style="border-radius: 0 999px 999px 0;">Buscar</button>
         </form>
@@ -87,5 +99,27 @@
   <script src="assets/js/api.js"></script>
   <script src="assets/js/componentes.js"></script>
   <script src="assets/js/catalogo.js"></script>
+<<<<<<< HEAD
+=======
+  <script>
+    // Solo visual: revela el encabezado al cargar (no toca lógica de negocio).
+    (function () {
+      var elementos = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window) || elementos.length === 0) {
+        elementos.forEach(function (el) { el.classList.add('reveal--visible'); });
+        return;
+      }
+      var observador = new IntersectionObserver(function (entradas) {
+        entradas.forEach(function (entrada) {
+          if (entrada.isIntersecting) {
+            entrada.target.classList.add('reveal--visible');
+            observador.unobserve(entrada.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      elementos.forEach(function (el) { observador.observe(el); });
+    })();
+  </script>
+>>>>>>> fase-6-si
 </body>
 </html>

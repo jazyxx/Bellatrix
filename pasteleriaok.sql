@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 12-08-2026 a las 18:28:35
+-- Tiempo de generación: 20-08-2026 a las 23:41:40
 -- Versión del servidor: 8.0.46
 -- Versión de PHP: 8.2.12
 
@@ -31,6 +31,13 @@ CREATE TABLE `administrador` (
   `id_admin` int NOT NULL,
   `nivel_acceso` int DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `administrador`
+--
+
+INSERT INTO `administrador` (`id_admin`, `nivel_acceso`) VALUES
+(3, 1);
 
 -- --------------------------------------------------------
 
@@ -74,6 +81,13 @@ CREATE TABLE `carrito` (
   `actualizado` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `carrito`
+--
+
+INSERT INTO `carrito` (`id_carrito`, `id_cliente`, `subtotal`, `creado_en`, `actualizado`) VALUES
+(1, 1, 0.00, '2026-08-17 17:09:50', '2026-08-20 14:06:52');
+
 -- --------------------------------------------------------
 
 --
@@ -107,6 +121,13 @@ CREATE TABLE `cliente` (
   `token_expiracion` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `cliente`
+--
+
+INSERT INTO `cliente` (`id_cliente`, `nombre`, `correo`, `contraseña`, `telefono`, `direccion_entrega`, `activo`, `fecha_registro`, `token_recuperacion`, `token_expiracion`) VALUES
+(1, 'Angel Jimenez', 'angeldavidj29@gmail.com', '$2y$10$N7nYE1o/4Q1GCghASBn8rOMu4txfq4Rdz79gnw8BvxWcveC41xw5e', '3227187806', NULL, 1, '2026-08-17 17:09:40', NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -120,6 +141,16 @@ CREATE TABLE `detalle_pedido` (
   `cantidad` int NOT NULL DEFAULT '1',
   `precio_unitario` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `detalle_pedido`
+--
+
+INSERT INTO `detalle_pedido` (`id_detalle_pedido`, `id_pedido`, `id_producto`, `cantidad`, `precio_unitario`) VALUES
+(1, 1, 1, 1, 67000.00),
+(2, 2, 1, 1, 67000.00),
+(3, 3, 1, 1, 67000.00),
+(4, 3, 2, 1, 69000.00);
 
 -- --------------------------------------------------------
 
@@ -147,7 +178,7 @@ CREATE TABLE `empleado` (
   `apellido` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `usuario` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
   `correo` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `contraseña` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `contraseña` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `rol` enum('Administrador','Cajero') COLLATE utf8mb4_general_ci NOT NULL,
   `activo` tinyint(1) NOT NULL DEFAULT '1',
   `telefono` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -160,8 +191,9 @@ CREATE TABLE `empleado` (
 --
 
 INSERT INTO `empleado` (`id_empleado`, `nombre`, `apellido`, `usuario`, `correo`, `contraseña`, `rol`, `activo`, `telefono`, `salario`, `fecha_contratacion`) VALUES
-(1, 'Angel', 'Jimenez', 'angel.admin', 'angel@ambrosia.com', 'angel123', 'Administrador', 1, NULL, NULL, NULL),
-(2, 'Thania', 'Castro', 'thania.admin', 'thania@ambrosia', 'thania123', 'Administrador', 1, NULL, NULL, NULL);
+(1, 'Angel', 'Jimenez', 'angel.admin', 'angel@ambrosia.com', 'Admin123*', 'Administrador', 1, NULL, NULL, NULL),
+(2, 'Thania', 'Castro', 'thania.admin', 'thania@ambrosia', 'thania.admin', 'Administrador', 1, NULL, NULL, NULL),
+(3, 'Admin de Prueba', NULL, 'admin.test', 'test@pasteleriaok.com', '$2y$10$E/x3txvKHwSlmBh5tl/TLuZ.gIfxhMd4D.36f2usbUVrHrJ5wtN8m', 'Administrador', 1, NULL, 0.00, '2026-08-18');
 
 -- --------------------------------------------------------
 
@@ -180,6 +212,16 @@ CREATE TABLE `gestor_ventas` (
   `id_empleado` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `gestor_ventas`
+--
+
+INSERT INTO `gestor_ventas` (`id_gestor`, `canal`, `unidad_negocio`, `fecha`, `total_ventas`, `total_egresos`, `id_empleado`) VALUES
+(1, 'Presencial', 'Pastelería', '2026-08-20', 134000.00, 67000.00, 1),
+(2, 'En línea', 'Heladería', '2026-08-20', 0.00, 0.00, 1),
+(3, 'En línea', 'Pastelería', '2026-08-20', 0.00, 0.00, 1),
+(4, 'Presencial', 'Heladería', '2026-08-20', 0.00, 0.00, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -193,6 +235,13 @@ CREATE TABLE `materia_prima` (
   `stock_actual` decimal(10,2) NOT NULL DEFAULT '0.00',
   `stock_minimo` decimal(10,2) NOT NULL DEFAULT '0.00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `materia_prima`
+--
+
+INSERT INTO `materia_prima` (`id_materia`, `nombre`, `unidad_medida`, `stock_actual`, `stock_minimo`) VALUES
+(1, 'Harina', 'kg', 10.00, 5.00);
 
 -- --------------------------------------------------------
 
@@ -211,6 +260,13 @@ CREATE TABLE `notificacion` (
   `fecha_envio` datetime DEFAULT NULL,
   `creado_en` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `notificacion`
+--
+
+INSERT INTO `notificacion` (`id_notificacion`, `id_cliente`, `id_pedido`, `tipo`, `canal_envio`, `mensaje`, `enviado`, `fecha_envio`, `creado_en`) VALUES
+(1, 1, NULL, 'Confirmación de registro', 'Correo', '¡Bienvenido(a) a Ambrosía, Angel Jimenez! Tu cuenta fue creada exitosamente.', 1, '2026-08-17 17:09:40', '2026-08-17 17:09:40');
 
 -- --------------------------------------------------------
 
@@ -245,6 +301,15 @@ CREATE TABLE `pedido` (
   `id_empleado_gestion` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `pedido`
+--
+
+INSERT INTO `pedido` (`id_pedido`, `id_cliente`, `estado`, `direccion_entrega`, `total`, `fecha_creacion`, `fecha_actualizacion`, `id_empleado_gestion`) VALUES
+(1, 1, 'Pendiente de pago', 'calle 67', 67000.00, '2026-08-20 11:31:14', '2026-08-20 11:31:14', NULL),
+(2, 1, 'Pendiente de pago', 'si', 67000.00, '2026-08-20 12:05:21', '2026-08-20 12:05:21', NULL),
+(3, 1, 'Pendiente de pago', '123', 136000.00, '2026-08-20 14:06:52', '2026-08-20 14:06:52', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -262,6 +327,14 @@ CREATE TABLE `productos` (
   `foto` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `disponible` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `productos`
+--
+
+INSERT INTO `productos` (`id_producto`, `nombre`, `descripcion`, `tipo`, `unidad_negocio`, `precio`, `stock`, `foto`, `disponible`) VALUES
+(1, 'Torta 67', 'Torta hecha con mucha aura', 'Tortas', 'Pastelería', 67000.00, 67, NULL, 1),
+(2, 'Torta 69', '69', 'Tortas', 'Pastelería', 69000.00, 5, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -291,6 +364,13 @@ CREATE TABLE `ventas` (
   `estado` enum('Activa','Anulada') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Activa',
   `id_empleado` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `ventas`
+--
+
+INSERT INTO `ventas` (`id_venta`, `fecha`, `total`, `canal`, `unidad_negocio`, `estado`, `id_empleado`) VALUES
+(1, '2026-08-20 11:29:42', 0.00, 'Presencial', 'Pastelería', 'Activa', 1);
 
 --
 -- Índices para tablas volcadas
@@ -434,25 +514,25 @@ ALTER TABLE `alerta_stock`
 -- AUTO_INCREMENT de la tabla `carrito`
 --
 ALTER TABLE `carrito`
-  MODIFY `id_carrito` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_carrito` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `carrito_items`
 --
 ALTER TABLE `carrito_items`
-  MODIFY `id_item` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_item` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `cliente`
 --
 ALTER TABLE `cliente`
-  MODIFY `id_cliente` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_cliente` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_pedido`
 --
 ALTER TABLE `detalle_pedido`
-  MODIFY `id_detalle_pedido` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_detalle_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_venta`
@@ -464,25 +544,25 @@ ALTER TABLE `detalle_venta`
 -- AUTO_INCREMENT de la tabla `empleado`
 --
 ALTER TABLE `empleado`
-  MODIFY `id_empleado` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_empleado` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `gestor_ventas`
 --
 ALTER TABLE `gestor_ventas`
-  MODIFY `id_gestor` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_gestor` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `materia_prima`
 --
 ALTER TABLE `materia_prima`
-  MODIFY `id_materia` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_materia` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `notificacion`
 --
 ALTER TABLE `notificacion`
-  MODIFY `id_notificacion` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_notificacion` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `pago`
@@ -494,13 +574,13 @@ ALTER TABLE `pago`
 -- AUTO_INCREMENT de la tabla `pedido`
 --
 ALTER TABLE `pedido`
-  MODIFY `id_pedido` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id_producto` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_producto` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `recetas`
@@ -512,7 +592,7 @@ ALTER TABLE `recetas`
 -- AUTO_INCREMENT de la tabla `ventas`
 --
 ALTER TABLE `ventas`
-  MODIFY `id_venta` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_venta` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Restricciones para tablas volcadas

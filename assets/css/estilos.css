@@ -30,6 +30,7 @@
      para botones y acentos que necesitan más contraste/peso visual) --- */
   --rosa: #EDAFB8;
   --rosa-fuerte: #E2899B;   /* CTA sólido de Pastelería */
+  --rosa-medio: #F3CFDC;    /* paso intermedio: profundidad en degradados y fondos con textura */
   --rosa-suave: #FBEEF0;    /* fondo tintado muy leve */
   --menta: #D2EECF;
   --menta-fuerte: #6FAE8C;  /* CTA sólido de Heladería */
@@ -52,8 +53,17 @@
   --radio-grande: 28px;
   --radio-suave: 18px;
   --radio-chico: 12px;
-  --sombra-suave: 0 20px 45px -22px rgba(59, 42, 38, 0.22);
-  --sombra-chica: 0 8px 20px -10px rgba(59, 42, 38, 0.16);
+  /* Sombras en DOS capas (contacto + ambiente): así es como cae la luz
+     realmente — una sombra tenue y cercana al objeto, y otra más difusa
+     y lejana. Una sola sombra grande se ve "pegada", plana. */
+  --sombra-suave: 0 2px 4px -1px rgba(59, 42, 38, 0.08), 0 24px 48px -20px rgba(59, 42, 38, 0.28);
+  --sombra-chica: 0 1px 2px -1px rgba(59, 42, 38, 0.07), 0 10px 22px -12px rgba(59, 42, 38, 0.18);
+  --sombra-rosa: 0 1px 2px -1px rgba(226, 137, 155, 0.18), 0 16px 32px -14px rgba(226, 137, 155, 0.35);
+  --sombra-menta: 0 1px 2px -1px rgba(111, 174, 140, 0.18), 0 16px 32px -14px rgba(111, 174, 140, 0.32);
+
+  /* --- Curvas de movimiento (nunca "ease" a secas: se sienten planas) --- */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 /* ============================================================
@@ -106,20 +116,23 @@ textarea:focus-visible, select:focus-visible {
 
 /* --- Botones de marca --- */
 .btn-ambrosia {
-  background-color: var(--rosa-fuerte);
+  background: linear-gradient(155deg, var(--rosa-fuerte) 0%, #D6768A 100%);
   border: none;
   color: var(--blanco);
   font-weight: 700;
   padding: 0.7rem 1.7rem;
   border-radius: 999px;
-  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: var(--sombra-chica);
+  position: relative;
+  transition: transform 0.18s var(--ease-out), background-color 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out);
+  box-shadow: var(--sombra-rosa), inset 0 1px 0 rgba(255,255,255,0.35);
 }
 .btn-ambrosia:hover {
-  background-color: var(--espresso);
+  background: linear-gradient(155deg, var(--espresso) 0%, #2A1E1B 100%);
   color: var(--blanco);
   transform: translateY(-2px);
+  box-shadow: var(--sombra-suave), inset 0 1px 0 rgba(255,255,255,0.2);
 }
+.btn-ambrosia:active { transform: translateY(0) scale(0.97); }
 .btn-ambrosia:disabled {
   background-color: var(--borde-suave);
   color: var(--espresso-suave);
@@ -135,23 +148,27 @@ textarea:focus-visible, select:focus-visible {
   font-weight: 700;
   padding: 0.65rem 1.5rem;
   border-radius: 999px;
-  transition: all 0.15s ease;
+  transition: transform 0.18s var(--ease-out), border-color 0.18s var(--ease-out), color 0.18s var(--ease-out);
 }
 .btn-ambrosia-outline:hover {
   border-color: var(--rosa-fuerte);
   color: var(--rosa-fuerte);
+  transform: translateY(-2px);
 }
+.btn-ambrosia-outline:active { transform: translateY(0) scale(0.97); }
 
 .btn-ambrosia-sage {
-  background-color: var(--menta-fuerte);
+  background: linear-gradient(155deg, var(--menta-fuerte) 0%, #5A9678 100%);
   border: none;
   color: var(--blanco);
   font-weight: 700;
   padding: 0.7rem 1.6rem;
   border-radius: 999px;
-  transition: all 0.15s ease;
+  box-shadow: var(--sombra-menta), inset 0 1px 0 rgba(255,255,255,0.3);
+  transition: transform 0.18s var(--ease-out), background-color 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out);
 }
-.btn-ambrosia-sage:hover { background-color: var(--espresso); }
+.btn-ambrosia-sage:hover { background: linear-gradient(155deg, var(--espresso) 0%, #2A1E1B 100%); transform: translateY(-2px); box-shadow: var(--sombra-suave); }
+.btn-ambrosia-sage:active { transform: translateY(0) scale(0.97); }
 
 /* --- Tarjeta de producto --- */
 .tarjeta-producto {
@@ -160,19 +177,23 @@ textarea:focus-visible, select:focus-visible {
   overflow: hidden;
   box-shadow: var(--sombra-chica);
   border: 1px solid var(--borde-suave);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.28s var(--ease-out), box-shadow 0.28s var(--ease-out), border-color 0.28s var(--ease-out);
   height: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
 }
 .tarjeta-producto:hover {
-  transform: translateY(-5px);
+  transform: translateY(-6px);
   box-shadow: var(--sombra-suave);
+  border-color: var(--rosa-suave);
 }
+.tarjeta-producto:hover .tarjeta-producto__imagen { transform: scale(1.04); }
 .tarjeta-producto__imagen {
   aspect-ratio: 1 / 1;
-  background: linear-gradient(160deg, var(--rosa-suave), var(--menta-suave));
+  background: radial-gradient(circle at 25% 20%, var(--rosa-medio) 0%, transparent 55%),
+              radial-gradient(circle at 80% 85%, var(--menta-suave) 0%, transparent 60%),
+              linear-gradient(160deg, var(--rosa-suave), var(--menta-suave));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -181,6 +202,7 @@ textarea:focus-visible, select:focus-visible {
   color: var(--espresso-suave);
   margin: 0.85rem 0.85rem 0;
   border-radius: var(--radio-chico);
+  transition: transform 0.4s var(--ease-out);
 }
 .tarjeta-producto__cuerpo {
   padding: 1rem 1.1rem 1.2rem;
@@ -262,9 +284,7 @@ textarea:focus-visible, select:focus-visible {
 .mensaje-formulario--error { background-color: #FBE2DF; color: #8A3B2E; }
 .mensaje-formulario--exito { background-color: var(--menta-suave); color: var(--menta-fuerte); }
 
-/* --- Estado vacío --- */
-.estado-vacio { text-align: center; padding: 4rem 1.5rem; color: var(--espresso-suave); }
-.estado-vacio__icono { font-family: var(--fuente-display); font-size: 2.6rem; margin-bottom: 0.6rem; color: var(--rosa-fuerte); }
+/* --- Estado vacío: definición completa vive en la sección 14 (Carrito) --- */
 
 
 /* ============================================================
@@ -357,7 +377,12 @@ textarea:focus-visible, select:focus-visible {
        porque ahora está sobre un fondo claro, no sobre el círculo.
    ============================================================ */
 .hero-ambrosia {
-  background: linear-gradient(180deg, var(--rosa-suave) 0%, var(--crema) 100%);
+  position: relative;
+  background:
+    radial-gradient(at 12% 15%, rgba(243, 207, 220, 0.55) 0%, transparent 45%),
+    radial-gradient(at 88% 8%, rgba(210, 238, 207, 0.45) 0%, transparent 40%),
+    radial-gradient(at 75% 90%, rgba(176, 196, 177, 0.30) 0%, transparent 45%),
+    linear-gradient(180deg, var(--rosa-suave) 0%, var(--crema) 100%);
   padding: 4.5rem 0 3rem;
   overflow: hidden;
 }
@@ -376,11 +401,14 @@ textarea:focus-visible, select:focus-visible {
   aspect-ratio: 1;
   margin: 0 auto;
   border-radius: 50%;
-  background: linear-gradient(145deg, var(--rosa-fuerte) 0%, var(--menta-fuerte) 100%);
+  background: linear-gradient(145deg, var(--rosa-fuerte) 0%, var(--rosa-medio) 45%, var(--menta-fuerte) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 28px 55px -20px rgba(59, 42, 38, 0.38); /* sombra marcada = profundidad */
+  box-shadow: 0 4px 8px -2px rgba(59,42,38,0.2), 0 34px 60px -22px rgba(59, 42, 38, 0.42); /* sombra en dos capas = profundidad real */
+  position: relative;
+  z-index: 1;
+  animation: hero-float 7s var(--ease-in-out) infinite reverse;
 }
 .hero-mancha__texto {
   font-family: var(--fuente-display);
@@ -422,9 +450,8 @@ textarea:focus-visible, select:focus-visible {
    botones), nunca en el lienzo completo detrás del texto.
    ============================================================ */
 .seccion { padding: 4.5rem 0; }
-.seccion--crema { background-color: var(--crema); }
-.seccion--blush { background-color: var(--blanco); } /* antes era blush saturado;
-   ahora es blanco — el rosa se concentra en los íconos de abajo, no en el fondo */
+.seccion--crema { background: radial-gradient(at 90% 0%, rgba(210,238,207,0.25) 0%, transparent 45%), var(--crema); }
+.seccion--blush { background: radial-gradient(at 8% 100%, rgba(243,207,220,0.30) 0%, transparent 45%), var(--blanco); } /* el rosa ya no vive en un fondo plano, sino en un acento sutil de esquina */
 
 /* --- Nuestra promesa: círculo de color fuerte + sombra, texto oscuro --- */
 .icono-promesa {
@@ -438,17 +465,27 @@ textarea:focus-visible, select:focus-visible {
   justify-content: center;
   font-size: 1.4rem;
   margin: 0 auto 1rem;
-  box-shadow: var(--sombra-chica); /* profundidad, no solo un círculo plano */
+  box-shadow: var(--sombra-menta); /* profundidad, no solo un círculo plano */
 }
+/* Alterna el color con significado por tarjeta, para que la sección respire
+   variedad de paleta en vez de un solo tono repetido cuatro veces. */
+.row.text-center > *:nth-child(4n+1) .icono-promesa { background: linear-gradient(155deg, var(--rosa-fuerte), #D6768A); box-shadow: var(--sombra-rosa); }
+.row.text-center > *:nth-child(4n+2) .icono-promesa { background: linear-gradient(155deg, var(--menta-fuerte), #5A9678); box-shadow: var(--sombra-menta); }
+.row.text-center > *:nth-child(4n+3) .icono-promesa { background: linear-gradient(155deg, var(--salvia-oscuro), #56705A); box-shadow: 0 1px 2px -1px rgba(111,138,115,0.2), 0 16px 32px -14px rgba(111,138,115,0.35); }
+.row.text-center > *:nth-child(4n+4) .icono-promesa { background: linear-gradient(155deg, var(--espresso), #2A1E1B); box-shadow: var(--sombra-suave); }
 
 /* --- Salón de Onces: tarjeta OSCURA sólida (alto contraste real,
    texto claro sobre fondo oscuro — no pastel-sobre-pastel) --- */
 .onces-panel {
-  background: var(--espresso);
+  background: radial-gradient(at 85% 15%, rgba(111,174,140,0.25) 0%, transparent 50%),
+              radial-gradient(at 10% 90%, rgba(226,137,155,0.18) 0%, transparent 45%),
+              var(--espresso);
   color: var(--crema);
   border-radius: var(--radio-suave);
   padding: 3rem;
   box-shadow: var(--sombra-suave);
+  position: relative;
+  overflow: hidden;
 }
 .onces-panel h2 { color: var(--crema); }
 .onces-panel .eyebrow { color: var(--menta); }
@@ -481,18 +518,7 @@ textarea:focus-visible, select:focus-visible {
   border: 1px solid var(--borde-suave);
   padding: 1.2rem 1.4rem;
 }
-.chip-filtro {
-  border: 1.5px solid var(--borde-suave);
-  background: var(--crema);
-  color: var(--espresso);
-  border-radius: 999px;
-  padding: 0.5rem 1.2rem;
-  font-weight: 700;
-  font-size: 0.88rem;
-  transition: all 0.15s ease;
-}
-.chip-filtro.activo { background: var(--espresso); color: var(--crema); border-color: var(--espresso); }
-.chip-filtro:hover:not(.activo) { border-color: var(--rosa-fuerte); }
+/* .chip-filtro y sus estados viven en la sección 13 (Catálogo), estilo unificado */
 
 
 /* ============================================================
@@ -528,4 +554,299 @@ textarea:focus-visible, select:focus-visible {
   .onces-panel { padding: 2rem 1.4rem; }
   .formulario-ambrosia { padding: 1.75rem 1.4rem; }
   .buscador-header { display: none; }
+}
+
+
+/* ============================================================
+   11. MOVIMIENTO — aparición al hacer scroll y micro-detalles
+   ============================================================
+   Solo estados de entrada (transform + opacity, nunca layout).
+   Se desactiva por completo con prefers-reduced-motion (ver
+   regla global en la sección 2).
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  will-change: transform, opacity;
+}
+.reveal.reveal--visible { opacity: 1; transform: translateY(0); }
+.reveal--stagger > * { opacity: 0; }
+.reveal--stagger.reveal--visible > * { animation: reveal-stagger 0.7s var(--ease-out) both; }
+.reveal--stagger.reveal--visible > *:nth-child(2) { animation-delay: 0.08s; }
+.reveal--stagger.reveal--visible > *:nth-child(3) { animation-delay: 0.16s; }
+.reveal--stagger.reveal--visible > *:nth-child(4) { animation-delay: 0.24s; }
+@keyframes reveal-stagger {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal--stagger > * { opacity: 1 !important; transform: none !important; animation: none !important; }
+}
+
+/* --- Marca y nav: subrayado que crece desde el centro, no un color plano --- */
+.marca-ambrosia { transition: opacity 0.18s var(--ease-out); }
+.marca-ambrosia:hover { opacity: 0.75; }
+
+.nav-ambrosia .nav-link {
+  position: relative;
+  padding-bottom: 2px;
+  transition: color 0.18s var(--ease-out);
+}
+.nav-ambrosia .nav-link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 0%;
+  height: 2px;
+  background: var(--rosa-fuerte);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transition: width 0.22s var(--ease-out);
+}
+.nav-ambrosia .nav-link:hover::after,
+.nav-ambrosia .nav-link.activo::after { width: 60%; }
+
+.icono-accion { transition: background-color 0.18s var(--ease-out), color 0.18s var(--ease-out), transform 0.18s var(--ease-out); }
+.icono-accion:hover { transform: translateY(-2px); }
+
+/* --- Ícono de "promesa": pequeño lift + sombra más marcada en hover --- */
+.icono-promesa { transition: transform 0.22s var(--ease-out), box-shadow 0.22s var(--ease-out); }
+.col-md-3:hover .icono-promesa,
+.col-6:hover .icono-promesa { transform: translateY(-4px) scale(1.05); box-shadow: var(--sombra-suave); }
+
+/* --- Hero: capa decorativa detrás del círculo, para que no flote solo en el vacío --- */
+.hero-ambrosia { position: relative; }
+.hero-mancha-wrap { position: relative; }
+.hero-mancha-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -8%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--menta-suave) 0%, var(--rosa-medio) 45%, transparent 75%);
+  z-index: 0;
+  filter: blur(2px);
+  animation: hero-float 7s var(--ease-in-out) infinite;
+}
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-mancha-wrap::before, .hero-mancha { animation: none; }
+}
+
+/* --- Estado de carga de "destacados": shimmer en vez de texto plano --- */
+#destacados-cargando {
+  background: linear-gradient(100deg, var(--borde-suave) 30%, var(--blanco) 50%, var(--borde-suave) 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: var(--radio-suave);
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--espresso-suave);
+  font-weight: 600;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #destacados-cargando { animation: none; }
+}
+
+
+/* ============================================================
+   12. AUTENTICACIÓN — login, login de empleados, registro
+   ============================================================
+   Misma familia visual del hero (mesh sutil con la paleta),
+   pero cada público tiene su propio acento de color:
+   cliente = rosa (marca principal), empleado = menta (herramienta
+   interna), para que el usuario note de inmediato en qué portal está.
+   ============================================================ */
+.seccion-auth {
+  position: relative;
+  min-height: 75vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: 3.5rem 0;
+}
+.seccion-auth--cliente {
+  background:
+    radial-gradient(at 15% 10%, rgba(243, 207, 220, 0.55) 0%, transparent 42%),
+    radial-gradient(at 90% 85%, rgba(210, 238, 207, 0.35) 0%, transparent 45%),
+    var(--crema);
+}
+.seccion-auth--empleado {
+  background:
+    radial-gradient(at 85% 10%, rgba(111, 174, 140, 0.30) 0%, transparent 45%),
+    radial-gradient(at 10% 90%, rgba(176, 196, 177, 0.30) 0%, transparent 45%),
+    var(--crema);
+}
+
+/* Insignia circular arriba del título — coherente con .icono-promesa */
+.icono-auth {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 1.35rem;
+  color: var(--blanco);
+}
+.icono-auth--rosa { background: linear-gradient(155deg, var(--rosa-fuerte), #D6768A); box-shadow: var(--sombra-rosa); }
+.icono-auth--menta { background: linear-gradient(155deg, var(--menta-fuerte), #5A9678); box-shadow: var(--sombra-menta); }
+
+/* La tarjeta del formulario entra con un poco más de presencia que el
+   .reveal genérico: parte un poco más abajo y con leve escala, porque
+   es el foco único de la pantalla (no un elemento entre varios). */
+.formulario-ambrosia {
+  animation: auth-entrar 0.55s var(--ease-out) both;
+}
+@keyframes auth-entrar {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .formulario-ambrosia { animation: none; }
+}
+
+/* Íconos dentro de los campos (Bootstrap Icons) — mismo alto y radio
+   que .form-control para que el input-group se vea como una sola pieza. */
+.formulario-ambrosia .input-group .input-group-text {
+  background: var(--crema);
+  border: 1.5px solid var(--borde-suave);
+  border-right: none;
+  color: var(--espresso-suave);
+  border-radius: var(--radio-chico) 0 0 var(--radio-chico);
+}
+.formulario-ambrosia .input-group .form-control {
+  border-left: none;
+  border-radius: 0 var(--radio-chico) var(--radio-chico) 0;
+}
+.formulario-ambrosia .input-group:focus-within .input-group-text {
+  border-color: var(--rosa);
+  background: var(--blanco);
+}
+
+
+/* ============================================================
+   13. CATÁLOGO
+   ============================================================ */
+.seccion-catalogo-hero {
+  padding: 3rem 0 2.5rem;
+  background:
+    radial-gradient(at 85% 0%, rgba(243, 207, 220, 0.45) 0%, transparent 45%),
+    radial-gradient(at 5% 100%, rgba(210, 238, 207, 0.35) 0%, transparent 45%),
+    var(--crema);
+}
+
+/* Barra de filtros pegajosa con efecto "vidrio": se usa decenas de veces
+   por sesión, así que NO lleva animación de entrada/salida — solo un
+   tratamiento visual estático (glass) para que flote sobre la grilla
+   sin perder legibilidad. */
+.barra-filtros--sticky {
+  position: sticky;
+  top: 78px; /* justo bajo el header sticky */
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.chip-filtro {
+  border: 1.5px solid var(--borde-suave);
+  background: var(--crema);
+  color: var(--espresso);
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  font-weight: 700;
+  font-size: 0.88rem;
+  transition: all 0.16s var(--ease-out);
+}
+.chip-filtro.activo { background: var(--espresso); color: var(--crema); border-color: var(--espresso); box-shadow: var(--sombra-chica); }
+.chip-filtro:hover:not(.activo) { border-color: var(--rosa-fuerte); transform: translateY(-1px); }
+
+@media (max-width: 767.98px) {
+  .barra-filtros--sticky { position: static; backdrop-filter: none; background: var(--blanco); }
+}
+
+
+/* ============================================================
+   14. CARRITO
+   ============================================================ */
+.seccion-carrito {
+  min-height: 70vh;
+  padding: 3.5rem 0;
+  background:
+    radial-gradient(at 90% 0%, rgba(210, 238, 207, 0.30) 0%, transparent 45%),
+    radial-gradient(at 5% 100%, rgba(243, 207, 220, 0.30) 0%, transparent 45%),
+    var(--crema);
+}
+
+/* Cada fila entra con una animación breve y escalonada — es contenido
+   que el usuario está a punto de revisar (no un elemento repetitivo de
+   navegación), así que aquí sí vale un poco de "vida" al pintarse. */
+.fila-carrito {
+  background: var(--blanco);
+  border: 1px solid var(--borde-suave);
+  border-radius: var(--radio-chico);
+  padding: 1rem 1.2rem;
+  box-shadow: var(--sombra-chica);
+  transition: box-shadow 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+  animation: fila-entrar 0.45s var(--ease-out) both;
+}
+.fila-carrito:hover { box-shadow: var(--sombra-suave); border-color: var(--rosa-suave); }
+#lista-items .fila-carrito:nth-child(2) { animation-delay: 0.05s; }
+#lista-items .fila-carrito:nth-child(3) { animation-delay: 0.1s; }
+#lista-items .fila-carrito:nth-child(4) { animation-delay: 0.15s; }
+#lista-items .fila-carrito:nth-child(n+5) { animation-delay: 0.2s; }
+@keyframes fila-entrar {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fila-carrito { animation: none; }
+}
+
+.control-cantidad button { transition: background-color 0.16s var(--ease-out), transform 0.1s var(--ease-out); }
+.control-cantidad button:active { transform: scale(0.9); }
+
+/* Resumen: degradado + halo decorativo en vez de un panel oscuro plano */
+.resumen-carrito {
+  background: radial-gradient(at 85% 10%, rgba(111, 174, 140, 0.28) 0%, transparent 55%),
+              linear-gradient(165deg, var(--espresso) 0%, #2A1E1B 100%);
+  color: var(--crema);
+  border-radius: var(--radio-grande);
+  padding: 1.8rem;
+  box-shadow: var(--sombra-suave);
+  position: sticky;
+  top: 96px;
+}
+.resumen-carrito .btn-ambrosia { width: 100%; }
+
+/* Estado vacío: ícono en insignia circular en vez de emoji suelto */
+.estado-vacio { text-align: center; padding: 4rem 1.5rem; color: var(--espresso-suave); animation: fila-entrar 0.5s var(--ease-out) both; }
+.estado-vacio__icono {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: linear-gradient(155deg, var(--rosa-fuerte), #D6768A);
+  box-shadow: var(--sombra-rosa);
+  font-family: var(--fuente-display);
+  font-size: 1.6rem;
+  color: var(--blanco);
+}
+@media (prefers-reduced-motion: reduce) {
+  .estado-vacio { animation: none; }
 }

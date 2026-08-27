@@ -23,6 +23,7 @@ async function inicializarHeader() {
 
   const usuario = await obtenerSesionActual();
 
+<<<<<<< HEAD
   if (usuario && usuario.tipo === 'cliente') {
     zonaCuenta.innerHTML = `
       <span class="me-3 d-none d-md-inline" style="font-weight:700;">Hola, ${escaparHtml(primerNombre(usuario.nombre))}</span>
@@ -33,6 +34,30 @@ async function inicializarHeader() {
   } else {
     // Sin sesión, o sesión de empleado (el sitio público es para clientes).
     zonaCuenta.innerHTML = `
+=======
+  if (usuario) {
+    if (usuario.tipo === 'cliente') {
+      zonaCuenta.innerHTML = `
+        <span class="me-3 d-none d-md-inline" style="font-weight:700;">Hola, ${escaparHtml(primerNombre(usuario.nombre))}</span>
+        <a href="cliente_dashboard.html" class="btn-ambrosia-outline btn-sm me-2">Mi panel</a>
+        <button id="boton-cerrar-sesion" class="btn-ambrosia-outline btn-sm">Cerrar sesión</button>
+      `;
+      await actualizarContadorCarrito();
+    } else if (usuario.tipo === 'empleado') {
+      // Enlace dinámico según rol
+      const linkLabel = usuario.rol === 'Administrador' ? 'Administrar' : 'Dashboard';
+      zonaCuenta.innerHTML = `
+        <span class="me-3 d-none d-md-inline" style="font-weight:700;">${escaparHtml(usuario.rol)}: ${escaparHtml(primerNombre(usuario.nombre))}</span>
+        <a href="admin_pos.html" class="btn-ambrosia btn-sm me-2">${linkLabel}</a>
+        <button id="boton-cerrar-sesion" class="btn-ambrosia-outline btn-sm">Salir</button>
+      `;
+    }
+    document.getElementById('boton-cerrar-sesion').addEventListener('click', cerrarSesion);
+  } else {
+    // Sin sesión
+    zonaCuenta.innerHTML = `
+      <a href="login_empleado.html" class="btn-sm me-3 text-muted text-decoration-none" style="font-weight:700; font-size: 0.9rem;">Portal Empleados</a>
+>>>>>>> fase-6-si
       <a href="login.html" class="btn-ambrosia-outline btn-sm me-2">Iniciar sesión</a>
       <a href="registro.html" class="btn-ambrosia btn-sm">Crear cuenta</a>
     `;

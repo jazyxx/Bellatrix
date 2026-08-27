@@ -34,7 +34,7 @@ class Database
     private const DB_HOST    = "127.0.0.1";
     private const DB_NAME    = "pasteleriaok";
     private const DB_USER    = "root";
-    private const DB_PASS    = "";
+    private const DB_PASS    = "1234";
     private const DB_CHARSET = "utf8mb4";
 
     /**
