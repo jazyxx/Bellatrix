@@ -24,6 +24,7 @@ require_once __DIR__ . '/app/controllers/CarritoController.php';
 require_once __DIR__ . '/app/controllers/PedidoController.php';
 require_once __DIR__ . '/app/controllers/PagoController.php';
 require_once __DIR__ . '/app/controllers/NotificacionController.php';
+require_once __DIR__ . '/app/controllers/AsistenteIAController.php';
 require_once __DIR__ . '/app/core/Middleware.php';
 
 /** @var Router $router Viene definido en index.php antes de incluir este archivo. */
@@ -112,6 +113,16 @@ $router->get('/api/cajas/reportes/diario',  [CajaController::class, 'reporteDiar
 $router->get('/api/cajas/reportes/semanal', [CajaController::class, 'reporteSemanal'], [$rolSoloAdmin]);
 $router->get('/api/cajas/reportes/mensual', [CajaController::class, 'reporteMensual'], [$rolSoloAdmin]);
 $router->get('/api/cajas/reportes/rango',   [CajaController::class, 'reporteRango'],   [$rolSoloAdmin]);
+
+// ==========================================================================
+//  Asistente Financiero con IA — módulo de Caja (admin_caja.html).
+//  Exclusivo Administrador, igual que los reportes y ajustes de caja:
+//  es información financiera sensible del negocio.
+// ==========================================================================
+
+$router->get('/api/asistente-ia/historial',    [AsistenteIAController::class, 'historial'],       [$rolSoloAdmin]);
+$router->post('/api/asistente-ia/mensaje',     [AsistenteIAController::class, 'mensaje'],         [$rolSoloAdmin]);
+$router->delete('/api/asistente-ia/historial', [AsistenteIAController::class, 'limpiarHistorial'],[$rolSoloAdmin]);
 
 // ==========================================================================
 //  CU011 — Catálogo de Productos (Fase 4, rutas PÚBLICAS, sin sesión)

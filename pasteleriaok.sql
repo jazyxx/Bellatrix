@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 20-08-2026 a las 23:41:40
+-- Tiempo de generación: 29-08-2026 a las 19:41:43
 -- Versión del servidor: 8.0.46
 -- Versión de PHP: 8.2.12
 
@@ -86,7 +86,7 @@ CREATE TABLE `carrito` (
 --
 
 INSERT INTO `carrito` (`id_carrito`, `id_cliente`, `subtotal`, `creado_en`, `actualizado`) VALUES
-(1, 1, 0.00, '2026-08-17 17:09:50', '2026-08-20 14:06:52');
+(1, 1, 0.00, '2026-08-17 17:09:50', '2026-08-29 09:09:34');
 
 -- --------------------------------------------------------
 
@@ -126,7 +126,7 @@ CREATE TABLE `cliente` (
 --
 
 INSERT INTO `cliente` (`id_cliente`, `nombre`, `correo`, `contraseña`, `telefono`, `direccion_entrega`, `activo`, `fecha_registro`, `token_recuperacion`, `token_expiracion`) VALUES
-(1, 'Angel Jimenez', 'angeldavidj29@gmail.com', '$2y$10$N7nYE1o/4Q1GCghASBn8rOMu4txfq4Rdz79gnw8BvxWcveC41xw5e', '3227187806', NULL, 1, '2026-08-17 17:09:40', NULL, NULL);
+(1, 'Angel Jimenez', 'angeldavidj29@gmail.com', '$2y$10$DlYJZRspAxOP6UbEe5BVVun6uD30ezCwZidE1aozdOccDfZS3gvMK', '3227187806', NULL, 1, '2026-08-17 17:09:40', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -150,7 +150,8 @@ INSERT INTO `detalle_pedido` (`id_detalle_pedido`, `id_pedido`, `id_producto`, `
 (1, 1, 1, 1, 67000.00),
 (2, 2, 1, 1, 67000.00),
 (3, 3, 1, 1, 67000.00),
-(4, 3, 2, 1, 69000.00);
+(4, 3, 2, 1, 69000.00),
+(5, 4, 14, 1, 11000.00);
 
 -- --------------------------------------------------------
 
@@ -165,6 +166,20 @@ CREATE TABLE `detalle_venta` (
   `cantidad` int NOT NULL DEFAULT '1',
   `precio_unitario` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `detalle_venta`
+--
+
+INSERT INTO `detalle_venta` (`id_detalle`, `id_venta`, `id_producto`, `cantidad`, `precio_unitario`) VALUES
+(1, 2, 16, 1, 13000.00),
+(2, 2, 10, 1, 32000.00),
+(3, 3, 13, 1, 10000.00),
+(4, 3, 11, 1, 12000.00),
+(5, 3, 3, 1, 35000.00),
+(6, 3, 17, 1, 11000.00),
+(7, 4, 8, 1, 38000.00),
+(8, 4, 12, 1, 15000.00);
 
 -- --------------------------------------------------------
 
@@ -220,7 +235,28 @@ INSERT INTO `gestor_ventas` (`id_gestor`, `canal`, `unidad_negocio`, `fecha`, `t
 (1, 'Presencial', 'Pastelería', '2026-08-20', 134000.00, 67000.00, 1),
 (2, 'En línea', 'Heladería', '2026-08-20', 0.00, 0.00, 1),
 (3, 'En línea', 'Pastelería', '2026-08-20', 0.00, 0.00, 1),
-(4, 'Presencial', 'Heladería', '2026-08-20', 0.00, 0.00, 1);
+(4, 'Presencial', 'Heladería', '2026-08-20', 0.00, 0.00, 1),
+(5, 'Presencial', 'Pastelería', '2026-08-21', 67000.00, 0.00, 1),
+(6, 'Presencial', 'Pastelería', '2026-08-26', 0.00, 0.00, 1),
+(7, 'Presencial', 'Pastelería', '2026-08-27', 166000.00, 0.00, 1),
+(8, 'Presencial', 'Heladería', '2026-08-27', 0.00, 0.00, 1),
+(9, 'En línea', 'Heladería', '2026-08-27', 0.00, 0.00, 1),
+(10, 'En línea', 'Pastelería', '2026-08-27', 0.00, 0.00, 1),
+(11, 'Presencial', 'Pastelería', '2026-08-29', 0.00, 0.00, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `interaccion_ia`
+--
+
+CREATE TABLE `interaccion_ia` (
+  `id_interaccion` int NOT NULL,
+  `id_empleado` int NOT NULL,
+  `rol_mensaje` enum('usuario','asistente') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `mensaje` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -241,7 +277,7 @@ CREATE TABLE `materia_prima` (
 --
 
 INSERT INTO `materia_prima` (`id_materia`, `nombre`, `unidad_medida`, `stock_actual`, `stock_minimo`) VALUES
-(1, 'Harina', 'kg', 10.00, 5.00);
+(1, 'Harina', 'kg', 9.00, 5.00);
 
 -- --------------------------------------------------------
 
@@ -266,7 +302,8 @@ CREATE TABLE `notificacion` (
 --
 
 INSERT INTO `notificacion` (`id_notificacion`, `id_cliente`, `id_pedido`, `tipo`, `canal_envio`, `mensaje`, `enviado`, `fecha_envio`, `creado_en`) VALUES
-(1, 1, NULL, 'Confirmación de registro', 'Correo', '¡Bienvenido(a) a Ambrosía, Angel Jimenez! Tu cuenta fue creada exitosamente.', 1, '2026-08-17 17:09:40', '2026-08-17 17:09:40');
+(1, 1, NULL, 'Confirmación de registro', 'Correo', '¡Bienvenido(a) a Ambrosía, Angel Jimenez! Tu cuenta fue creada exitosamente.', 1, '2026-08-17 17:09:40', '2026-08-17 17:09:40'),
+(2, 1, NULL, 'Recuperación de contraseña', 'Correo', 'Usa este código para restablecer tu contraseña: b0f9bf688344308c9ffc379ac06daf9775673626af1d0be47674dea3cc18abf6\nEste código vence en 1 hora. Si tú no solicitaste esto, ignora este mensaje.', 1, '2026-08-27 16:09:21', '2026-08-27 16:09:17');
 
 -- --------------------------------------------------------
 
@@ -308,7 +345,8 @@ CREATE TABLE `pedido` (
 INSERT INTO `pedido` (`id_pedido`, `id_cliente`, `estado`, `direccion_entrega`, `total`, `fecha_creacion`, `fecha_actualizacion`, `id_empleado_gestion`) VALUES
 (1, 1, 'Pendiente de pago', 'calle 67', 67000.00, '2026-08-20 11:31:14', '2026-08-20 11:31:14', NULL),
 (2, 1, 'Pendiente de pago', 'si', 67000.00, '2026-08-20 12:05:21', '2026-08-20 12:05:21', NULL),
-(3, 1, 'Pendiente de pago', '123', 136000.00, '2026-08-20 14:06:52', '2026-08-20 14:06:52', NULL);
+(3, 1, 'Pendiente de pago', '123', 136000.00, '2026-08-20 14:06:52', '2026-08-20 14:06:52', NULL),
+(4, 1, 'Pendiente de pago', 'calle 123', 11000.00, '2026-08-29 09:09:34', '2026-08-29 09:09:34', NULL);
 
 -- --------------------------------------------------------
 
@@ -333,8 +371,26 @@ CREATE TABLE `productos` (
 --
 
 INSERT INTO `productos` (`id_producto`, `nombre`, `descripcion`, `tipo`, `unidad_negocio`, `precio`, `stock`, `foto`, `disponible`) VALUES
-(1, 'Torta 67', 'Torta hecha con mucha aura', 'Tortas', 'Pastelería', 67000.00, 67, NULL, 1),
-(2, 'Torta 69', '69', 'Tortas', 'Pastelería', 69000.00, 5, NULL, 1);
+(1, 'Torta 67', 'Torta hecha con mucha aura', 'Tortas', 'Pastelería', 67000.00, 70, NULL, 1),
+(2, 'Torta 69', '69', 'Tortas', 'Pastelería', 69000.00, 5, NULL, 1),
+(3, 'Red Velvet', 'Bizcocho de terciopelo rojo con relleno y cobertura de crema de queso suave.', 'Tortas', 'Pastelería', 35000.00, 5, NULL, 1),
+(4, 'Selva Negra', 'Capas de bizcocho de chocolate, crema batida y cerezas.', 'Tortas', 'Pastelería', 32000.00, 4, NULL, 1),
+(5, 'Tres Leches Tradicional', 'Bizcocho esponjoso bañado en mezcla de tres leches y coronado con merengue.', 'Tortas', 'Pastelería', 28000.00, 6, NULL, 1),
+(6, 'Cheesecake de Frutos Rojos', 'Base crujiente de galleta, crema horneada y mermelada artesanal de frutos del bosque.', 'Tortas', 'Pastelería', 34000.00, 5, NULL, 1),
+(7, 'Pastel de Zanahoria', 'Bizcocho especiado con nueces, zanahoria rallada y frosting de queso crema.', 'Tortas', 'Pastelería', 30000.00, 5, NULL, 1),
+(8, 'Chocolatoso Extremo', 'Relleno y cubierto con ganache denso de chocolate 70% cacao.', 'Tortas', 'Pastelería', 38000.00, 3, NULL, 1),
+(9, 'Tartaleta de Limón', 'Base crujiente con crema de limón ácida y merengue suizo dorado.', 'Tortas', 'Pastelería', 25000.00, 6, NULL, 1),
+(10, 'Pastel de Maracuyá', 'Capas de bizcocho de vainilla con mousseline de maracuyá y chocolate blanco.', 'Tortas', 'Pastelería', 32000.00, 3, NULL, 1),
+(11, 'Dulce de Leche Veteado', 'Base cremosa de leche con vetas gruesas de dulce de leche repostero.', 'Postres', 'Heladería', 12000.00, 12, NULL, 1),
+(12, 'Gelato de Pistacho', 'Elaborado con pasta pura de pistacho y trozos tostados por encima.', 'Helados', 'Heladería', 15000.00, 7, NULL, 1),
+(13, 'Sorbete de Mango y Maracuyá', 'Opción a base de agua y fruta natural, ligera y sin lácteos.', 'Bebidas', 'Heladería', 10000.00, 10, NULL, 1),
+(14, 'Menta con Chispas', 'Helado refrescante de menta con escamas de chocolate negro.', 'Helados', 'Heladería', 11000.00, 8, NULL, 1),
+(15, 'Vainilla de Madagascar', 'Crema helada clásica con semillas visibles de vaina de vainilla natural.', 'Tortas', 'Pastelería', 11000.00, 10, NULL, 1),
+(16, 'Caramelo Salado y Brownie', 'Base de caramelo con toque de sal marina y trozos de brownie húmedo.', 'Helados', 'Heladería', 13000.00, 9, NULL, 1),
+(17, 'Cookies & Cream', 'Helado de crema suave cargado con trozos generosos de galleta de chocolate.', 'Helados', 'Heladería', 11000.00, 12, NULL, 1),
+(18, 'Sorbete de Frutos Rojos', 'Mezcla balanceada entre lo dulce y lo ácido de frambuesas, moras y arándanos.', 'Bebidas', 'Heladería', 10000.00, 10000, NULL, 1),
+(19, 'Sándwich Helado Artesanal', 'Dos galletas suaves con chispas abrazando una bola de helado de vainilla.', 'Helados', 'Heladería', 14000.00, 15, NULL, 1),
+(20, 'Paletas de Yogur y Arándanos', 'Paletas heladas a base de yogur griego con remolinos de mermelada de arándano.', 'Helados', 'Heladería', 12000.00, 15, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -370,7 +426,10 @@ CREATE TABLE `ventas` (
 --
 
 INSERT INTO `ventas` (`id_venta`, `fecha`, `total`, `canal`, `unidad_negocio`, `estado`, `id_empleado`) VALUES
-(1, '2026-08-20 11:29:42', 0.00, 'Presencial', 'Pastelería', 'Activa', 1);
+(1, '2026-08-20 11:29:42', 0.00, 'Presencial', 'Pastelería', 'Activa', 1),
+(2, '2026-08-27 11:38:01', 45000.00, 'Presencial', 'Pastelería', 'Activa', 1),
+(3, '2026-08-27 11:38:32', 68000.00, 'Presencial', 'Pastelería', 'Activa', 1),
+(4, '2026-08-27 11:40:30', 53000.00, 'Presencial', 'Pastelería', 'Activa', 1);
 
 --
 -- Índices para tablas volcadas
@@ -451,6 +510,13 @@ ALTER TABLE `gestor_ventas`
   ADD KEY `fk_gestor_empleado` (`id_empleado`);
 
 --
+-- Indices de la tabla `interaccion_ia`
+--
+ALTER TABLE `interaccion_ia`
+  ADD PRIMARY KEY (`id_interaccion`),
+  ADD KEY `fk_interaccion_empleado` (`id_empleado`);
+
+--
 -- Indices de la tabla `materia_prima`
 --
 ALTER TABLE `materia_prima`
@@ -520,7 +586,7 @@ ALTER TABLE `carrito`
 -- AUTO_INCREMENT de la tabla `carrito_items`
 --
 ALTER TABLE `carrito_items`
-  MODIFY `id_item` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_item` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `cliente`
@@ -532,13 +598,13 @@ ALTER TABLE `cliente`
 -- AUTO_INCREMENT de la tabla `detalle_pedido`
 --
 ALTER TABLE `detalle_pedido`
-  MODIFY `id_detalle_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_detalle_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_venta`
 --
 ALTER TABLE `detalle_venta`
-  MODIFY `id_detalle` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_detalle` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `empleado`
@@ -550,7 +616,13 @@ ALTER TABLE `empleado`
 -- AUTO_INCREMENT de la tabla `gestor_ventas`
 --
 ALTER TABLE `gestor_ventas`
-  MODIFY `id_gestor` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_gestor` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT de la tabla `interaccion_ia`
+--
+ALTER TABLE `interaccion_ia`
+  MODIFY `id_interaccion` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT de la tabla `materia_prima`
@@ -562,7 +634,7 @@ ALTER TABLE `materia_prima`
 -- AUTO_INCREMENT de la tabla `notificacion`
 --
 ALTER TABLE `notificacion`
-  MODIFY `id_notificacion` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_notificacion` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `pago`
@@ -574,13 +646,13 @@ ALTER TABLE `pago`
 -- AUTO_INCREMENT de la tabla `pedido`
 --
 ALTER TABLE `pedido`
-  MODIFY `id_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id_producto` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_producto` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `recetas`
@@ -592,7 +664,7 @@ ALTER TABLE `recetas`
 -- AUTO_INCREMENT de la tabla `ventas`
 --
 ALTER TABLE `ventas`
-  MODIFY `id_venta` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_venta` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Restricciones para tablas volcadas
@@ -649,6 +721,12 @@ ALTER TABLE `detalle_venta`
 --
 ALTER TABLE `gestor_ventas`
   ADD CONSTRAINT `fk_gestor_empleado` FOREIGN KEY (`id_empleado`) REFERENCES `empleado` (`id_empleado`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `interaccion_ia`
+--
+ALTER TABLE `interaccion_ia`
+  ADD CONSTRAINT `fk_interaccion_empleado` FOREIGN KEY (`id_empleado`) REFERENCES `empleado` (`id_empleado`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `notificacion`
