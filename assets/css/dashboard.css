@@ -42,26 +42,6 @@
   --db-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* ============================================================
-   FIX GLOBAL: CANDADO DE ANCHO PARA MÓVILES (FLEXBOX)
-   ============================================================ */
-
-/* 1. Evita que la página entera cree una barra de desplazamiento inferior */
-html, body {
-  overflow-x: hidden !important;
-  max-width: 100vw;
-}
-
-/* 2. La magia negra de Flexbox: Obliga a las columnas a respetar el ancho de la pantalla y no estirarse por culpa del contenido */
-.row > * {
-  min-width: 0 !important; 
-}
-
-/* 3. Evita que las tarjetas blancas se salgan de los bordes */
-.db-card {
-  max-width: 100%;
-}
-
 /* Base resets */
 body {
   background:
@@ -270,6 +250,7 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 .db-card-icono--success { background: rgba(185, 251, 192, 0.35); }
 .db-card-icono--warning { background: rgba(251, 248, 204, 0.6); }
 .db-card-icono--danger  { background: rgba(255, 207, 210, 0.4); }
+.db-card-icono--rosa    { background: rgba(226, 137, 155, 0.22); }
 .db-card-icono i { font-size: 1rem; }
 
 
@@ -648,121 +629,184 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   }
 }
 
-/* ============================================================
-   RESPONSIVIDAD PUNTO DE VENTA (POS)
-   ============================================================ */
-
-/* Estilos base para pantallas de escritorio (Laptop / PC) */
-@media (min-width: 992px) {
-  .pos-cart-container {
-    height: calc(100vh - 100px);
-  }
-  .pos-product-grid {
-    max-height: calc(100vh - 320px);
-    overflow-y: auto;
-    padding: 4px;
-  }
-}
-
-/* Estilos para móviles y tablets (Dispositivos pequeños) */
-@media (max-width: 991.98px) {
-  .pos-cart-container {
-    height: auto !important; /* Permite que el carrito crezca según su contenido */
-    min-height: auto;
-    margin-top: 1.5rem;
-  }
-
-  .pos-product-grid {
-    max-height: 400px; /* Limita la grilla en celular para que no sea infinita */
-    overflow-y: auto;
-    padding: 4px;
-  }
-
-  .cart-items {
-    max-height: 250px; /* Hace la lista de productos del carrito escroleable en celular */
-    overflow-y: auto;
-  }
-}
 
 /* ============================================================
-   RESPONSIVIDAD PARA TABLAS (HISTORIAL Y PEDIDOS - MODO TARJETA)
+   16. ASISTENTE FINANCIERO IA — widget flotante (admin_caja.html)
    ============================================================ */
+.ia-widget-boton {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: var(--db-white);
+  background: linear-gradient(155deg, var(--brand-rosa) 0%, var(--brand-menta) 100%);
+  box-shadow: 0 10px 24px -8px rgba(111, 174, 140, 0.55);
+  z-index: 200;
+  transition: transform 0.2s var(--db-ease-out), box-shadow 0.2s var(--db-ease-out);
+}
+.ia-widget-boton:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 30px -8px rgba(111, 174, 140, 0.6); }
+.ia-widget-boton:active { transform: translateY(0) scale(0.96); }
 
-@media (max-width: 767.98px) {
-  /* Al usar .tabla-tarjetas blindamos el código para que NO afecte al inventario */
-  
-  .tabla-tarjetas tbody tr {
-    display: block !important;
-    margin-bottom: 1rem;
-    border: 1px solid var(--db-border, #e5e7eb) !important;
-    border-radius: 8px;
-    padding: 10px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  }
-  
-  .tabla-tarjetas thead {
-    display: none !important;
-  }
-
-  .tabla-tarjetas tbody td {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 0.75rem 0.5rem !important;
-    border-bottom: 1px solid #f3f4f6 !important;
-    text-align: right !important;
-    width: 100% !important; 
-  }
-
-  /* Etiqueta que aparecerá a la izquierda en celular */
-  .tabla-tarjetas tbody td::before {
-    content: attr(data-label);
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    color: #6b7280;
-    text-align: left;
-    margin-right: 15px; 
-  }
-
-  .tabla-tarjetas tbody td:last-child {
-    border-bottom: none !important;
-    justify-content: center !important;
-  }
+.ia-widget-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 96px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  height: 520px;
+  max-height: calc(100vh - 140px);
+  background: var(--db-white);
+  border-radius: var(--db-radius);
+  box-shadow: var(--db-shadow-hover);
+  border: 1px solid var(--db-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 200;
+  opacity: 0;
+  transform: translateY(16px) scale(0.98);
+  pointer-events: none;
+  transition: opacity 0.2s var(--db-ease-out), transform 0.2s var(--db-ease-out);
+}
+.ia-widget-panel.abierto {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 
-/* ============================================================
-   RESETEO DEL LAYOUT PRINCIPAL PARA MÓVILES (FIX DEL MARGEN)
-   ============================================================ */
-@media (max-width: 991.98px) {
-  
-  .dashboard-main, 
-  #dashboard-main-content {
-    margin-left: 0 !important;
-    width: 100% !important;
-    padding-left: 15px !important;
-    padding-right: 15px !important;
-  }
-  
-  /* 1. Le quitamos el !important al left para no bloquearlo para siempre */
-  .dashboard-sidebar {
-    position: fixed !important;
-    left: -250px; /* Lo escondemos justo fuera del borde izquierdo */
-    z-index: 1040;
-    transition: left 0.3s ease !important; /* Le damos una animación suave */
-  }
-  
-  /* 2. Cuando el botón (JS) active el menú, esta regla lo trae a la pantalla */
-  .dashboard-sidebar.show,
-  .dashboard-sidebar.active,
-  .dashboard-sidebar.toggled {
-    left: 0 !important;
-  }
-  
-  .dashboard-layout {
-    display: block !important;
-    width: 100vw;
-    overflow-x: hidden;
-  }
+.ia-widget-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  background:
+    radial-gradient(at 85% 0%, rgba(111, 174, 140, 0.35) 0%, transparent 60%),
+    linear-gradient(160deg, var(--db-espresso) 0%, #2A1E1B 100%);
+  color: #FFF9F6;
+  flex-shrink: 0;
+}
+.ia-widget-header__icono {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(155deg, var(--brand-rosa), #D6768A);
+  flex-shrink: 0;
+}
+.ia-widget-header strong { display: block; font-family: var(--fuente-display); font-size: 0.95rem; }
+.ia-widget-header span { display: block; font-size: 0.72rem; opacity: 0.75; }
+.ia-widget-header button {
+  margin-left: auto;
+  background: none; border: none; color: #FFF9F6; opacity: 0.8;
+  font-size: 1.1rem;
+}
+.ia-widget-header button:hover { opacity: 1; }
+
+.ia-widget-mensajes {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  background: var(--db-bg-light);
+}
+
+.ia-mensaje {
+  max-width: 85%;
+  padding: 0.55rem 0.8rem;
+  border-radius: var(--db-radius-sm);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  animation: ia-mensaje-entrar 0.25s var(--db-ease-out) both;
+}
+.ia-mensaje--usuario {
+  align-self: flex-end;
+  background: linear-gradient(155deg, var(--brand-rosa), #D6768A);
+  color: var(--db-white);
+  border-bottom-right-radius: 3px;
+}
+.ia-mensaje--asistente {
+  align-self: flex-start;
+  background: var(--db-white);
+  border: 1px solid var(--db-border);
+  color: var(--db-espresso);
+  border-bottom-left-radius: 3px;
+  white-space: pre-line;
+}
+.ia-mensaje--sistema {
+  align-self: center;
+  background: transparent;
+  color: var(--db-espresso-suave);
+  font-size: 0.78rem;
+  text-align: center;
+  max-width: 100%;
+}
+@keyframes ia-mensaje-entrar {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ia-mensaje { animation: none; }
+}
+
+.ia-widget-escribiendo {
+  align-self: flex-start;
+  display: flex;
+  gap: 4px;
+  padding: 0.6rem 0.8rem;
+  background: var(--db-white);
+  border: 1px solid var(--db-border);
+  border-radius: var(--db-radius-sm);
+  border-bottom-left-radius: 3px;
+}
+.ia-widget-escribiendo span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--db-espresso-suave);
+  animation: ia-punto 1.1s ease-in-out infinite;
+}
+.ia-widget-escribiendo span:nth-child(2) { animation-delay: 0.15s; }
+.ia-widget-escribiendo span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes ia-punto {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+.ia-widget-form {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-top: 1px solid var(--db-border);
+  background: var(--db-white);
+  flex-shrink: 0;
+}
+.ia-widget-form input {
+  flex: 1;
+  border: 1.5px solid var(--db-border);
+  border-radius: 999px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.16s var(--db-ease-out);
+}
+.ia-widget-form input:focus { border-color: var(--brand-rosa); }
+.ia-widget-form button {
+  width: 38px; height: 38px; flex-shrink: 0;
+  border-radius: 50%; border: none;
+  background: linear-gradient(155deg, var(--brand-rosa), var(--brand-menta));
+  color: var(--db-white);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.16s var(--db-ease-out);
+}
+.ia-widget-form button:hover:not(:disabled) { transform: scale(1.06); }
+.ia-widget-form button:disabled { opacity: 0.5; }
+
+@media (max-width: 480px) {
+  .ia-widget-panel { right: 16px; bottom: 88px; }
+  .ia-widget-boton { right: 16px; bottom: 16px; }
 }

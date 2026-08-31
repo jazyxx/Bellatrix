@@ -157,7 +157,8 @@ INSERT INTO `detalle_pedido` (`id_detalle_pedido`, `id_pedido`, `id_producto`, `
 (1, 1, 1, 1, 67000.00),
 (2, 2, 1, 1, 67000.00),
 (3, 3, 1, 1, 67000.00),
-(4, 3, 2, 1, 69000.00);
+(4, 3, 2, 1, 69000.00),
+(5, 4, 14, 1, 11000.00);
 
 -- --------------------------------------------------------
 
@@ -268,7 +269,7 @@ CREATE TABLE `materia_prima` (
 --
 
 INSERT INTO `materia_prima` (`id_materia`, `nombre`, `unidad_medida`, `stock_actual`, `stock_minimo`) VALUES
-(1, 'Harina', 'kg', 10.00, 5.00);
+(1, 'Harina', 'kg', 9.00, 5.00);
 
 -- --------------------------------------------------------
 
@@ -336,7 +337,8 @@ CREATE TABLE `pedido` (
 INSERT INTO `pedido` (`id_pedido`, `id_cliente`, `estado`, `direccion_entrega`, `total`, `fecha_creacion`, `fecha_actualizacion`, `id_empleado_gestion`) VALUES
 (1, 1, 'Pendiente de pago', 'calle 67', 67000.00, '2026-08-20 11:31:14', '2026-08-20 11:31:14', NULL),
 (2, 1, 'Pendiente de pago', 'si', 67000.00, '2026-08-20 12:05:21', '2026-08-20 12:05:21', NULL),
-(3, 1, 'Pendiente de pago', '123', 136000.00, '2026-08-20 14:06:52', '2026-08-20 14:06:52', NULL);
+(3, 1, 'Pendiente de pago', '123', 136000.00, '2026-08-20 14:06:52', '2026-08-20 14:06:52', NULL),
+(4, 1, 'Pendiente de pago', 'calle 123', 11000.00, '2026-08-29 09:09:34', '2026-08-29 09:09:34', NULL);
 
 -- --------------------------------------------------------
 
@@ -500,6 +502,13 @@ ALTER TABLE `gestor_ventas`
   ADD KEY `fk_gestor_empleado` (`id_empleado`);
 
 --
+-- Indices de la tabla `interaccion_ia`
+--
+ALTER TABLE `interaccion_ia`
+  ADD PRIMARY KEY (`id_interaccion`),
+  ADD KEY `fk_interaccion_empleado` (`id_empleado`);
+
+--
 -- Indices de la tabla `materia_prima`
 --
 ALTER TABLE `materia_prima`
@@ -581,7 +590,7 @@ ALTER TABLE `cliente`
 -- AUTO_INCREMENT de la tabla `detalle_pedido`
 --
 ALTER TABLE `detalle_pedido`
-  MODIFY `id_detalle_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_detalle_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_venta`
@@ -623,7 +632,7 @@ ALTER TABLE `pago`
 -- AUTO_INCREMENT de la tabla `pedido`
 --
 ALTER TABLE `pedido`
-  MODIFY `id_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
@@ -698,6 +707,12 @@ ALTER TABLE `detalle_venta`
 --
 ALTER TABLE `gestor_ventas`
   ADD CONSTRAINT `fk_gestor_empleado` FOREIGN KEY (`id_empleado`) REFERENCES `empleado` (`id_empleado`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `interaccion_ia`
+--
+ALTER TABLE `interaccion_ia`
+  ADD CONSTRAINT `fk_interaccion_empleado` FOREIGN KEY (`id_empleado`) REFERENCES `empleado` (`id_empleado`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `notificacion`

@@ -19,9 +19,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('admin-only-section').style.display = 'flex';
     document.getElementById('cajero-restriction-banner').style.display = 'none';
     inicializarAdminCaja();
+    // El widget del Asistente Financiero ya está en el DOM reconstruido
+    // por injectDashboardLayout() (paso 2) — recién AHORA se enganchan
+    // sus event listeners, nunca antes (ver comentario en asistente_ia.js).
+    inicializarAsistenteIA();
   } else {
     document.getElementById('admin-only-section').style.display = 'none';
     document.getElementById('cajero-restriction-banner').style.display = 'block';
+    // El Asistente Financiero con IA es exclusivo de Administrador
+    // (igual que los reportes y ajustes de caja) — se oculta para
+    // Cajero, ya que el backend lo rechazaría con 403 de todas formas.
+    document.getElementById('ia-widget-boton')?.remove();
+    document.getElementById('ia-widget-panel')?.remove();
   }
 
   // 4. Cargar la caja inicial del día por defecto

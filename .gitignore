@@ -1,0 +1,13 @@
+# Excluir la carpeta config completa
+config/
+
+# O si solo quieres ignorar archivos de configuración específicos:
+# config/phpmailer.php
+# config/IA.php
+
+# Ignorar archivos de variables de entorno
+.env
+
+# Ignorar descargas de composer / node si aplicara
+vendor/
+node_modules/
