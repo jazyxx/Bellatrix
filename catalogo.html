@@ -44,7 +44,7 @@
   <section class="py-4" style="background-color: var(--crema);">
     <div class="container">
 
-      <!-- ============================================================
+     <!-- ============================================================
            BARRA DE FILTROS
            ============================================================ -->
       <div class="barra-filtros barra-filtros--sticky d-flex flex-wrap align-items-center gap-3 mb-4">
@@ -52,6 +52,11 @@
           <button class="chip-filtro activo" data-unidad="">Todo</button>
           <button class="chip-filtro" data-unidad="Pastelería">Pastelería</button>
           <button class="chip-filtro" data-unidad="Heladería">Heladería</button>
+          
+          <!-- Botón de Torta Personalizada que abre el modal -->
+          <button type="button" class="chip-filtro fw-bold" style="background-color: #e4f7e4; color: #413724; border-color: #b4e2c5;" data-bs-toggle="modal" data-bs-target="#modalTortaPersonalizada">
+            <i class="bi bi-cake2-fill me-1"></i> Torta Personalizada
+          </button>
         </div>
 
         <form id="form-busqueda" class="ms-md-auto d-flex" style="min-width: 260px;" role="search">
@@ -76,6 +81,94 @@
 
     </div>
   </section>
+
+<!-- ============================================================
+       MODAL TORTA PERSONALIZADA
+       ============================================================ -->
+  <div class="modal fade" id="modalTortaPersonalizada" tabindex="-1" aria-labelledby="modalTortaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+      <div class="modal-content" style="border-radius: 1rem; border: none;">
+        <div class="modal-header" style="background-color: var(--crema); border-bottom: 2px solid var(--borde-suave); border-radius: 1rem 1rem 0 0;">
+          <h5 class="modal-title fuente-display fw-bold" id="modalTortaLabel" style="color: var(--texto-oscuro);">
+            <i class="bi bi-cake2 me-2" style="color: #b48855;"></i>Cotizar Torta Personalizada
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="form-torta-personalizada">
+            
+            <!-- Fecha de entrega -->
+            <div class="mb-4">
+              <label for="torta-fecha" class="form-label fw-bold">Día de Entrega <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" id="torta-fecha" required style="border-radius: 0.5rem;">
+            </div>
+
+            <div class="row g-4 mb-4">
+              <!-- Tamaño / Pisos -->
+              <div class="col-md-5">
+                <label class="form-label fw-bold">Tamaño</label>
+                <div class="d-flex flex-column gap-2">
+                  <div class="form-check"><input class="form-check-input chk-piso" type="checkbox" value="Primera" id="p1"><label class="form-check-label" for="p1">Primera</label></div>
+                  <div class="form-check"><input class="form-check-input chk-piso" type="checkbox" value="Segunda" id="p2"><label class="form-check-label" for="p2">Segunda</label></div>
+                  <div class="form-check"><input class="form-check-input chk-piso" type="checkbox" value="Tercera" id="p3"><label class="form-check-label" for="p3">Tercera</label></div>
+                  <div class="form-check"><input class="form-check-input chk-piso" type="checkbox" value="Cuarta" id="p4"><label class="form-check-label" for="p4">Cuarta</label></div>
+                  <div class="form-check"><input class="form-check-input chk-piso" type="checkbox" value="Quinta" id="p5"><label class="form-check-label" for="p5">Quinta</label></div>
+                  <div class="form-check"><input class="form-check-input chk-piso" type="checkbox" value="Sexta" id="p6"><label class="form-check-label" for="p6">Sexta</label></div>
+                </div>
+              </div>
+
+              <!-- Sabores / Masas -->
+              <div class="col-md-7">
+                <label class="form-label fw-bold">Tipo de Masa / Sabor</label>
+                <div class="row g-2">
+                  <div class="col-sm-6"><div class="form-check"><input class="form-check-input chk-masa" type="checkbox" value="Masa Blanca" id="m1"><label class="form-check-label" for="m1">Masa Blanca</label></div></div>
+                  <div class="col-sm-6"><div class="form-check"><input class="form-check-input chk-masa" type="checkbox" value="Masa Negra" id="m2"><label class="form-check-label" for="m2">Masa Negra</label></div></div>
+                  <div class="col-sm-6"><div class="form-check"><input class="form-check-input chk-masa" type="checkbox" value="3 Leches" id="m3"><label class="form-check-label" for="m3">3 Leches</label></div></div>
+                  <div class="col-sm-6"><div class="form-check"><input class="form-check-input chk-masa" type="checkbox" value="Milky Way" id="m4"><label class="form-check-label" for="m4">Milky Way</label></div></div>
+                  <div class="col-sm-6"><div class="form-check"><input class="form-check-input chk-masa" type="checkbox" value="Torta de Helado" id="m5"><label class="form-check-label" for="m5">Torta de Helado</label></div></div>
+                  <div class="col-sm-6"><div class="form-check"><input class="form-check-input chk-masa" type="checkbox" value="Torta Chocolate" id="m6"><label class="form-check-label" for="m6">Torta Chocolate</label></div></div>
+                  <div class="col-sm-6"><div class="form-check"><input class="form-check-input chk-masa" type="checkbox" value="Torta Española" id="m7"><label class="form-check-label" for="m7">Torta Española</label></div></div>
+                  <div class="col-sm-6"><div class="form-check"><input class="form-check-input chk-masa" type="checkbox" value="Torta María Luisa" id="m8"><label class="form-check-label" for="m8">Torta María Luisa</label></div></div>
+                  <div class="col-sm-6"><div class="form-check"><input class="form-check-input chk-masa" type="checkbox" value="Torta de Amapola" id="m9"><label class="form-check-label" for="m9">Torta de Amapola</label></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Forma de la Torta -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Forma de la Torta</label>
+              <div class="d-flex flex-wrap gap-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="tortaForma" id="f-redonda" value="Redonda" checked>
+                  <label class="form-check-label" for="f-redonda">Redonda</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="tortaForma" id="f-cuadrada" value="Cuadrada">
+                  <label class="form-check-label" for="f-cuadrada">Cuadrada</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="tortaForma" id="f-corazon" value="Corazón">
+                  <label class="form-check-label" for="f-corazon">Corazón</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Especificaciones -->
+            <div class="mb-2">
+              <label for="torta-especificaciones" class="form-label fw-bold">Especificaciones del Diseño</label>
+              <textarea class="form-control" id="torta-especificaciones" rows="3" placeholder="Ej: Que tenga temática de F1, colores rojo y negro, y diga 'Feliz Cumpleaños'..." style="border-radius: 0.5rem;"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer d-flex justify-content-between align-items-center" style="background-color: #f8f9fa; border-radius: 0 0 1rem 1rem;">
+          <small class="text-muted d-none d-sm-block">Te contactaremos para detalles y pago.</small>
+          <button type="button" class="btn btn-success px-4" id="btn-enviar-whatsapp" style="border-radius: 999px;">
+            <i class="bi bi-whatsapp me-2"></i>Enviar a WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <footer class="footer-ambrosia">
     <div class="container text-center">

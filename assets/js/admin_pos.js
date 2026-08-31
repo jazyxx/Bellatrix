@@ -287,6 +287,18 @@ async function finalizarVentaPOS() {
       // Éxito completo
       showDashboardAlert(`¡Venta #${idVenta} finalizada con éxito! Total: ${document.getElementById('cart-total').textContent}`, 'success');
       
+      // --- NUEVA LÓGICA DE REMISIÓN ---
+      // Buscamos si hay alguna torta personalizada en el carrito actual
+      const tieneTortaPersonalizada = carritoLocal.some(item => 
+        item.nombre.toLowerCase().includes("torta personalizada")
+      );
+
+      if (tieneTortaPersonalizada) {
+        // Abrimos el formato físico de remisión en una ventana nueva
+        window.open(`imprimir_remision.html?id=${idVenta}`, '_blank', 'width=800,height=600');
+      }
+      // --------------------------------
+
       // Reset POS
       carritoLocal = [];
       document.getElementById('pos-recibido').value = '';

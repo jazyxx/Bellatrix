@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 29-08-2026 a las 19:41:43
+-- Tiempo de generación: 28-08-2026 a las 00:26:18
 -- Versión del servidor: 8.0.46
 -- Versión de PHP: 8.2.12
 
@@ -86,7 +86,7 @@ CREATE TABLE `carrito` (
 --
 
 INSERT INTO `carrito` (`id_carrito`, `id_cliente`, `subtotal`, `creado_en`, `actualizado`) VALUES
-(1, 1, 0.00, '2026-08-17 17:09:50', '2026-08-29 09:09:34');
+(1, 1, 10000.00, '2026-08-17 17:09:50', '2026-08-27 11:45:38');
 
 -- --------------------------------------------------------
 
@@ -101,6 +101,13 @@ CREATE TABLE `carrito_items` (
   `cantidad` int NOT NULL DEFAULT '1',
   `precio_unitario` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `carrito_items`
+--
+
+INSERT INTO `carrito_items` (`id_item`, `id_carrito`, `id_producto`, `cantidad`, `precio_unitario`) VALUES
+(5, 1, 13, 1, 10000.00);
 
 -- --------------------------------------------------------
 
@@ -241,22 +248,7 @@ INSERT INTO `gestor_ventas` (`id_gestor`, `canal`, `unidad_negocio`, `fecha`, `t
 (7, 'Presencial', 'Pastelería', '2026-08-27', 166000.00, 0.00, 1),
 (8, 'Presencial', 'Heladería', '2026-08-27', 0.00, 0.00, 1),
 (9, 'En línea', 'Heladería', '2026-08-27', 0.00, 0.00, 1),
-(10, 'En línea', 'Pastelería', '2026-08-27', 0.00, 0.00, 1),
-(11, 'Presencial', 'Pastelería', '2026-08-29', 0.00, 0.00, 1);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `interaccion_ia`
---
-
-CREATE TABLE `interaccion_ia` (
-  `id_interaccion` int NOT NULL,
-  `id_empleado` int NOT NULL,
-  `rol_mensaje` enum('usuario','asistente') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `mensaje` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+(10, 'En línea', 'Pastelería', '2026-08-27', 0.00, 0.00, 1);
 
 -- --------------------------------------------------------
 
@@ -586,7 +578,7 @@ ALTER TABLE `carrito`
 -- AUTO_INCREMENT de la tabla `carrito_items`
 --
 ALTER TABLE `carrito_items`
-  MODIFY `id_item` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_item` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `cliente`
@@ -616,13 +608,7 @@ ALTER TABLE `empleado`
 -- AUTO_INCREMENT de la tabla `gestor_ventas`
 --
 ALTER TABLE `gestor_ventas`
-  MODIFY `id_gestor` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
---
--- AUTO_INCREMENT de la tabla `interaccion_ia`
---
-ALTER TABLE `interaccion_ia`
-  MODIFY `id_interaccion` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id_gestor` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `materia_prima`

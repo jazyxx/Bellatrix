@@ -46,7 +46,8 @@ async function cargarPedidos() {
         <td><strong class="text-success">${formatearPrecioCOP(p.total)}</strong></td>
         <td><span class="badge-pastel ${badgeClass}">${p.estado}</span></td>
         <td class="text-center">
-          <button class="btn btn-sm btn-db-primary py-1" onclick="verTracking(${p.id_pedido})"><i class="bi bi-eye-fill me-1"></i>Rastrear</button>
+          <button class="btn btn-sm btn-db-primary py-1 mb-1" onclick="verTracking(${p.id_pedido})"><i class="bi bi-eye-fill me-1"></i>Rastrear</button>
+          <button class="btn btn-sm btn-outline-secondary py-1 mb-1 ms-1" onclick="abrirReciboVirtual(${p.id_pedido})" title="Imprimir Recibo"><i class="bi bi-receipt me-1"></i>Recibo</button>
         </td>
       </tr>
     `;
@@ -140,4 +141,9 @@ function formatearFecha(fechaStr) {
   if (!fechaStr) return '';
   const f = new Date(fechaStr);
   return f.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+function abrirReciboVirtual(idPedido) {
+  // Abre una pestaña nueva enfocada solo en el recibo
+  window.open(`recibo_pedido.html?id=${idPedido}`, '_blank', 'width=800,height=700');
 }

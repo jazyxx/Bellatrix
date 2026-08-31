@@ -49,7 +49,7 @@ async function cargarCatalogo() {
 }
 
 function activarChipsDeUnidad() {
-  const chips = document.querySelectorAll('#chips-unidad .chip-filtro');
+  const chips = document.querySelectorAll('#chips-unidad .chip-filtro[data-unidad]');
   chips.forEach((chip) => {
     // Marca visualmente el chip que coincide con el filtro inicial de la URL.
     if (chip.dataset.unidad === filtroUnidad) {
@@ -92,8 +92,59 @@ function activarBusqueda() {
   });
 }
 
+function activarPedidoTortaPersonalizada() {
+  const btnWhatsApp = document.getElementById('btn-enviar-whatsapp');
+
+  if (btnWhatsApp) {
+    btnWhatsApp.addEventListener('click', () => {
+      const fecha = document.getElementById('torta-fecha').value;
+      
+      if (!fecha) {
+        alert('Por favor, selecciona la fecha en la que necesitas la torta.');
+        document.getElementById('torta-fecha').focus();
+        return;
+      }
+
+      // Capturar Checkboxes de Tamaño (Pisos) y Sabores/Masas
+      const pisos = Array.from(document.querySelectorAll('.chk-piso:checked')).map(cb => cb.value);
+      const masas = Array.from(document.querySelectorAll('.chk-masa:checked')).map(cb => cb.value);
+
+      // Capturar Forma y Especificaciones
+      const formaEl = document.querySelector('input[name="tortaForma"]:checked');
+      const forma = formaEl ? formaEl.value : 'No especificada';
+      const especificaciones = document.getElementById('torta-especificaciones').value.trim();
+
+      // Armar el mensaje
+      let mensaje = `*¡Hola Ambrosía! Quisiera cotizar una Torta Personalizada*\n\n`;
+      mensaje += `*Día de entrega:* ${fecha}\n`;
+      mensaje += `*Forma:* ${forma}\n`;
+      mensaje += `*Tamaño:* ${pisos.length > 0 ? pisos.join(', ') : 'Por definir'}\n`;
+      mensaje += `*Sabores/Masas:* ${masas.length > 0 ? masas.join(', ') : 'Por definir'}\n`;
+      
+      if (especificaciones) {
+        mensaje += `\n*Especificaciones:* ${especificaciones}\n`;
+      }
+      mensaje += `\n¿Me podrían confirmar el presupuesto y los detalles del diseño? Quedo atent@.`;
+
+      const telefonoAmbrosia = '573205274821'; // Número de WhatsApp de Ambrosía
+      const urlWA = `https://wa.me/${telefonoAmbrosia}?text=${encodeURIComponent(mensaje)}`;
+      
+      // Cerrar el modal y abrir WhatsApp
+      const modalEl = document.getElementById('modalTortaPersonalizada');
+      if (modalEl) {
+        // En caso de que Bootstrap ya haya inicializado el modal
+        const modalInstancia = bootstrap.Modal.getInstance(modalEl);
+        if (modalInstancia) modalInstancia.hide();
+      }
+
+      window.open(urlWA, '_blank');
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   activarChipsDeUnidad();
   activarBusqueda();
+  activarPedidoTortaPersonalizada();
   cargarCatalogo();
 });

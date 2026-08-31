@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remisión de Pedido - Ambrosía</title>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Estilos simulando un talonario de panadería físico */
+    body { 
+      font-family: 'Courier Prime', monospace; 
+      background: #e9ecef; 
+      display: flex; 
+      justify-content: center; 
+      padding: 20px;
+    }
+    .remision-caja {
+      background: #fff;
+      border: 1px solid #ccc;
+      width: 100%;
+      max-width: 450px;
+      padding: 30px 20px;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .titulo { text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 5px; color: #d63384; }
+    .subtitulo { text-align: center; font-size: 0.9rem; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+    
+    .fila-dato { margin-bottom: 15px; display: flex; align-items: flex-end; }
+    .fila-dato strong { margin-right: 10px; font-size: 0.9rem; white-space: nowrap; }
+    .linea-punteada { flex-grow: 1; border-bottom: 1px dashed #000; min-height: 15px; font-size: 0.9rem; padding-left: 5px; }
+    
+    .tabla-items { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; }
+    .tabla-items th, .tabla-items td { border: 1px solid #000; padding: 5px; text-align: left; font-size: 0.85rem; }
+    .tabla-items th { background: #f8f9fa; text-align: center; }
+    .text-right { text-align: right !important; }
+    
+    .btn-imprimir {
+      display: block; width: 100%; padding: 10px; background: #333; color: #fff; 
+      text-align: center; border: none; cursor: pointer; margin-bottom: 20px; font-family: inherit; font-size: 1rem;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; display: block; }
+      .remision-caja { border: none; box-shadow: none; width: 100%; max-width: 100%; padding: 0; }
+      .btn-imprimir { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div>
+    <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir Remisión</button>
+
+    <div class="remision-caja" id="contenido-remision">
+      <div class="titulo">AMBROSÍA</div>
+      <div class="subtitulo">Remisión de Pedido Especial<br><small>No Válido como Factura Electrónica</small></div>
+
+      <div class="fila-dato">
+        <strong>Venta N°:</strong>
+        <div class="linea-punteada" id="rem-id">Cargando...</div>
+      </div>
+      
+      <div class="fila-dato">
+        <strong>Fecha:</strong>
+        <div class="linea-punteada" id="rem-fecha"></div>
+      </div>
+
+      <div class="fila-dato">
+        <strong>Cliente:</strong>
+        <div class="linea-punteada"></div> <!-- Espacio para llenar a mano -->
+      </div>
+      
+      <div class="fila-dato">
+        <strong>Teléfono:</strong>
+        <div class="linea-punteada"></div> <!-- Espacio para llenar a mano -->
+      </div>
+
+      <div class="fila-dato">
+        <strong>Fecha Entrega:</strong>
+        <div class="linea-punteada"></div> <!-- Espacio para llenar a mano -->
+      </div>
+
+      <table class="tabla-items">
+        <thead>
+          <tr>
+            <th style="width: 15%;">Cant</th>
+            <th style="width: 50%;">Descripción</th>
+            <th style="width: 35%;">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody id="rem-items">
+          <!-- Los items se inyectan acá -->
+        </tbody>
+      </table>
+
+      <div class="fila-dato">
+        <strong>Total a Pagar:</strong>
+        <div class="linea-punteada" id="rem-total"></div>
+      </div>
+      <div class="fila-dato">
+        <strong>Abono:</strong>
+        <div class="linea-punteada"></div> <!-- Espacio para llenar a mano -->
+      </div>
+      <div class="fila-dato">
+        <strong>Saldo Pendiente:</strong>
+        <div class="linea-punteada"></div> <!-- Espacio para llenar a mano -->
+      </div>
+
+      <div style="margin-top: 20px; font-size: 0.8rem; border-top: 1px dashed #000; padding-top: 10px;">
+        <strong>Notas / Detalles del Diseño:</strong>
+        <br><br><br><br> <!-- Espacio para escribir características de la torta -->
+        <hr style="border: none; border-bottom: 1px dashed #000;">
+      </div>
+      
+      <div style="text-align: center; margin-top: 20px; font-size: 0.8rem;">
+        ¡Gracias por elegirnos!<br>
+        Firma Recibido: ___________________
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const params = new URLSearchParams(window.location.search);
+      const idVenta = params.get('id');
+
+      if (!idVenta) {
+        document.getElementById('rem-id').textContent = 'Error: ID no proporcionado';
+        return;
+      }
+
+      // Consumimos el endpoint de la venta para obtener los detalles
+      const respuesta = await apiFetch(`api/ventas/${idVenta}`);
+      if (!respuesta.exito || !respuesta.datos) {
+        document.getElementById('rem-id').textContent = 'Error al cargar';
+        return;
+      }
+
+      const venta = respuesta.datos;
+      
+      document.getElementById('rem-id').textContent = venta.id_venta;
+      document.getElementById('rem-fecha').textContent = new Date().toLocaleDateString('es-CO');
+      
+      let itemsHtml = '';
+      if (venta.productos && venta.productos.length > 0) {
+        venta.productos.forEach(item => {
+          itemsHtml += `
+            <tr>
+              <td style="text-align:center;">${item.cantidad}</td>
+              <td>${item.nombre}</td>
+              <td class="text-right">$${Number(item.subtotal).toLocaleString('es-CO')}</td>
+            </tr>
+          `;
+        });
+      }
+      
+      document.getElementById('rem-items').innerHTML = itemsHtml;
+      document.getElementById('rem-total').innerHTML = `<strong>$${Number(venta.total).toLocaleString('es-CO')}</strong>`;
+    });
+  </script>
+</body>
+</html>
