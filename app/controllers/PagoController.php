@@ -40,11 +40,17 @@ class PagoController
      * Crea el registro de intento de pago (estado 'Pendiente') por el
      * monto exacto del pedido, usando Pago::procesarPago() (Fase 1).
      */
+    // --- NUEVO: CONFIGURACIÓN NEQUI ---
+    private $apiUrlNequi = "https://api.sandbox.nequi.com";
+    private $apiKeyNequi = "TU_API_KEY_AQUI"; 
+    private $codigoComercioNequi = "NIT_900_AMBROSIA";
+    // ----------------------------------
     public function iniciar(): void
     {
         $datos = Request::jsonBody();
         $idPedido = $datos['id_pedido'] ?? null;
         $medioPago = $datos['medio_pago'] ?? '';
+        $celular = $datos['celular'] ?? null; // NUEVO: Requerido para el Push de Nequi
 
         $mediosValidos = ['PSE', 'Tarjeta crédito', 'Tarjeta débito', 'Nequi', 'Otro'];
         if (!is_numeric($idPedido)) {
@@ -76,6 +82,26 @@ class PagoController
             'medio_pago' => $medioPago,
         ]);
         $pago->procesarPago();
+        // --- NUEVO: INTEGRACIÓN REAL CON NEQUI ---
+        if ($medioPago === 'Nequi') {
+            if (empty($celular)) {
+                Response::error("Para pagar con Nequi debes proporcionar el número de celular.", 400);
+                return;
+            }
+
+            $tokenAcceso = $this->generarTokenNequi();
+            if (!$tokenAcceso) {
+                Response::error("Error de autenticación con la pasarela de Nequi.", 500);
+                return;
+            }
+
+            $respuestaNequi = $this->enviarPushNequi($celular, $pedido->total, $pago->referencia, $tokenAcceso);
+            if (!$respuestaNequi['exito']) {
+                Response::error('Error al conectar con Nequi: ' . $respuestaNequi['mensaje'], 500);
+                return;
+            }
+        }
+        // -----------------------------------------
 
         Response::exito([
             'id_pago'    => $pago->idPago,
@@ -186,5 +212,124 @@ class PagoController
         }
 
         Response::exito($pago->generarComprobante());
+    }
+    // =========================================================================
+    // NUEVOS MÉTODOS PARA INTEGRACIÓN NEQUI
+    // =========================================================================
+
+    /**
+     * webhookNequi()
+     * POST /api/pagos/webhook-nequi
+     * Endpoint público que recibe la respuesta asíncrona de Nequi.
+     */
+    public function webhookNequi(): void
+    {
+        $payloadRaw = file_get_contents('php://input');
+        $datosWebhook = json_decode($payloadRaw, true);
+
+        if (empty($datosWebhook)) {
+            Response::error("No payload received", 400);
+            return;
+        }
+
+        $estadoNequi = $datosWebhook['ResponseMessage']['ResponseBody']['any']['status'] ?? '';
+        $referenciaPasarela = $datosWebhook['ResponseMessage']['ResponseBody']['any']['transactionId'] ?? null;
+        $referenciaNuestra = $datosWebhook['ResponseMessage']['ResponseBody']['any']['reference1'] ?? null;
+
+        $pago = Pago::obtenerPorReferencia($referenciaNuestra); 
+        
+        if ($pago) {
+            $aprobado = (strtoupper($estadoNequi) === 'APPROVED');
+            $pago->confirmarTransaccion($aprobado, $referenciaPasarela);
+        }
+
+        http_response_code(200);
+        echo json_encode(["status" => "success"]);
+    }
+
+    /**
+     * Método privado para enviar la petición Push a Nequi
+     */
+    private function enviarPushNequi($celular, $monto, $referenciaPedido, $tokenAcceso)
+    {
+        $endpoint = $this->apiUrlNequi . "/payments/v2/-services-paymentservice-unregisteredpayment";
+
+        $cuerpoPeticion = [
+            "RequestMessage" => [
+                "RequestBody" => [
+                    "any" => [
+                        "unregisteredPaymentRQ" => [
+                            "phoneNumber" => (string)$celular,
+                            "code" => $this->codigoComercioNequi,
+                            "value" => (string)$monto,
+                            "reference1" => (string)$referenciaPedido,
+                            "reference2" => "Compra Bellatrix",
+                            "reference3" => ""
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $headers = [
+            "Content-Type: application/json",
+            "Accept: application/json",
+            "x-api-key: " . $this->apiKeyNequi,
+            "Authorization: Bearer " . $tokenAcceso
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $endpoint);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($cuerpoPeticion));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
+
+        $respuesta = curl_exec($ch);
+        $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) return ["exito" => false, "mensaje" => $error];
+
+        return [
+            "exito" => $codigoHttp == 200 || $codigoHttp == 202,
+            "datos" => json_decode($respuesta, true)
+        ];
+    }
+
+    /**
+     * Método privado para generar el Token OAuth2
+     */
+    private function generarTokenNequi()
+    {
+        $clientId = "TU_CLIENT_ID";
+        $clientSecret = "TU_CLIENT_SECRET";
+        
+        $authUrl = "https://oauth.sandbox.nequi.com/oauth2/token?grant_type=client_credentials";
+        $credencialesBase64 = base64_encode($clientId . ":" . $clientSecret);
+
+        $headers = [
+            "Authorization: Basic " . $credencialesBase64,
+            "Content-Type: application/x-www-form-urlencoded",
+            "Accept: application/json"
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $authUrl);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+        $respuesta = curl_exec($ch);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) return null;
+
+        $datos = json_decode($respuesta, true);
+        return $datos['access_token'] ?? null;
     }
 }

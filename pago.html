@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finalizar Pago — Ambrosía</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/estilos.css">
+</head>
+<body>
+
+  <header class="header-ambrosia py-3">
+    <div class="container d-flex align-items-center justify-content-between">
+      <a href="index.html" class="marca-ambrosia text-decoration-none">Ambrosía</a>
+      <nav class="nav-ambrosia d-none d-lg-flex">
+        <a class="nav-link" href="index.html">Inicio</a>
+        <a class="nav-link" href="catalogo.html">Catálogo</a>
+      </nav>
+      <div class="d-flex align-items-center">
+        <a href="carrito.html" class="icono-accion me-3 text-decoration-none" aria-label="Ver carrito">
+          <i class="bi bi-basket3-fill"></i>
+          <span id="contador-carrito" class="contador-carrito" style="display:none;">0</span>
+        </a>
+        <div id="zona-cuenta" class="d-flex align-items-center"></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="seccion-pago py-5">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-8">
+          
+          <span class="eyebrow">Checkout seguro</span>
+          <h1 class="fuente-display mt-1 mb-4">Pago en Línea</h1>
+
+          <div class="resumen-carrito">
+            <h3 class="h5 mb-3" style="color: var(--crema); font-family: var(--fuente-display);">Detalles de tu transacción</h3>
+            
+            <p class="mb-4" style="opacity: 0.9;">
+              Estás a un paso de completar tu <strong>Pedido #<span id="pago-id-pedido">...</span></strong>.
+            </p>
+
+            <form id="form-pago">
+              
+              <!-- Selector de Medio de Pago -->
+              <label for="medio-pago" class="d-block mb-1 small fw-bold">Medio de Pago</label>
+              <select class="form-select mb-3" id="medio-pago" required>
+                <option value="" disabled selected>Selecciona una opción...</option>
+
+                <option value="Nequi">Nequi</option>
+              </select>
+
+              <!-- Campo dinámico para Nequi (Oculto por defecto) -->
+              <div id="caja-celular-nequi" class="mb-4" style="display: none;">
+                <label for="celular-nequi" class="d-block mb-1 small fw-bold text-info">Número de celular (Nequi)</label>
+                <input type="tel" id="celular-nequi" class="form-control" placeholder="Ej: 3001234567" pattern="[0-9]{10}">
+                <p class="small mt-2" style="opacity: 0.75;">
+                  <i class="bi bi-info-circle me-1"></i> Enviaremos una notificación a tu celular para que apruebes el cobro.
+                </p>
+              </div>
+
+              <!-- Mensaje de error/éxito -->
+              <div id="mensaje-pago" class="mensaje-formulario mensaje-formulario--error mb-3" style="display:none;"></div>
+
+              <button type="submit" id="btn-pagar" class="btn-ambrosia w-100 mt-2">Pagar Ahora</button>
+            </form>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer-ambrosia py-4">
+    <div class="container text-center">
+      <p class="small mb-0" style="opacity: 0.6;">&copy; 2026 Ambrosía. Sistema Bellatrix.</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/componentes.js"></script>
+  <script src="assets/js/pago.js"></script> <!-- Aquí conectamos el nuevo JS -->
+</body>
+</html>

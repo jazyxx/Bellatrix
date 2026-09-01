@@ -167,6 +167,7 @@ $router->get('/api/pedidos/{id}', [PedidoController::class, 'ver'], [
 
 $router->post('/api/pagos',                 [PagoController::class, 'iniciar'],   [$rolCliente]);
 $router->post('/api/pagos/{id}/confirmar',  [PagoController::class, 'confirmar'], [$rolCliente]);
+$router->post('/api/pagos/webhook-nequi',   [PagoController::class, 'webhookNequi']);
 
 $router->get('/api/pagos/pedido/{idPedido}', [PagoController::class, 'porPedido'], [
     [Middleware::class, 'autenticado'],

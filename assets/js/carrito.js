@@ -185,5 +185,6 @@ async function confirmarPedido() {
       <h2 class="h4 fuente-display">¡Pedido #${respuesta.datos.id_pedido} confirmado!</h2>
       <p class="text-muted">Te avisaremos por notificación en cuanto cambie de estado.</p>
       <a href="catalogo.html" class="btn-ambrosia mt-2">Seguir explorando</a>
+      <a href="pago.html?id_pedido=${respuesta.datos.id_pedido}" class="btn-ambrosia mt-2" style="background-color: #d2eecf; border-color: #28a745;">Ir a pagar</a>
     </div>`;
 }
