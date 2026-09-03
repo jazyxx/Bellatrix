@@ -181,3 +181,9 @@ $router->get('/api/pagos/{id}/comprobante', [PagoController::class, 'comprobante
 // ==========================================================================
 
 $router->get('/api/notificaciones', [NotificacionController::class, 'misNotificaciones'], [$rolCliente]);
+
+// ==========================================================================
+//  Perfil de Cliente — Actualizar Datos
+// ==========================================================================
+
+$router->post('/api/actualizar-perfil', [AuthController::class, 'actualizarPerfil'], [$rolCliente]);

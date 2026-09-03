@@ -79,19 +79,23 @@ class AuthController
             return;
         }
 
-        Sesion::guardar([
-            'id'            => $cliente->idCliente,
-            'tipo'          => 'cliente',
-            'rol'           => 'Cliente',
-            'nombre'        => $cliente->nombre,
-            'identificador' => $cliente->correo,
+       Sesion::guardar([
+            'id'                => $cliente->idCliente,
+            'tipo'              => 'cliente',
+            'rol'               => 'Cliente',
+            'nombre'            => $cliente->nombre,
+            'identificador'     => $cliente->correo,
+            'telefono'          => $cliente->telefono,
+            'direccion_entrega' => $cliente->direccionEntrega,
         ]);
 
         Response::exito([
-            'id_cliente' => $cliente->idCliente,
-            'nombre'     => $cliente->nombre,
-            'correo'     => $cliente->correo,
-            'rol'        => 'Cliente',
+            'id_cliente'        => $cliente->idCliente,
+            'nombre'            => $cliente->nombre,
+            'correo'            => $cliente->correo,
+            'telefono'          => $cliente->telefono,
+            'direccion_entrega' => $cliente->direccionEntrega,
+            'rol'               => 'Cliente',
         ], 'Sesión iniciada correctamente. ¡Bienvenido(a) de nuevo!');
     }
 
@@ -249,9 +253,22 @@ class AuthController
     public function me(): void
     {
         $usuario = Sesion::obtenerUsuario();
+
+        // Si es un cliente, consulta los datos frescos de la base de datos
+        if ($usuario && ($usuario['tipo'] ?? '') === 'cliente') {
+            $cliente = Cliente::obtenerPorId((int) $usuario['id']);
+            if ($cliente !== null) {
+                $usuario['nombre']            = $cliente->nombre;
+                $usuario['telefono']          = $cliente->telefono;
+                $usuario['direccion_entrega'] = $cliente->direccionEntrega;
+
+                // Actualiza la sesión para futuras consultas
+                Sesion::guardar($usuario);
+            }
+        }
+
         Response::exito($usuario, 'Sesión activa encontrada.');
     }
-
     /**
      * recuperar()
      * ------------------------------------------------------------
@@ -326,4 +343,56 @@ class AuthController
 
         Response::exito([], 'Contraseña actualizada correctamente. Ya puedes iniciar sesión.');
     }
-}
+
+    /**
+     * actualizarPerfil()
+     * ------------------------------------------------------------
+     * POST /api/actualizar-perfil  (rol: Cliente)
+     */
+    public function actualizarPerfil(): void
+    {
+        $datos = Request::jsonBody();
+        $idCliente = Sesion::obtenerId();
+
+        $nombre = trim($datos['nombre'] ?? '');
+        if ($nombre === '') {
+            Response::error('El nombre es obligatorio.', 400);
+            return;
+        }
+
+        $cliente = Cliente::obtenerPorId($idCliente);
+        if ($cliente === null) {
+            Response::error('No se encontró la información del cliente.', 404);
+            return;
+        }
+
+        $cliente->nombre = $nombre;
+        $cliente->telefono = !empty($datos['telefono']) ? trim($datos['telefono']) : null;
+        $cliente->direccionEntrega = !empty($datos['direccion_entrega']) ? trim($datos['direccion_entrega']) : null;
+
+        try {
+            if ($cliente->actualizar()) {
+                Sesion::guardar([
+                    'id'                => $cliente->idCliente,
+                    'tipo'              => 'cliente',
+                    'rol'               => 'Cliente',
+                    'nombre'            => $cliente->nombre,
+                    'identificador'     => $cliente->correo,
+                    'telefono'          => $cliente->telefono,
+                    'direccion_entrega' => $cliente->direccionEntrega,
+                ]);
+
+                Response::exito([
+                    'nombre'            => $cliente->nombre,
+                    'telefono'          => $cliente->telefono,
+                    'direccion_entrega' => $cliente->direccionEntrega,
+                ], 'Perfil actualizado exitosamente.');
+            } else {
+                Response::error('No se pudieron guardar los cambios en el perfil.', 500);
+            }
+        } catch (Exception $e) {
+            Response::error('Error al actualizar el perfil: ' . $e->getMessage(), 500);
+        }
+    }
+} // <- Asegúrate de que esta sea la última llave de la clase
+
