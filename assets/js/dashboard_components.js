@@ -7,7 +7,8 @@
 async function injectDashboardLayout(rol, activeTabId) {
   const sidebarLinks = {
     'Cliente': [
-      { id: 'cliente_pedidos', href: 'cliente_dashboard.html', icon: 'bi-bag-check-fill', text: 'Mis Pedidos' },
+      { id: 'cliente_dashboard', href: 'cliente_dashboard.html', icon: 'bi-person-circle', text: 'Mi Perfil' },
+      { id: 'cliente_pedidos', href: 'cliente_pedidos.html', icon: 'bi-bag-check-fill', text: 'Mis Pedidos' },
       { id: 'logout', href: '#', icon: 'bi-box-arrow-right', text: 'Cerrar Sesión', onclick: 'cerrarSesionDashboard()' }
     ],
     'Administrador': [

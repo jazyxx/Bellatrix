@@ -158,6 +158,63 @@ class PedidoController
     }
 
     /**
+     * cancelarPorCliente($id)
+     * ------------------------------------------------------------
+     * PUT /api/pedidos/{id}/cancelar  (rol: Cliente)
+     * 
+     * Permite a un cliente cancelar exclusivamente su propio pedido.
+     * Solo es válido si el pedido aún no está en preparación.
+     */
+    public function cancelarPorCliente(string $id): void
+    {
+        $pedido = Pedido::obtenerPorId((int) $id);
+        
+        if ($pedido === null) {
+            Response::error('El pedido solicitado no existe.', 404);
+            return;
+        }
+
+        // 1. Validar que el pedido pertenezca al cliente logueado
+        if ($pedido->idCliente !== Sesion::obtenerId()) {
+            Response::error('No tienes permiso para modificar este pedido.', 403);
+            return;
+        }
+
+        // 2. Regla de negocio: Solo cancelar si no han empezado a prepararlo
+        $estadosPermitidos = ['Pendiente de pago', 'Confirmado'];
+        if (!in_array($pedido->estado, $estadosPermitidos, true)) {
+            Response::error('El pedido ya no se puede cancelar porque su estado es: ' . $pedido->estado, 400);
+            return;
+        }
+
+        // GUARDAMOS EL ESTADO ANTERIOR para saber si se necesita reembolso
+        $estadoAnterior = $pedido->estado;
+
+        // 3. Efectuar el cambio de estado (esto dispara la notificación al cliente)
+        try {
+            $pedido->cambiarEstado('Cancelado');
+            
+            // =========================================================
+            // 4. NOTIFICACIÓN PARA ADMINISTRADORES / CAJEROS
+            // =========================================================
+            if ($estadoAnterior === 'Confirmado') {
+                $mensajeStaff = "🚨 URGENTE: El cliente canceló el pedido #{$id}. DETENER PRODUCCIÓN. Requiere proceso de reembolso (Pedido ya estaba pagado).";
+            } else {
+                $mensajeStaff = "El cliente canceló el pedido #{$id} (No requiere reembolso, estaba pendiente de pago).";
+            }
+
+            // Aquí debes usar tu clase/modelo de Notificaciones para guardarlo.
+            // Ajusta esta línea a la sintaxis exacta de tu sistema Bellatrix. Ejemplos:
+            // Notificacion::crearParaStaff($mensajeStaff);
+            // Notificacion::crearParaRol('Administrador', $mensajeStaff);
+            
+            Response::exito($this->serializarPedido($pedido), 'Tu pedido ha sido cancelado exitosamente.');
+        } catch (Exception $e) {
+            Response::error($e->getMessage(), 422);
+        }
+    }
+
+    /**
      * serializarPedido()
      * Convierte el Pedido y sus líneas de detalle en un arreglo plano.
      */
@@ -181,3 +238,5 @@ class PedidoController
         ];
     }
 }
+
+

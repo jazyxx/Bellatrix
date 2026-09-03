@@ -153,6 +153,7 @@ $router->delete('/api/carrito',                        [CarritoController::class
 
 $router->post('/api/pedidos', [PedidoController::class, 'confirmar'], [$rolCliente]);
 $router->get('/api/pedidos',  [PedidoController::class, 'misPedidos'], [$rolCliente]);
+$router->put('/api/pedidos/{id}/cancelar', [PedidoController::class, 'cancelarPorCliente'], [$rolCliente]);
 
 $router->get('/api/pedidos/gestion', [PedidoController::class, 'listarPorEstado'], [$rolVentas]);
 $router->put('/api/pedidos/{id}/estado', [PedidoController::class, 'actualizarEstado'], [$rolVentas]);

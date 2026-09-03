@@ -130,6 +130,5 @@ function mostrarPantallaExito(medioPago) {
       <h2 class="h4 fuente-display mt-3">¡Transacción iniciada!</h2>
       <p class="text-muted">${textoSecundario}</p>
       <a href="catalogo.html" class="btn-ambrosia mt-3">Volver al catálogo</a>
-      
     </div>`;
 }
