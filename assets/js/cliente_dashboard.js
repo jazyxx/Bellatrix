@@ -17,10 +17,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 3. Pintar Perfil
   document.getElementById('perfil-nombre').textContent = usuario.nombre || 'Cliente';
   document.getElementById('perfil-correo').textContent = usuario.identificador || '';
+  const elTel = document.getElementById('perfil-telefono');
+  if (elTel) elTel.textContent = usuario.telefono || '-';
 
   // 4. Cargar datos
   cargarPedidos();
   cargarNotificaciones();
+
+  // 5. Configurar Edición de Perfil
+  inicializarEditarPerfil();
 });
 
 async function cargarPedidos() {
@@ -104,7 +109,6 @@ async function verTracking(idPedido) {
   }
 
   // Actualizar los Steppers de tracking
-  // Estados válidos: 'Pendiente de pago' -> 'Confirmado' -> 'En preparación' -> 'Listo para recoger' -> 'Entregado' (o 'Cancelado')
   const steps = [
     { id: 'step-pendiente', state: 'Pendiente de pago' },
     { id: 'step-confirmado', state: 'Confirmado' },
@@ -115,7 +119,7 @@ async function verTracking(idPedido) {
 
   let currentStepIdx = steps.findIndex(s => s.state === p.estado);
   if (p.estado === 'Cancelado') {
-    currentStepIdx = -1; // Desactivar barra si está cancelado
+    currentStepIdx = -1;
   }
 
   steps.forEach((step, idx) => {
@@ -129,7 +133,6 @@ async function verTracking(idPedido) {
     }
   });
 
-  // Scroll suave al tracking card
   card.scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -144,6 +147,53 @@ function formatearFecha(fechaStr) {
 }
 
 function abrirReciboVirtual(idPedido) {
-  // Abre una pestaña nueva enfocada solo en el recibo
   window.open(`recibo_pedido.html?id=${idPedido}`, '_blank', 'width=800,height=700');
+}
+
+// Configuración de edición de perfil
+function inicializarEditarPerfil() {
+  const modalEditar = document.getElementById('modalEditarPerfil');
+  if (modalEditar) {
+    modalEditar.addEventListener('show.bs.modal', () => {
+      document.getElementById('input-perfil-nombre').value = document.getElementById('perfil-nombre').textContent.trim();
+      document.getElementById('input-perfil-correo').value = document.getElementById('perfil-correo').textContent.trim();
+      
+      const telElem = document.getElementById('perfil-telefono');
+      const telActual = telElem ? telElem.textContent.trim() : '';
+      document.getElementById('input-perfil-telefono').value = (telActual === '-') ? '' : telActual;
+    });
+  }
+
+ const formPerfil = document.getElementById('form-editar-perfil');
+if (formPerfil) {
+  formPerfil.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const nuevoNombre = document.getElementById('input-perfil-nombre').value.trim();
+    const nuevoTelefono = document.getElementById('input-perfil-telefono').value.trim();
+
+    // Enviar el objeto directamente sin JSON.stringify
+    const respuesta = await apiFetch('api/actualizar-perfil', {
+      method: 'POST',
+      body: {
+        nombre: nuevoNombre,
+        telefono: nuevoTelefono
+      }
+    });
+
+    if (respuesta && respuesta.exito) {
+      document.getElementById('perfil-nombre').textContent = nuevoNombre;
+      const elTel = document.getElementById('perfil-telefono');
+      if (elTel) elTel.textContent = nuevoTelefono || '-';
+
+      const modalEl = document.getElementById('modalEditarPerfil');
+      const bsModal = bootstrap.Modal.getInstance(modalEl);
+      if (bsModal) bsModal.hide();
+
+      alert('Tus datos se han actualizado correctamente.');
+    } else {
+      alert((respuesta && respuesta.mensaje) || 'Error al actualizar los datos.');
+    }
+  });
+}
 }
