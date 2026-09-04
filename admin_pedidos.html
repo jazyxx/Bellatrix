@@ -23,6 +23,15 @@
           <p class="text-muted mb-0">Gestiona el ciclo de preparación y despacho de pedidos confirmados del E-Commerce.</p>
         </div>
       </div>
+
+      <div class="row">
+        <div class="col-12">
+        <!-- Contenedor donde aparecerán las notificaciones de cancelación -->
+        <div id="alertas-cancelaciones"></div>
+        <!-- Aquí empieza tu tabla actual de gestión de pedidos -->
+        <div class="db-card db-card--primary">
+        <!-- ... tu tabla ... -->
+         
       <div>
         <!-- Selector de estados para filtrado de bandeja de trabajo -->
         <select class="form-select form-db form-select-sm" id="pedidos-estado-filtro" onchange="cargarPedidosBandeja()">
