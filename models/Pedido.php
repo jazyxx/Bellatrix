@@ -26,6 +26,10 @@ class Pedido
     public ?string $fechaCreacion;
     public ?string $fechaActualizacion;
     public ?int $idEmpleadoGestion;
+    
+    // NUEVO: Propiedades para almacenar los datos del cliente traídos del JOIN
+    public ?string $nombreCliente;
+    public ?string $telefonoCliente;
 
     /** @var DetallePedido[] */
     public array $productos = [];
@@ -50,6 +54,13 @@ class Pedido
         $this->fechaCreacion      = $datos['fecha_creacion']       ?? null;
         $this->fechaActualizacion = $datos['fecha_actualizacion']  ?? null;
         $this->idEmpleadoGestion  = $datos['id_empleado_gestion']  ?? null;
+
+        $this->fechaActualizacion = $datos['fecha_actualizacion']  ?? null;
+        $this->idEmpleadoGestion  = $datos['id_empleado_gestion']  ?? null;
+
+        // NUEVO: Mapear los datos del cliente
+        $this->nombreCliente   = $datos['nombre_cliente'] ?? null;
+        $this->telefonoCliente = $datos['telefono_cliente'] ?? null;
 
         if ($this->idPedido !== null) {
             $this->productos = DetallePedido::listarPorPedido($this->idPedido);
@@ -208,7 +219,19 @@ class Pedido
     public static function listarPorEstado(string $estado): array
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM pedido WHERE estado = :estado ORDER BY fecha_creacion ASC");
+        // Cambiamos el SELECT * genérico por un JOIN con la tabla de usuarios
+        $sql = "
+            SELECT p.*, u.nombre AS nombre_cliente, u.telefono AS telefono_cliente 
+            FROM pedido p
+            LEFT JOIN cliente u ON p.id_cliente = u.id_cliente
+            WHERE p.estado = :estado 
+            ORDER BY p.fecha_creacion ASC
+        ";
+        
+        /* Nota: Si tu tabla de usuarios se llama diferente (ej: 'usuario' o 'clientes') 
+           o su ID es diferente (ej: solo 'id'), ajusta la línea del LEFT JOIN arriba. */
+           
+        $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':estado', $estado);
         $stmt->execute();
 

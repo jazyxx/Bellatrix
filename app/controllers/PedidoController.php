@@ -221,16 +221,21 @@ class PedidoController
     private function serializarPedido(Pedido $pedido): array
     {
         return [
-            'id_pedido'            => $pedido->idPedido,
-            'id_cliente'           => $pedido->idCliente,
-            'estado'               => $pedido->estado,
-            'direccion_entrega'    => $pedido->direccionEntrega,
-            'total'                => $pedido->total,
-            'fecha_creacion'       => $pedido->fechaCreacion,
-            'fecha_actualizacion'  => $pedido->fechaActualizacion,
-            'id_empleado_gestion'  => $pedido->idEmpleadoGestion,
-            'productos'            => array_map(fn($d) => [
+            'id_pedido'           => $pedido->idPedido,
+            'id_cliente'          => $pedido->idCliente,
+            // NUEVO: Dejamos pasar los datos reales del cliente si existen en el objeto
+            'nombre_cliente'      => $pedido->nombreCliente ?? null,
+            'telefono_cliente'    => $pedido->telefonoCliente ?? null,
+            'estado'              => $pedido->estado,
+            'direccion_entrega'   => $pedido->direccionEntrega,
+            'total'               => $pedido->total,
+            'fecha_creacion'      => $pedido->fechaCreacion,
+            'fecha_actualizacion' => $pedido->fechaActualizacion,
+            'id_empleado_gestion' => $pedido->idEmpleadoGestion,
+            'productos'           => array_map(fn($d) => [
                 'id_producto'     => $d->idProducto,
+                // NUEVO: Dejamos pasar el nombre del producto si existe
+                'nombre_producto' => $d->nombreProducto ?? null,
                 'cantidad'        => $d->cantidad,
                 'precio_unitario' => $d->precioUnitario,
                 'subtotal'        => $d->subtotal(),

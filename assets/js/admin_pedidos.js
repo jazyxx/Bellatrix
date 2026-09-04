@@ -52,30 +52,43 @@ async function cargarPedidosBandeja() {
   }
 
   tbody.innerHTML = pedidos.map(p => {
-    // Formatear los productos vendidos
-    const itemsHTML = p.productos ? p.productos.map(item => `
-      <div class="small text-muted d-flex justify-content-between border-bottom pb-1 mb-1">
-        <span>${item.cantidad}x ${escaparHtml(item.nombre || 'Producto')}</span>
-      </div>
-    `).join('') : '<span class="text-muted small">Sin items listados</span>';
+    // 1. CORRECCIÓN VISUAL: Diseño limpio para los productos (sin el óvalo gris)
+    const itemsHTML = p.productos && p.productos.length > 0 
+      ? p.productos.map(item => `
+          <div class="small text-dark mb-1">
+            <strong class="text-primary">${item.cantidad}x</strong> 
+            <span class="text-muted mx-1">|</span>
+            ${escaparHtml(item.nombre_producto || item.nombre || 'Producto')}
+          </div>
+        `).join('') 
+      : '<span class="text-muted small">Sin items listados</span>';
 
-    // Botones de acción dinámicos según el estado de la cola
+    const clienteNombre = p.nombre_cliente || (p.id_cliente ? `Cliente #${p.id_cliente}` : 'Cliente Desconocido');
+    const telefonoCliente = p.telefono_cliente || 'Teléfono no disp.';
+
+    // 2. CORRECCIÓN VISUAL: Contenedor flex con 'gap-2' para evitar que los botones colisionen
     let botonesGestion = '';
 
     if (p.estado === 'Confirmado') {
       botonesGestion = `
-        <button class="btn btn-sm btn-db-primary me-1 py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'En preparación')"><i class="bi bi-fire me-1"></i>Preparar</button>
-        <button class="btn btn-sm btn-db-danger py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
+        <div class="d-flex flex-wrap justify-content-end gap-2">
+          <button class="btn btn-sm btn-db-primary py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'En preparación')"><i class="bi bi-fire me-1"></i>Preparar</button>
+          <button class="btn btn-sm btn-db-danger py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
+        </div>
       `;
     } else if (p.estado === 'En preparación') {
       botonesGestion = `
-        <button class="btn btn-sm btn-db-success me-1 py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Listo para recoger')"><i class="bi bi-check2-square me-1"></i>Marcar Listo</button>
-        <button class="btn btn-sm btn-db-danger py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
+        <div class="d-flex flex-wrap justify-content-end gap-2">
+          <button class="btn btn-sm btn-db-success py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Listo para recoger')"><i class="bi bi-check2-square me-1"></i>Marcar Listo</button>
+          <button class="btn btn-sm btn-db-danger py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
+        </div>
       `;
     } else if (p.estado === 'Listo para recoger') {
       botonesGestion = `
-        <button class="btn btn-sm btn-db-success me-1 py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Entregado')"><i class="bi bi-truck me-1"></i>Despachar/Entregar</button>
-        <button class="btn btn-sm btn-db-danger py-1 font-weight-bold" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
+        <div class="d-flex flex-wrap justify-content-end gap-2">
+          <button class="btn btn-sm btn-db-success py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Entregado')"><i class="bi bi-truck me-1"></i>Despachar/Entregar</button>
+          <button class="btn btn-sm btn-db-danger py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
+        </div>
       `;
     } else if (p.estado === 'Pendiente de pago') {
       botonesGestion = `
@@ -87,22 +100,24 @@ async function cargarPedidosBandeja() {
       `;
     }
 
-    const clienteNombre = p.nombre_cliente || p.id_cliente;
-
     return `
-      <tr>
+      <tr class="align-middle">
         <td><strong>#${p.id_pedido}</strong></td>
-        <td>${formatearFecha(p.fecha_creacion || '')}</td>
+        <td>
+           <div class="small fw-bold text-dark">${formatearFecha(p.fecha_creacion || '')}</div>
+        </td>
         <td>
           <div class="fw-bold text-dark">${escaparHtml(clienteNombre)}</div>
-          <span class="text-muted small">Cliente #${p.id_cliente}</span>
+          <div class="text-muted small"><i class="bi bi-telephone-fill me-1"></i>${escaparHtml(telefonoCliente)}</div>
         </td>
         <td>
-          <span class="small d-block text-truncate" style="max-width: 150px;">${escaparHtml(p.direccion_entrega || 'Recoge en Tienda')}</span>
+          <span class="small d-block pe-2">${escaparHtml(p.direccion_entrega || 'Recoge en Tienda')}</span>
         </td>
-        <td><div style="max-height: 80px; overflow-y: auto; min-width: 140px;">${itemsHTML}</div></td>
-        <td><strong class="text-success">${formatearPrecioCOP(p.total)}</strong></td>
-        <td class="text-end" style="min-width: 160px;">${botonesGestion}</td>
+        <td>
+          <div class="d-flex flex-column justify-content-center">${itemsHTML}</div>
+        </td>
+        <td><strong class="text-success h6 mb-0">${formatearPrecioCOP(p.total)}</strong></td>
+        <td class="text-end" style="min-width: 170px;">${botonesGestion}</td>
       </tr>
     `;
   }).join('');
