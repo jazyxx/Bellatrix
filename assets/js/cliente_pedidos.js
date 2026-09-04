@@ -48,11 +48,17 @@ async function cargarPedidos() {
                          </button>`;
       }
 
-      // Ensamblamos los botones normales (Rastrear y Recibo siempre van si no está cancelado)
+      // NUEVO: Botón de Recibo (Solo aparece si YA se pagó)
+      let botonRecibo = '';
+      if (p.estado !== 'Pendiente de pago') {
+        botonRecibo = `<button class="btn btn-sm btn-outline-secondary py-1 px-2 mb-1 ms-1" onclick="abrirReciboVirtual(${p.id_pedido})" title="Imprimir Recibo"><i class="bi bi-receipt"></i></button>`;
+      }
+
+      // Ensamblamos los botones
       botonesAccion = `
         <button class="btn btn-sm btn-db-primary py-1 mb-1" onclick="verTracking(${p.id_pedido})"><i class="bi bi-eye-fill me-1"></i>Rastrear</button>
         ${botonPago}
-        <button class="btn btn-sm btn-outline-secondary py-1 px-2 mb-1 ms-1" onclick="abrirReciboVirtual(${p.id_pedido})" title="Imprimir Recibo"><i class="bi bi-receipt"></i></button>
+        ${botonRecibo}
         ${botonCancelar}
       `;
     }
