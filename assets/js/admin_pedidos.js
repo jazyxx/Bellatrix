@@ -92,7 +92,7 @@ async function cargarPedidosBandeja() {
       `;
     } else if (p.estado === 'Pendiente de pago') {
       botonesGestion = `
-        <span class="text-muted small italic">Esperando pasarela</span>
+        <span class="text-muted small italic">Esperando pago</span>
       `;
     } else {
       botonesGestion = `
