@@ -17,6 +17,7 @@ async function injectDashboardLayout(rol, activeTabId) {
       { id: 'admin_inventario', href: 'admin_inventario.html', icon: 'bi-box-seam-fill', text: 'Inventario/Recetas' },
       { id: 'admin_pedidos', href: 'admin_pedidos.html', icon: 'bi-truck', text: 'Pedidos Online' },
       { id: 'admin_ventas', href: 'admin_ventas.html', icon: 'bi-graph-up-arrow', text: 'Historial Ventas' },
+      { id: 'admin_usuarios', href: 'admin_usuarios.html', icon: 'bi-people-fill', text: 'Usuarios' },
       { id: 'logout', href: '#', icon: 'bi-box-arrow-right', text: 'Salir', onclick: 'cerrarSesionDashboard()' }
     ],
     'Cajero': [
