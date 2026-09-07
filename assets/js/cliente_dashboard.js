@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('perfil-correo').textContent = usuario.identificador || '';
   const elTel = document.getElementById('perfil-telefono');
   if (elTel) elTel.textContent = usuario.telefono || '-';
+  const elDir = document.getElementById('perfil-direccion');
+  if (elDir) elDir.textContent = usuario.direccion_entrega || '-';
 
   inicializarEditarPerfil();
 });
@@ -26,6 +28,10 @@ function inicializarEditarPerfil() {
       const telElem = document.getElementById('perfil-telefono');
       const telActual = telElem ? telElem.textContent.trim() : '';
       document.getElementById('input-perfil-telefono').value = (telActual === '-') ? '' : telActual;
+
+      const dirElem = document.getElementById('perfil-direccion');
+      const dirActual = dirElem ? dirElem.textContent.trim() : '';
+      document.getElementById('input-perfil-direccion').value = (dirActual === '-') ? '' : dirActual;
     });
   }
 
@@ -36,12 +42,14 @@ function inicializarEditarPerfil() {
 
       const nuevoNombre = document.getElementById('input-perfil-nombre').value.trim();
       const nuevoTelefono = document.getElementById('input-perfil-telefono').value.trim();
+      const nuevaDireccion = document.getElementById('input-perfil-direccion').value.trim();
 
       const respuesta = await apiFetch('api/actualizar-perfil', {
         method: 'POST',
         body: {
           nombre: nuevoNombre,
-          telefono: nuevoTelefono
+          telefono: nuevoTelefono,
+          direccion_entrega: nuevaDireccion
         }
       });
 
@@ -49,6 +57,8 @@ function inicializarEditarPerfil() {
         document.getElementById('perfil-nombre').textContent = nuevoNombre;
         const elTel = document.getElementById('perfil-telefono');
         if (elTel) elTel.textContent = nuevoTelefono || '-';
+        const elDir = document.getElementById('perfil-direccion');
+        if (elDir) elDir.textContent = nuevaDireccion || '-';
 
         const modalEl = document.getElementById('modalEditarPerfil');
         const bsModal = bootstrap.Modal.getInstance(modalEl);
