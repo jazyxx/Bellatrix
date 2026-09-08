@@ -188,3 +188,25 @@ $router->get('/api/notificaciones', [NotificacionController::class, 'misNotifica
 // ==========================================================================
 
 $router->post('/api/actualizar-perfil', [AuthController::class, 'actualizarPerfil'], [$rolCliente]);
+
+// ==========================================================================
+//  CU003 — Gestión de Usuarios (Clientes y Empleados) — Solo Administrador
+// ==========================================================================
+
+require_once __DIR__ . '/app/controllers/UsuarioController.php';
+
+// -- Clientes --
+$router->get('/api/usuarios/clientes',               [UsuarioController::class, 'listarClientes'],    [$rolSoloAdmin]);
+$router->get('/api/usuarios/clientes/{id}',           [UsuarioController::class, 'verCliente'],        [$rolSoloAdmin]);
+$router->put('/api/usuarios/clientes/{id}',            [UsuarioController::class, 'actualizarCliente'], [$rolSoloAdmin]);
+$router->post('/api/usuarios/clientes/{id}/activar',   [UsuarioController::class, 'activarCliente'],    [$rolSoloAdmin]);
+$router->delete('/api/usuarios/clientes/{id}',         [UsuarioController::class, 'desactivarCliente'], [$rolSoloAdmin]);
+
+// -- Empleados (Administrador / Cajero) --
+$router->get('/api/usuarios/empleados',                 [UsuarioController::class, 'listarEmpleados'],          [$rolSoloAdmin]);
+$router->get('/api/usuarios/empleados/{id}',             [UsuarioController::class, 'verEmpleado'],              [$rolSoloAdmin]);
+$router->post('/api/usuarios/empleados',                 [UsuarioController::class, 'crearEmpleado'],            [$rolSoloAdmin]);
+$router->put('/api/usuarios/empleados/{id}',              [UsuarioController::class, 'actualizarEmpleado'],       [$rolSoloAdmin]);
+$router->put('/api/usuarios/empleados/{id}/contrasena',   [UsuarioController::class, 'cambiarContrasenaEmpleado'],[$rolSoloAdmin]);
+$router->post('/api/usuarios/empleados/{id}/activar',     [UsuarioController::class, 'activarEmpleado'],          [$rolSoloAdmin]);
+$router->delete('/api/usuarios/empleados/{id}',            [UsuarioController::class, 'desactivarEmpleado'],       [$rolSoloAdmin]);

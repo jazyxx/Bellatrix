@@ -168,4 +168,63 @@ class Empleado
         $stmt = $pdo->query("SELECT * FROM empleado ORDER BY nombre ASC");
         return array_map(fn($fila) => new Empleado($fila), $stmt->fetchAll());
     }
+
+    /**
+     * activar()
+     * Complemento lógico de desactivar(): vuelve a marcar activo = 1.
+     * Se usa desde el panel de Administrador (CU003, gestión de
+     * usuarios) para reactivar a un empleado desactivado.
+     */
+    public function activar(): bool
+    {
+        $sql = "UPDATE empleado SET activo = 1 WHERE id_empleado = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':id', $this->idEmpleado, PDO::PARAM_INT);
+        $ok = $stmt->execute();
+        if ($ok) $this->activo = true;
+        return $ok;
+    }
+
+    /**
+     * cambiarContrasena($nuevaContrasenaPlano)
+     * ------------------------------------------------------------
+     * A diferencia del Cliente (que tiene su propio flujo de "¿olvidaste
+     * tu contraseña?" con token por correo), los Empleados no tienen
+     * autogestión de contraseña: es el Administrador quien la
+     * restablece manualmente desde su panel de gestión de usuarios
+     * (CU003). Siempre se guarda hasheada con bcrypt.
+     */
+    public function cambiarContrasena(string $nuevaContrasenaPlano): bool
+    {
+        $hash = password_hash($nuevaContrasenaPlano, PASSWORD_BCRYPT);
+        $sql = "UPDATE empleado SET contraseña = :hash WHERE id_empleado = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->bindValue(':id', $this->idEmpleado, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    /**
+     * obtenerDatos()
+     * ------------------------------------------------------------
+     * Devuelve las propiedades del empleado como arreglo asociativo
+     * (mismo patrón que Producto::obtenerDatos()). NUNCA incluye la
+     * contraseña. Administrador y Cajero sobrescriben este método para
+     * agregar su propiedad extra (nivel_acceso / turno).
+     */
+    public function obtenerDatos(): array
+    {
+        return [
+            'id_empleado'        => $this->idEmpleado,
+            'nombre'             => $this->nombre,
+            'apellido'           => $this->apellido,
+            'usuario'            => $this->usuario,
+            'correo'             => $this->correo,
+            'rol'                => $this->rol,
+            'activo'             => $this->activo,
+            'telefono'           => $this->telefono,
+            'salario'            => $this->salario,
+            'fecha_contratacion' => $this->fechaContratacion,
+        ];
+    }
 }

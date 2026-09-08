@@ -168,4 +168,16 @@ class Cajero extends Empleado
         $fila = $stmt->fetch();
         return $fila ? new Cajero($fila) : null;
     }
+
+    /**
+     * obtenerDatos()
+     * Sobrescribe Empleado::obtenerDatos() para agregar el campo extra
+     * de este subtipo (turno), sin repetir el resto de campos.
+     */
+    public function obtenerDatos(): array
+    {
+        $datos = parent::obtenerDatos();
+        $datos['turno'] = $this->turno;
+        return $datos;
+    }
 }

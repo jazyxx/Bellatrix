@@ -253,4 +253,43 @@ class Cliente
         $stmt = $pdo->query("SELECT * FROM cliente ORDER BY nombre ASC");
         return array_map(fn($fila) => new Cliente($fila), $stmt->fetchAll());
     }
+
+    /**
+     * activar()
+     * ------------------------------------------------------------
+     * Complemento lógico de desactivar(): vuelve a marcar activo = 1.
+     * Se usa desde el panel de Administrador (CU003, gestión de
+     * usuarios) para reactivar una cuenta que se había desactivado.
+     */
+    public function activar(): bool
+    {
+        $sql = "UPDATE cliente SET activo = 1 WHERE id_cliente = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':id', $this->idCliente, PDO::PARAM_INT);
+        $ok = $stmt->execute();
+        if ($ok) $this->activo = true;
+        return $ok;
+    }
+
+    /**
+     * obtenerDatos()
+     * ------------------------------------------------------------
+     * Devuelve las propiedades del cliente como arreglo asociativo,
+     * listo para convertir a JSON en un controlador (mismo patrón que
+     * Producto::obtenerDatos()). NUNCA incluye la contraseña ni los
+     * tokens de recuperación: esos datos jamás deben salir hacia el
+     * frontend.
+     */
+    public function obtenerDatos(): array
+    {
+        return [
+            'id_cliente'        => $this->idCliente,
+            'nombre'            => $this->nombre,
+            'correo'            => $this->correo,
+            'telefono'          => $this->telefono,
+            'direccion_entrega' => $this->direccionEntrega,
+            'activo'            => $this->activo,
+            'fecha_registro'    => $this->fechaRegistro,
+        ];
+    }
 }
