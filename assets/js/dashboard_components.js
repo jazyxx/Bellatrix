@@ -32,10 +32,10 @@ async function injectDashboardLayout(rol, activeTabId) {
   const usuario = await obtenerSesionActual();
   const userName = usuario ? usuario.nombre : 'Usuario';
   
-  // Guardamos el contenido actual del body
+  // Guarda el contenido actual del body
   const currentContent = document.body.innerHTML;
   
-  // Reemplazamos el body con la estructura de layout
+  // Reemplaza el body con la estructura de layout
   document.body.innerHTML = `
     <div class="dashboard-layout">
       <!-- Sidebar -->
