@@ -175,6 +175,18 @@ class Administrador extends Empleado
     /** Propiedad temporal auxiliar usada solo durante crear(), no existe en la BD. */
     public ?string $contrasenaSinHashear = null;
 
+    /**
+     * obtenerDatos()
+     * Sobrescribe Empleado::obtenerDatos() para agregar el campo extra
+     * de este subtipo (nivel_acceso), sin repetir el resto de campos.
+     */
+    public function obtenerDatos(): array
+    {
+        $datos = parent::obtenerDatos();
+        $datos['nivel_acceso'] = $this->nivelAcceso;
+        return $datos;
+    }
+
     public static function obtenerPorId(int $idEmpleado): ?Administrador
     {
         $pdo = \Database::getConnection();

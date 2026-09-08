@@ -12,31 +12,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('perfil-correo').textContent = usuario.identificador || '';
   const elTel = document.getElementById('perfil-telefono');
   if (elTel) elTel.textContent = usuario.telefono || '-';
+  const elDir = document.getElementById('perfil-direccion');
+  if (elDir) elDir.textContent = usuario.direccion_entrega || '-';
 
-  cargarNotificaciones();
   inicializarEditarPerfil();
 });
-
-async function cargarNotificaciones() {
-  const respuesta = await apiFetch('api/notificaciones');
-  const container = document.getElementById('lista-notificaciones');
-  if (!container) return;
-
-  if (!respuesta.exito || !respuesta.datos || respuesta.datos.length === 0) {
-    container.innerHTML = `<p class="text-muted small text-center my-4">No tienes notificaciones pendientes.</p>`;
-    return;
-  }
-
-  container.innerHTML = respuesta.datos.map(n => `
-    <div class="p-3 border-bottom mb-2 bg-white rounded shadow-sm">
-      <div class="d-flex align-items-center justify-content-between mb-1">
-        <span class="badge-pastel badge-pastel-primary" style="font-size: 0.75rem;">Notificación</span>
-        <span class="text-muted" style="font-size: 0.75rem;">${formatearFecha(n.fecha_creacion || '')}</span>
-      </div>
-      <p class="mb-0 small text-dark mt-2">${escaparHtml(n.mensaje)}</p>
-    </div>
-  `).join('');
-}
 
 function inicializarEditarPerfil() {
   const modalEditar = document.getElementById('modalEditarPerfil');
@@ -48,6 +28,10 @@ function inicializarEditarPerfil() {
       const telElem = document.getElementById('perfil-telefono');
       const telActual = telElem ? telElem.textContent.trim() : '';
       document.getElementById('input-perfil-telefono').value = (telActual === '-') ? '' : telActual;
+
+      const dirElem = document.getElementById('perfil-direccion');
+      const dirActual = dirElem ? dirElem.textContent.trim() : '';
+      document.getElementById('input-perfil-direccion').value = (dirActual === '-') ? '' : dirActual;
     });
   }
 
@@ -58,12 +42,14 @@ function inicializarEditarPerfil() {
 
       const nuevoNombre = document.getElementById('input-perfil-nombre').value.trim();
       const nuevoTelefono = document.getElementById('input-perfil-telefono').value.trim();
+      const nuevaDireccion = document.getElementById('input-perfil-direccion').value.trim();
 
       const respuesta = await apiFetch('api/actualizar-perfil', {
         method: 'POST',
         body: {
           nombre: nuevoNombre,
-          telefono: nuevoTelefono
+          telefono: nuevoTelefono,
+          direccion_entrega: nuevaDireccion
         }
       });
 
@@ -71,6 +57,8 @@ function inicializarEditarPerfil() {
         document.getElementById('perfil-nombre').textContent = nuevoNombre;
         const elTel = document.getElementById('perfil-telefono');
         if (elTel) elTel.textContent = nuevoTelefono || '-';
+        const elDir = document.getElementById('perfil-direccion');
+        if (elDir) elDir.textContent = nuevaDireccion || '-';
 
         const modalEl = document.getElementById('modalEditarPerfil');
         const bsModal = bootstrap.Modal.getInstance(modalEl);
@@ -82,10 +70,4 @@ function inicializarEditarPerfil() {
       }
     });
   }
-}
-
-function formatearFecha(fechaStr) {
-  if (!fechaStr) return '';
-  const f = new Date(fechaStr);
-  return f.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
