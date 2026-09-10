@@ -19,12 +19,17 @@ require_once __DIR__ . '/MateriaPrima.php';
  *  el stock de cada materia prima involucrada.
  * ==========================================================================
  */
-class Receta
+
+class Receta implements JsonSerializable
 {
     public ?int $idReceta;
     public ?int $idProducto;
     public ?int $idMateria;
-    public ?float $cantidad; // Cantidad de materia prima necesaria por 1 unidad de producto
+    public ?float $cantidad; 
+
+    // Nuevas propiedades para mostrar en la interfaz
+    public ?string $nombreMateria;
+    public ?string $unidadMedida;
 
     private PDO $pdo;
 
@@ -36,11 +41,24 @@ class Receta
         $this->idProducto = $datos['id_producto'] ?? null;
         $this->idMateria  = $datos['id_materia']  ?? null;
         $this->cantidad   = isset($datos['cantidad']) ? (float)$datos['cantidad'] : null;
+        
+        $this->nombreMateria = $datos['nombre_materia'] ?? null;
+        $this->unidadMedida  = $datos['unidad_medida'] ?? null;
     }
 
-    // =================================================================
-    //  CRUD básico
-    // =================================================================
+    // Traduce las variables de PHP al formato exacto que pide JavaScript
+    #[\ReturnTypeWillChange]
+    public function jsonSerialize()
+    {
+        return [
+            'id_receta'      => $this->idReceta,
+            'id_producto'    => $this->idProducto,
+            'id_materia'     => $this->idMateria,
+            'cantidad'       => $this->cantidad,
+            'nombre_materia' => $this->nombreMateria,
+            'unidad_medida'  => $this->unidadMedida
+        ];
+    }
 
     public function crear(): int
     {
@@ -79,7 +97,7 @@ class Receta
     /**
      * obtenerPorId($id)
      * ------------------------------------------------------------
-     * Añadido en la Fase 3: lo usa InventarioController para poder
+     * Lo usa InventarioController para poder
      * cargar una línea de receta puntual antes de eliminarla
      * (Receta::eliminar() es un método de instancia, así que primero
      * hay que tener el objeto cargado con sus datos).
@@ -98,24 +116,35 @@ class Receta
     /**
      * obtenerPorProducto($idProducto)
      * Devuelve TODAS las líneas de receta (insumos necesarios) de
-     * un producto específico. Esta es la consulta clave que usará
-     * el futuro Controlador de Ventas para el CU008.
+     * un producto específico. Consulta clave que usa
+     * el Controlador de Ventas 
      */
+
     public static function obtenerPorProducto(int $idProducto): array
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM recetas WHERE id_producto = :id");
-        $stmt->bindValue(':id', $idProducto, PDO::PARAM_INT);
-        $stmt->execute();
+        try {
+            // ¡OJO AQUÍ! Verifica el nombre de la tabla después del INNER JOIN
+            $stmt = $pdo->prepare("
+                SELECT r.*, m.nombre AS nombre_materia, m.unidad_medida 
+                FROM recetas r
+                INNER JOIN materia_prima m ON r.id_materia = m.id_materia
+                WHERE r.id_producto = :id
+            ");
+            $stmt->bindValue(':id', $idProducto, PDO::PARAM_INT);
+            $stmt->execute();
 
-        return array_map(fn($fila) => new Receta($fila), $stmt->fetchAll());
+            return array_map(fn($fila) => new Receta($fila), $stmt->fetchAll());
+        } catch (Exception $e) {
+            // Si la consulta falla, evitamos que la API colapse
+            error_log("Error SQL en recetas: " . $e->getMessage());
+            return [];
+        }
     }
 
     /**
      * descontarInsumosPorVenta($idProducto, $cantidadVendida)
      * ------------------------------------------------------------
-     * MÉTODO CLAVE PARA EL CU008.
-     *
      * Cuando se vende, por ejemplo, 3 unidades del producto "Torta de
      * chocolate", este método:
      *   1. Busca todas las recetas de ese producto (sus insumos).
@@ -137,15 +166,14 @@ class Receta
 
         foreach ($recetas as $receta) {
             if ($receta->idMateria === null || $receta->cantidad === null) {
-                continue; // Fila de receta incompleta, se ignora por seguridad.
+                continue;
             }
 
             $materia = MateriaPrima::obtenerPorId($receta->idMateria);
             if ($materia === null) {
-                continue; // La materia prima referenciada ya no existe.
+                continue;
             }
 
-            // Regla de negocio central del CU008: descuento PROPORCIONAL.
             $cantidadADescontar = $receta->cantidad * $cantidadVendida;
             $materia->descontarStock($cantidadADescontar);
 
