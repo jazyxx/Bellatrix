@@ -16,7 +16,7 @@ async function injectDashboardLayout(rol, activeTabId) {
       { id: 'admin_pos', href: 'admin_pos.html', icon: 'bi-cart3', text: 'Punto de Venta' },
       { id: 'admin_caja', href: 'admin_caja.html', icon: 'bi-cash-coin', text: 'Control de Caja' },
       { id: 'admin_inventario', href: 'admin_inventario.html', icon: 'bi-cup-hot-fill', text: 'Vitrina' },
-      { id: 'admin_insumos', href: 'admin_insumos.html', icon: 'bi-box-seam-fill', text: 'Insumos y Fórmulas' },
+      { id: 'admin_insumos', href: 'admin_insumos.html', icon: 'bi-box-seam-fill', text: 'Insumos y Recetas' },
       { id: 'admin_pedidos', href: 'admin_pedidos.html', icon: 'bi-truck', text: 'Pedidos Online' },
       { id: 'admin_ventas', href: 'admin_ventas.html', icon: 'bi-graph-up-arrow', text: 'Historial Ventas' },
       { id: 'admin_usuarios', href: 'admin_usuarios.html', icon: 'bi-people-fill', text: 'Usuarios' },
