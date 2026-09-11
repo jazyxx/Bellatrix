@@ -14,20 +14,31 @@
 <body>
 
   <!-- Contenido principal -->
-  <div class="row">
-    <div class="col-12 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <!-- Contenido principal -->
+  <div class="row mb-4">
+    <div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-3">
       <div class="d-flex align-items-center gap-2">
         <span class="db-card-icono db-card-icono--primary"><i class="bi bi-truck"></i></span>
         <div>
           <h1 class="fuente-display mb-0" style="font-size: 1.6rem;">Bandeja de Pedidos en Línea</h1>
-          <p class="text-muted mb-0">Gestiona el ciclo de preparación y despacho de pedidos confirmados del E-Commerce.</p>
+          <p class="text-muted mb-0">Gestiona el ciclo de preparación y despacho de pedidos.</p>
         </div>
       </div>
+      <div class="w-100 d-md-block" style="max-width: 250px;">
+        <select class="form-select form-db form-select-sm w-100" id="pedidos-estado-filtro" onchange="cargarPedidosBandeja()">
+          <option value="Confirmado">Confirmados (Por preparar)</option>
+          <option value="En preparación">En preparación</option>
+          <option value="Listo para recoger">Listos para Recoger / Despachar</option>
+          <option value="Entregado">Entregados</option>
+          <option value="Pendiente de pago">Pendientes de Pago</option>
+          <option value="Cancelado">Cancelados</option>
+        </select>
+      </div>
+    </div>
+  </div>
 
-      <div class="row">
-        <div class="col-12">
-        <!-- Contenedor donde aparecerán las notificaciones de cancelación -->
-        <div id="alertas-cancelaciones"></div>
+  <!-- Contenedor donde aparecerán las notificaciones de cancelación -->
+  <div id="alertas-cancelaciones"></div>
         <!-- Aquí empieza tu tabla actual de gestión de pedidos -->
         <div class="db-card db-card--primary">
         <!-- ... tu tabla ... -->
@@ -54,8 +65,8 @@
           <h3 class="h5 mb-0 fuente-display" id="bandeja-titulo">Cola de Órdenes</h3>
         </div>
         <hr class="my-2">
-        <div class="table-responsive">
-          <table class="db-table">
+        <div class="table-responsive text-nowrap">
+          <table class="db-table w-100">
             <thead>
               <tr>
                 <th>ID</th>

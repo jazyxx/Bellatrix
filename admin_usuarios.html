@@ -35,7 +35,7 @@
     <div class="col-12">
       <div class="db-card">
         <!-- Pestañas Empleados / Clientes -->
-        <ul class="nav nav-tabs border-0 mb-3" id="usuarios-tabs" role="tablist" style="gap: .25rem;">
+        <ul class="nav nav-tabs border-0 mb-3 flex-nowrap overflow-auto" id="usuarios-tabs" role="tablist" style="gap: .25rem; white-space: nowrap;">
           <li class="nav-item" role="presentation">
             <button class="nav-link active fw-bold" id="tab-empleados-btn" data-bs-toggle="tab" data-bs-target="#tab-empleados" type="button" role="tab">
               <i class="bi bi-person-badge-fill me-1"></i>Empleados
@@ -57,7 +57,7 @@
               <input type="text" class="form-control form-db border-start-0" id="emp-buscar" placeholder="Filtrar por nombre, usuario o correo..." oninput="filtrarEmpleados()">
             </div>
             <div class="table-responsive text-nowrap">
-              <table class="db-table">
+              <table class="db-table w-100">
                 <thead>
                   <tr>
                     <th>Nombre</th>
@@ -82,7 +82,7 @@
               <input type="text" class="form-control form-db border-start-0" id="cli-buscar" placeholder="Filtrar por nombre o correo..." oninput="filtrarClientes()">
             </div>
             <div class="table-responsive text-nowrap">
-              <table class="db-table">
+              <table class="db-table w-100">
                 <thead>
                   <tr>
                     <th>Nombre</th>
@@ -117,21 +117,21 @@
           <input type="hidden" id="emp-id">
           <div class="modal-body">
             <div class="row mb-3">
-              <div class="col-7">
+              <div class="col-12 col-md-7 mb-3 mb-md-0">
                 <label for="emp-nombre" class="small text-muted d-block mb-1">Nombre:</label>
                 <input type="text" class="form-control form-db" id="emp-nombre" required placeholder="ej: Angel Jimenez">
               </div>
-              <div class="col-5">
+              <div class="col-12 col-md-5">
                 <label for="emp-apellido" class="small text-muted d-block mb-1">Apellido:</label>
                 <input type="text" class="form-control form-db" id="emp-apellido" placeholder="Opcional">
               </div>
             </div>
             <div class="row mb-3">
-              <div class="col-6">
+              <div class="col-12 col-md-6 mb-3 mb-md-0">
                 <label for="emp-usuario" class="small text-muted d-block mb-1">Usuario:</label>
                 <input type="text" class="form-control form-db" id="emp-usuario" required placeholder="ej: angel.admin">
               </div>
-              <div class="col-6">
+              <div class="col-12 col-md-6">
                 <label for="emp-rol" class="small text-muted d-block mb-1">Rol:</label>
                 <select class="form-select form-db" id="emp-rol" required onchange="alternarCamposRolEmpleado()">
                   <option value="Cajero">Cajero</option>
@@ -149,11 +149,11 @@
               <div class="form-text">Solo se pide al crear. Para cambiarla después, usa "Restablecer contraseña" en la tabla.</div>
             </div>
             <div class="row mb-3">
-              <div class="col-6">
+              <div class="col-12 col-md-6 mb-3 mb-md-0">
                 <label for="emp-telefono" class="small text-muted d-block mb-1">Teléfono:</label>
                 <input type="tel" class="form-control form-db" id="emp-telefono" placeholder="Opcional">
               </div>
-              <div class="col-6">
+              <div class="col-12 col-md-6">
                 <label for="emp-salario" class="small text-muted d-block mb-1">Salario:</label>
                 <input type="number" class="form-control form-db" id="emp-salario" min="0" placeholder="Opcional">
               </div>
