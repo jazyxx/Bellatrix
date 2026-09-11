@@ -60,7 +60,7 @@ async function cargarProductosVitrina() {
   if (esAdministrador) {
     const selector = document.getElementById('receta-producto-selector');
     if (selector) {
-      selector.innerHTML = `<option value="">-- Selecciona un Producto --</option>` + 
+      selector.innerHTML = `<option value="">Selecciona un Producto</option>` + 
         todosProductosVitrina.map(p => `<option value="${p.id_producto}">${escaparHtml(p.nombre)}</option>`).join('');
     }
   }
@@ -249,7 +249,7 @@ async function cargarMateriasPrimas() {
 
   // Llenar selector de nueva linea de receta
   if (selectReceta) {
-    selectReceta.innerHTML = `<option value="">-- Selecciona --</option>` + 
+    selectReceta.innerHTML = `<option value="">Selecciona</option>` + 
       todasMateriasPrimas.map(m => `<option value="${m.id_materia}">${escaparHtml(m.nombre)} (${m.unidad_medida})</option>`).join('');
   }
 }
