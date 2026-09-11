@@ -17,7 +17,7 @@ require_once __DIR__ . '/../core/Response.php';
  *    - CU019: Gestionar Materias Primas (insumos, umbrales, alertas).
  *
  *  NOTA: el descuento AUTOMÁTICO de stock al finalizar una venta (CU008)
- *  NO vive aquí, sino en VentaController::finalizar(), porque es ahí
+ *  no está aquí, sino en VentaController::finalizar(), porque es ahí
  *  donde ocurre el evento que lo dispara (una venta finalizada). Este
  *  controlador se encarga de la gestión MANUAL del inventario (que un
  *  Administrador/Cajero dan de alta o editan productos e insumos).
@@ -339,14 +339,15 @@ class InventarioController
         $lineas = Receta::obtenerPorProducto((int) $idProducto);
 
         $datos = array_map(fn(Receta $r) => [
-            'id_receta'  => $r->idReceta,
-            'id_materia' => $r->idMateria,
-            'cantidad'   => $r->cantidad,
+            'id_receta'      => $r->idReceta,
+            'id_materia'     => $r->idMateria,
+            'cantidad'       => $r->cantidad,
+            'nombre_materia' => $r->nombreMateria, // Agregamos el nombre
+            'unidad_medida'  => $r->unidadMedida   // Agregamos la unidad
         ], $lineas);
 
         Response::exito($datos, 'Receta obtenida correctamente.');
     }
-
     /**
      * agregarLineaReceta()
      * POST /api/inventario/recetas
