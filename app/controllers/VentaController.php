@@ -22,7 +22,7 @@ require_once __DIR__ . '/../core/Sesion.php';
  *             automatizada de stock y el descuento proporcional de
  *             materia prima (ya implementado como lógica de negocio
  *             en Venta::finalizar() y Receta::descontarInsumosPorVenta()
- *             durante la Fase 1). Este controlador es quien DISPARA
+ *             Este controlador es quien DISPARA
  *             esa lógica y, además, la conecta con el CU018: cada venta
  *             finalizada también registra su ingreso en la Caja del
  *             día correspondiente (GestorVentas).
@@ -74,8 +74,8 @@ class VentaController
      * ------------------------------------------------------------
      * POST /api/ventas/{id}/productos
      * Body: { "id_producto": 3, "cantidad": 2 }
-     * Implementa el CU007. Reutiliza Venta::añadirProducto() de la
-     * Fase 1, que ya valida que haya stock suficiente antes de agregar.
+     * Implementa el CU007. Reutiliza Venta::añadirProducto()
+     * que ya valida que haya stock suficiente antes de agregar.
      */
     public function agregarProducto(string $idVenta): void
     {
@@ -99,7 +99,7 @@ class VentaController
             Response::exito($this->serializarVenta($venta), 'Producto agregado a la venta exitosamente.');
         } catch (Exception $e) {
             // Aquí caen los errores esperados de negocio (stock
-            // insuficiente, venta no activa, producto inexistente).
+            // insuficiente, venta no activa, producto inexistente). nOOOOO
             Response::error($e->getMessage(), 422);
         }
     }
@@ -135,7 +135,7 @@ class VentaController
             // Paso 1 (CU008): descuenta stock de productos + materia prima.
             $venta->finalizar();
 
-            // Paso 1.5 (Fase 4): revisa si alguna materia prima usada en
+            // Paso 1.5: revisa si alguna materia prima usada en
             // esta venta quedó en stock bajo, y genera su alerta si aplica.
             $this->generarAlertasPorVenta($venta);
 
@@ -167,12 +167,12 @@ class VentaController
     /**
      * generarAlertasPorVenta()
      * ------------------------------------------------------------
-     * Añadido en la Fase 4. Después de que Venta::finalizar() descontó
+     * Después de que Venta::finalizar() descontó
      * la materia prima de cada producto vendido (según su receta), este
      * método revisa CADA insumo afectado y, si quedó en stock bajo,
      * genera su alerta automáticamente — reutilizando la misma regla
      * de negocio que ya usa InventarioController (AlertaStock::
-     * generarSiAplica(), Fase 3/4), sin duplicar código.
+     * generarSiAplica()), sin duplicar código.
      *
      * $materiasRevisadas evita revisar el mismo insumo dos veces si
      * dos productos distintos de la venta comparten un mismo insumo

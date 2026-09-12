@@ -58,7 +58,7 @@ class Cliente
      * ------------------------------------------------------------
      * Inserta este cliente como una fila nueva en `cliente`, guardando
      * la contraseña de forma segura con password_hash() (bcrypt).
-     * Devuelve false si el correo ya existe (columna UNIQUE en la BD).
+     * Devuelve false si el correo ya existe (columna UNIQUE en la BD). angelgei
      */
     public function registrarse(): bool
     {
