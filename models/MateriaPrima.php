@@ -45,9 +45,7 @@ class MateriaPrima
      * se vende un producto que "consume" esta materia prima según
      * su receta (ver Receta.php -> descontarInsumosPorVenta()).
      *
-     * Si el nuevo stock queda por debajo del stock mínimo, devuelve
-     * información para que el controlador (en la Fase 3) pueda
-     * disparar una alerta (tabla `alerta_stock`).
+     * Ahora SÍ dispara la alerta (tabla `alerta_stock`) automáticamente.
      */
     public function descontarStock(float $cantidad): bool
     {
@@ -65,6 +63,10 @@ class MateriaPrima
 
         if ($ok) {
             $this->stockActual = $nuevoStock;
+            
+            // AQUÍ ESTÁ EL DISPARADOR: Si tras la venta el stock es crítico, genera alerta
+            require_once __DIR__ . '/AlertaStock.php';
+            AlertaStock::generarSiAplica($this);
         }
 
         return $ok;
@@ -137,7 +139,16 @@ class MateriaPrima
         $stmt->bindValue(':stock_actual', $this->stockActual);
         $stmt->bindValue(':stock_minimo', $this->stockMinimo);
         $stmt->bindValue(':id', $this->idMateria, PDO::PARAM_INT);
-        return $stmt->execute();
+        
+        $ok = $stmt->execute();
+
+        // AQUÍ ESTÁ EL DISPARADOR: Después de actualizar, comprobamos si hay alerta
+        if ($ok) {
+            require_once __DIR__ . '/AlertaStock.php';
+            AlertaStock::generarSiAplica($this);
+        }
+
+        return $ok;
     }
 
     public function eliminar(): bool

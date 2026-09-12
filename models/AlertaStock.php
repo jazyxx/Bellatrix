@@ -21,6 +21,9 @@ class AlertaStock
     public bool $atendida;
     public ?string $fechaGenerada;
     public ?string $creadoEn;
+    public ?string $nombreMateria = null;
+    public ?string $mensaje = null;
+    public ?string $estado = null;
 
     private PDO $pdo;
 
@@ -154,12 +157,33 @@ class AlertaStock
     /**
      * listarActivas()
      * Devuelve todas las alertas que siguen activas y sin atender,
-     * para mostrarlas en el panel de administración.
+     * para mostrarlas en el panel de administración con textos para el Frontend.
      */
     public static function listarActivas(): array
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->query("SELECT * FROM alerta_stock WHERE activa = 1 AND atendida = 0 ORDER BY fecha_generada DESC");
-        return array_map(fn($fila) => new AlertaStock($fila), $stmt->fetchAll());
+        
+        // ¡Corregido! INNER JOIN materia_prima (en singular, como está en tu base de datos)
+        $sql = "SELECT a.*, m.nombre AS nombre_materia 
+                FROM alerta_stock a
+                INNER JOIN materia_prima m ON a.id_materia = m.id_materia
+                WHERE a.activa = 1 AND a.atendida = 0 
+                ORDER BY a.fecha_generada DESC";
+                
+        $stmt = $pdo->query($sql);
+        
+        $alertas = [];
+        foreach ($stmt->fetchAll() as $fila) {
+            $alerta = new AlertaStock($fila);
+            
+            // Asignamos manualmente las variables que pide JavaScript
+            $alerta->nombreMateria = $fila['nombre_materia'] ?? 'Insumo desconocido';
+            $alerta->estado = 'Crítico'; 
+            $alerta->mensaje = 'Stock por debajo del mínimo (' . $alerta->umbral . ')';
+            
+            $alertas[] = $alerta;
+        }
+        
+        return $alertas;
     }
 }

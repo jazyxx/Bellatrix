@@ -513,6 +513,9 @@ class InventarioController
             'id_producto'    => $a->idProducto,
             'umbral'         => $a->umbral,
             'fecha_generada' => $a->fechaGenerada,
+            'nombre_materia' => $a->nombreMateria, 
+            'mensaje'        => $a->mensaje,
+            'estado'         => $a->estado
         ], $alertas);
 
         Response::exito($datos, 'Alertas activas obtenidas correctamente.');
