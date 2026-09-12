@@ -170,23 +170,59 @@ class Venta
     /**
      * anularVenta()
      * ------------------------------------------------------------
-     * Cambia el estado de la venta a 'Anulada'. Nota: si la venta ya
-     * fue finalizada (stock ya descontado), este método NO revierte
-     * automáticamente el stock; esa regla de "devolución de inventario"
-     * se define con más detalle en la Fase 3 según la política de
-     * negocio exacta que definas para devoluciones.
+     * Cambia el estado de la venta a 'Anulada' y devuelve
+     * automáticamente el stock de la materia prima al inventario
+     * basándose en la receta de cada producto vendido.
      */
     public function anularVenta(): bool
     {
-        $sql = "UPDATE ventas SET estado = 'Anulada' WHERE id_venta = :id";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':id', $this->idVenta, PDO::PARAM_INT);
-        $ok = $stmt->execute();
+        // Inicia la transacción para proteger la base de datos
+        $this->pdo->beginTransaction();
 
-        if ($ok) {
+        try {
+            // Cambia el estado de la venta a 'Anulada'
+            $sql = "UPDATE ventas SET estado = 'Anulada' WHERE id_venta = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':id', $this->idVenta, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // Devuelve la materia prima al inventario leyendo las recetas
+            foreach ($this->detalles as $detalle) {
+                $idProducto = $detalle->idProducto;
+                $cantidadVendida = $detalle->cantidad;
+
+                // Busca los ingredientes de este producto
+                $lineasReceta = Receta::obtenerPorProducto($idProducto);
+
+                foreach ($lineasReceta as $linea) {
+                    if ($linea->idMateria !== null && $linea->cantidad !== null) {
+                        
+                        // Calcula la cantidad exacta a devolver re matemático
+                        $cantidadADevolver = $linea->cantidad * $cantidadVendida;
+
+                        // Suma el stock en la tabla materia_prima
+                        $sqlMP = "UPDATE materia_prima SET stock_actual = stock_actual + :cantidad WHERE id_materia = :id_materia";
+                        $stmtMP = $this->pdo->prepare($sqlMP);
+                        
+                        // PARAM_STR funciona bien para decimales en PDO
+                        $stmtMP->bindValue(':cantidad', $cantidadADevolver, PDO::PARAM_STR); 
+                        $stmtMP->bindValue(':id_materia', $linea->idMateria, PDO::PARAM_INT);
+                        $stmtMP->execute();
+                    }
+                }
+            }
+
+            // Confirma todos los cambios esova
+            $this->pdo->commit();
             $this->estado = 'Anulada';
+            
+            return true;
+
+        } catch (Exception $e) {
+            // Si hay un error, echa todo para atrás re triste
+            $this->pdo->rollBack();
+            throw $e;
         }
-        return $ok;
     }
 
     // =================================================================

@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../models/Pedido.php';
 require_once __DIR__ . '/../../models/CarritoDeCompras.php';
+require_once __DIR__ . '/../../models/Receta.php';
 require_once __DIR__ . '/../core/Request.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../core/Sesion.php';
@@ -134,6 +135,8 @@ class PedidoController
      *   2. Se actualiza en la base de datos.
      *   3. Se dispara notificarCliente() -> se crea y "envía"
      *      (simulado) la notificación correspondiente al cliente (CU016).
+     *   4. Si el estado cambia a 'Listo para recoger', se descuenta
+     *      la materia prima.
      */
     public function actualizarEstado(string $id): void
     {
@@ -147,9 +150,25 @@ class PedidoController
         $nuevoEstado = $datos['estado'] ?? '';
 
         try {
-            // Se registra qué empleado gestionó este cambio de estado.
+            // 1. Guardamos el estado anterior ANTES de cambiarlo
+            $estadoAnterior = $pedido->estado;
+
+            // 2. Ejecutamos el cambio de estado normal
             $pedido->idEmpleadoGestion = Sesion::obtenerId();
             $pedido->cambiarEstado($nuevoEstado);
+
+            // =========================================================
+            // 3. NUEVA LÓGICA: Descuento de Materia Prima (Fase 3)
+            // =========================================================
+            // Solo descontamos si el NUEVO estado es 'Listo para recoger' 
+            // Y el estado anterior NO lo era (evita descuentos dobles)
+            if ($nuevoEstado === 'Listo para recoger' && $estadoAnterior !== 'Listo para recoger') {
+                
+                // Recorremos los productos del pedido y descontamos la receta
+                foreach ($pedido->productos as $detalle) {
+                    Receta::descontarInsumosPorVenta($detalle->idProducto, $detalle->cantidad);
+                }
+            }
 
             Response::exito($this->serializarPedido($pedido), "El pedido ahora está en estado: '{$nuevoEstado}'.");
         } catch (Exception $e) {
@@ -198,7 +217,7 @@ class PedidoController
             // 4. NOTIFICACIÓN PARA ADMINISTRADORES / CAJEROS
             // =========================================================
             if ($estadoAnterior === 'Confirmado') {
-                $mensajeStaff = "🚨 URGENTE: El cliente canceló el pedido #{$id}. DETENER PRODUCCIÓN. Requiere proceso de reembolso (Pedido ya estaba pagado).";
+                $mensajeStaff = "URGENTE: El cliente canceló el pedido #{$id}. DETENER PRODUCCIÓN. Requiere proceso de reembolso (Pedido ya estaba pagado).";
             } else {
                 $mensajeStaff = "El cliente canceló el pedido #{$id} (No requiere reembolso, estaba pendiente de pago).";
             }
