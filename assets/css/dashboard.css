@@ -810,3 +810,75 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   .ia-widget-panel { right: 16px; bottom: 88px; }
   .ia-widget-boton { right: 16px; bottom: 16px; }
 }
+
+
+/* ============================================================
+   17. MODALES DE FORMULARIO ("db-modal")
+   ============================================================
+   Aplica a cualquier modal de Bootstrap del panel que agregue la
+   clase .db-modal-content en su .modal-content — así un modal de
+   edición se ve parte del mismo sistema (no el Bootstrap genérico
+   gris con botones azul/gris de fábrica).
+   ============================================================ */
+.db-modal-content {
+  border: none;
+  border-radius: var(--db-radius);
+  overflow: hidden; /* recorta el header de color a las esquinas redondeadas */
+  box-shadow: var(--db-shadow-hover);
+}
+
+/* Encabezado con acento de marca en vez del blanco plano de Bootstrap */
+.db-modal-header {
+  border: none;
+  padding: 1.4rem 1.5rem 1.1rem;
+  background:
+    radial-gradient(at 90% 0%, rgba(111, 174, 140, 0.20) 0%, transparent 55%),
+    radial-gradient(at 5% 100%, rgba(226, 137, 155, 0.18) 0%, transparent 50%),
+    var(--db-bg-light);
+}
+.db-modal-header .db-modal-icono {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  color: var(--db-white);
+  background: linear-gradient(155deg, var(--brand-rosa) 0%, var(--brand-menta) 100%);
+  box-shadow: 0 8px 18px -8px rgba(226, 137, 155, 0.5);
+  flex-shrink: 0;
+}
+.db-modal-header .modal-title { font-size: 1.15rem; }
+.db-modal-header .btn-close { margin-top: -2px; }
+
+.db-modal-body { padding: 1.5rem; }
+
+.db-modal-body .input-group-text {
+  background: var(--db-bg-light);
+  border: 1.5px solid var(--db-border);
+  border-right: none;
+  color: var(--db-espresso-suave);
+}
+.db-modal-body .input-group .form-control {
+  border-left: none;
+}
+.db-modal-body .input-group:focus-within .input-group-text {
+  border-color: var(--brand-rosa);
+}
+.db-modal-body .input-group:focus-within .form-control {
+  border-color: var(--brand-rosa);
+}
+
+.db-modal-footer {
+  border-top: 1px solid var(--db-border);
+  padding: 1rem 1.5rem;
+}
+
+/* El fade nativo de Bootstrap solo mueve opacidad; se le suma una
+   ligera entrada de escala para que se sienta menos "seco" al abrir. */
+.modal.fade .db-modal-content { transition: transform 0.2s var(--db-ease-out), opacity 0.2s var(--db-ease-out); transform: scale(0.97); }
+.modal.show .db-modal-content { transform: scale(1); }
+@media (prefers-reduced-motion: reduce) {
+  .modal.fade .db-modal-content, .modal.show .db-modal-content { transition: none; transform: none; }
+}

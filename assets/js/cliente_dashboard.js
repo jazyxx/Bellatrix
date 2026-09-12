@@ -64,9 +64,9 @@ function inicializarEditarPerfil() {
         const bsModal = bootstrap.Modal.getInstance(modalEl);
         if (bsModal) bsModal.hide();
 
-        alert('Tus datos se han actualizado correctamente.');
+        showDashboardAlert('Tus datos se han actualizado correctamente.', 'success');
       } else {
-        alert((respuesta && respuesta.mensaje) || 'Error al actualizar los datos.');
+        showDashboardAlert((respuesta && respuesta.mensaje) || 'Error al actualizar los datos.', 'danger');
       }
     });
   }

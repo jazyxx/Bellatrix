@@ -28,7 +28,7 @@
             <div class="db-avatar"><i class="bi bi-person-fill"></i></div>
             <h3 class="h5 mb-0 fuente-display">Mis Datos</h3>
           </div>
-          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil" title="Editar Perfil">
+          <button class="btn btn-db-outline btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil" title="Editar Perfil">
             <i class="bi bi-pencil-square"></i> Editar
           </button>
         </div>
@@ -69,34 +69,49 @@
   <!-- Modal para Editar Perfil (Mismo de cliente_dashboard.html) -->
   <div class="modal fade" id="modalEditarPerfil" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title fuente-display">Editar Mis Datos</h5>
+      <div class="modal-content db-modal-content">
+        <div class="modal-header db-modal-header">
+          <div class="d-flex align-items-center gap-2">
+            <div class="db-modal-icono"><i class="bi bi-person-fill-gear"></i></div>
+            <h5 class="modal-title fuente-display mb-0">Editar Mis Datos</h5>
+          </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <form id="form-editar-perfil">
-          <div class="modal-body">
+          <div class="modal-body db-modal-body">
             <div class="mb-3">
-              <label for="input-perfil-nombre" class="form-label">Nombre completo</label>
-              <input type="text" class="form-control" id="input-perfil-nombre" required>
+              <label for="input-perfil-nombre" class="form-label small text-muted">Nombre completo</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control form-db" id="input-perfil-nombre" required>
+              </div>
             </div>
             <div class="mb-3">
-              <label for="input-perfil-telefono" class="form-label">Teléfono</label>
-              <input type="tel" class="form-control" id="input-perfil-telefono" placeholder="Ej. 3001234567">
+              <label for="input-perfil-telefono" class="form-label small text-muted">Teléfono</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                <input type="tel" class="form-control form-db" id="input-perfil-telefono" placeholder="Ej. 3001234567">
+              </div>
             </div>
             <div class="mb-3">
-              <label for="input-perfil-direccion" class="form-label">Dirección de entrega</label>
-              <textarea class="form-control" id="input-perfil-direccion" rows="2" placeholder="Dirección para tus pedidos a domicilio"></textarea>
+              <label for="input-perfil-direccion" class="form-label small text-muted">Dirección de entrega</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                <textarea class="form-control form-db" id="input-perfil-direccion" rows="2" placeholder="Dirección para tus pedidos a domicilio"></textarea>
+              </div>
             </div>
-            <div class="mb-3">
-              <label for="input-perfil-correo" class="form-label">Correo electrónico</label>
-              <input type="email" class="form-control bg-light" id="input-perfil-correo" readonly disabled>
+            <div class="mb-1">
+              <label for="input-perfil-correo" class="form-label small text-muted">Correo electrónico</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="email" class="form-control form-db" id="input-perfil-correo" readonly disabled style="background: var(--db-bg-light);">
+              </div>
               <div class="form-text">El correo no se puede modificar porque es tu usuario de acceso.</div>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+          <div class="modal-footer db-modal-footer">
+            <button type="button" class="btn btn-db-outline btn-sm" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-db-primary btn-sm"><i class="bi bi-check-circle-fill me-1"></i>Guardar Cambios</button>
           </div>
         </form>
       </div>
