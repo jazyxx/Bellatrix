@@ -88,11 +88,19 @@ function tarjetaProductoHTML(producto) {
   const claseBadge = producto.unidad_negocio === 'Pastelería' ? 'badge-pasteleria' : 'badge-heladeria';
   const inicial = producto.nombre ? producto.nombre.charAt(0).toUpperCase() : '?';
 
+  // Si el producto tiene una foto guardada, se muestra la imagen real
+  // (servida como binario por InventarioController::fotoProducto, sin
+  // necesidad de sesión). Si no, se conserva el placeholder con la
+  // inicial del nombre, igual que antes.
+  const imagen = producto.tiene_foto
+    ? `<img src="api/inventario/productos/${producto.id_producto}/foto" alt="${escaparHtml(producto.nombre)}" class="tarjeta-producto__imagen" loading="lazy">`
+    : `<div class="tarjeta-producto__imagen" aria-hidden="true">${escaparHtml(inicial)}</div>`;
+
   return `
     <div class="col-12 col-md-6 col-lg-3">
       <div class="tarjeta-producto">
         ${producto.agotado ? '<span class="badge-agotado">Agotado</span>' : ''}
-        <div class="tarjeta-producto__imagen" aria-hidden="true">${escaparHtml(inicial)}</div>
+        ${imagen}
         <div class="tarjeta-producto__cuerpo">
           <span class="${claseBadge} mb-2" style="width: fit-content;">${escaparHtml(producto.unidad_negocio)}</span>
           <h3 class="h6 fuente-display mb-1">${escaparHtml(producto.nombre)}</h3>

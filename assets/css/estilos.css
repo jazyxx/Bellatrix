@@ -204,6 +204,14 @@ textarea:focus-visible, select:focus-visible {
   border-radius: var(--radio-chico);
   transition: transform 0.4s var(--ease-out);
 }
+/* Cuando la tarjeta muestra una foto real (<img>) en vez del
+   placeholder con la inicial (<div>), object-fit evita que la imagen
+   se estire fuera de proporción — se recorta en vez de deformarse. */
+img.tarjeta-producto__imagen {
+  width: calc(100% - 1.7rem);
+  object-fit: cover;
+  background: var(--rosa-suave); /* se ve mientras la imagen carga */
+}
 .tarjeta-producto__cuerpo {
   padding: 1rem 1.1rem 1.2rem;
   display: flex;

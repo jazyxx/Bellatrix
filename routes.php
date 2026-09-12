@@ -56,6 +56,10 @@ $rolSoloAdmin            = Middleware::rol(['Administrador']);
 // -- Productos --
 $router->get('/api/inventario/productos',                    [InventarioController::class, 'listarProductos'],      [$rolInventarioProductos]);
 $router->get('/api/inventario/productos/{id}',                [InventarioController::class, 'verProducto'],          [$rolInventarioProductos]);
+// PÚBLICA a propósito (sin middleware de rol): el catálogo de la tienda
+// en línea (index.html / catalogo.html) también necesita mostrar estas
+// imágenes sin que el visitante haya iniciado sesión.
+$router->get('/api/inventario/productos/{id}/foto',           [InventarioController::class, 'fotoProducto']);
 $router->post('/api/inventario/productos',                    [InventarioController::class, 'crearProducto'],        [$rolInventarioProductos]);
 $router->put('/api/inventario/productos/{id}',                 [InventarioController::class, 'actualizarProducto'],   [$rolInventarioProductos]);
 $router->post('/api/inventario/productos/{id}/ajustar-stock',  [InventarioController::class, 'ajustarStockProducto'], [$rolInventarioProductos]);

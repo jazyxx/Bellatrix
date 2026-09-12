@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 4. Inicializar listeners
   document.getElementById('form-modal-producto').addEventListener('submit', guardarProducto);
+  document.getElementById('prod-foto').addEventListener('change', manejarSeleccionDeFoto);
 
   // 5. Cargar datos iniciales de vitrina
   await cargarProductosVitrina();
@@ -46,16 +47,20 @@ function renderizarProductosVitrina(productos) {
   if (!tbody) return;
 
   if (productos.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No se encontraron productos.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No se encontraron productos.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = productos.map(p => {
     const isAgotado = p.stock <= 0;
     const badgeColor = p.unidad_negocio === 'Pastelería' ? 'badge-pastel-danger' : 'badge-pastel-success';
+    const miniatura = p.tiene_foto
+      ? `<img src="api/inventario/productos/${p.id_producto}/foto" alt="${escaparHtml(p.nombre)}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`
+      : `<div class="d-flex align-items-center justify-content-center" style="width:40px;height:40px;border-radius:8px;background:var(--db-bg-light);color:var(--db-espresso-suave);"><i class="bi bi-image"></i></div>`;
 
     return `
       <tr>
+        <td>${miniatura}</td>
         <td>
           <div class="fw-bold text-dark">${escaparHtml(p.nombre)}</div>
           <span class="badge-pastel ${badgeColor}" style="font-size:0.65rem;">${p.unidad_negocio} · ${p.tipo || 'Postre'}</span>
@@ -111,6 +116,7 @@ function abrirModalProducto() {
   document.getElementById('prod-id').value = '';
   document.getElementById('modal-producto-titulo').textContent = 'Crear Nuevo Producto';
   document.getElementById('prod-stock-container').style.display = 'block';
+  resetearFotoModal();
   modalProductoBs.show();
 }
 
@@ -128,10 +134,61 @@ async function abrirEditarProducto(idProducto) {
   document.getElementById('prod-unidad').value = p.unidad_negocio;
   document.getElementById('prod-tipo').value = p.tipo || 'Tortas';
   document.getElementById('prod-precio').value = p.precio;
-  
+
+  resetearFotoModal();
+  if (p.tiene_foto) {
+    // Muestra la foto que ya está guardada (sin necesidad de que el
+    // Administrador la vuelva a subir si no quiere cambiarla).
+    mostrarVistaPreviaFoto(`api/inventario/productos/${p.id_producto}/foto`);
+  }
+
   document.getElementById('prod-stock-container').style.display = 'none';
   document.getElementById('modal-producto-titulo').textContent = 'Editar Producto';
   modalProductoBs.show();
+}
+
+/**
+ * ------------------------------------------------------------
+ * Manejo de la foto del producto (subir + vista previa)
+ * ------------------------------------------------------------
+ * fotoBase64Seleccionada guarda el resultado de FileReader como un
+ * "data URL" (data:image/png;base64,XXXX). Se manda tal cual en el
+ * body de guardarProducto() SOLO si el Administrador eligió un
+ * archivo nuevo — si no, no se manda el campo, y el backend conserva
+ * la foto que ya existía (ver Producto::actualizar()).
+ */
+let fotoBase64Seleccionada = null;
+
+function resetearFotoModal() {
+  fotoBase64Seleccionada = null;
+  document.getElementById('prod-foto').value = '';
+  document.getElementById('prod-foto-preview').style.display = 'none';
+  document.getElementById('prod-foto-placeholder').style.display = 'flex';
+}
+
+function mostrarVistaPreviaFoto(src) {
+  const img = document.getElementById('prod-foto-preview');
+  img.src = src;
+  img.style.display = 'block';
+  document.getElementById('prod-foto-placeholder').style.display = 'none';
+}
+
+function manejarSeleccionDeFoto(e) {
+  const archivo = e.target.files[0];
+  if (!archivo) return;
+
+  if (archivo.size > 4 * 1024 * 1024) {
+    alert('La imagen es demasiado pesada (máximo 4MB).');
+    e.target.value = '';
+    return;
+  }
+
+  const lector = new FileReader();
+  lector.onload = () => {
+    fotoBase64Seleccionada = lector.result; // "data:image/png;base64,...."
+    mostrarVistaPreviaFoto(fotoBase64Seleccionada);
+  };
+  lector.readAsDataURL(archivo);
 }
 
 async function guardarProducto(e) {
@@ -146,6 +203,10 @@ async function guardarProducto(e) {
   const stock = Number(document.getElementById('prod-stock').value) || 0;
 
   const body = { nombre, descripcion, unidad_negocio, tipo, precio };
+  if (fotoBase64Seleccionada) {
+    body.foto_base64 = fotoBase64Seleccionada;
+  }
+
   let endpoint = 'api/inventario/productos';
   let method = 'POST';
 

@@ -75,7 +75,10 @@ class InventarioController
     /**
      * crearProducto()
      * POST /api/inventario/productos
-     * Body: { nombre, descripcion?, tipo?, unidad_negocio, precio, stock?, foto? }
+     * Body: { nombre, descripcion?, tipo?, unidad_negocio, precio, stock?, foto_base64? }
+     * `foto_base64` es opcional: una cadena "data:image/...;base64,XXXX"
+     * (lo que produce FileReader.readAsDataURL() en el navegador) o un
+     * base64 crudo sin ese prefijo — ambos formatos se aceptan.
      */
     public function crearProducto(): void
     {
@@ -86,8 +89,15 @@ class InventarioController
             return;
         }
 
+        [$fotoBinaria, $errorFoto] = $this->decodificarFotoBase64($datos['foto_base64'] ?? null);
+        if ($errorFoto !== null) {
+            Response::error($errorFoto, 422);
+            return;
+        }
+
         try {
             $producto = new Producto($datos);
+            $producto->fotoBinaria = $fotoBinaria;
             $producto->crear();
             Response::exito($producto->obtenerDatos(), 'Producto creado exitosamente.', 201);
         } catch (Exception $e) {
@@ -102,6 +112,10 @@ class InventarioController
      * puntuales de solo el stock existe un endpoint más específico
      * abajo (ajustarStockProducto), que reutiliza la validación de
      * negocio de Producto::actualizarStock() de la Fase 1.
+     *
+     * Si el body NO trae `foto_base64`, la foto que ya estaba guardada
+     * se conserva tal cual (ver Producto::actualizar()) — así se puede
+     * editar precio/stock/nombre sin tener que volver a subir la foto.
      */
     public function actualizarProducto(string $id): void
     {
@@ -118,13 +132,19 @@ class InventarioController
             return;
         }
 
+        [$fotoBinaria, $errorFoto] = $this->decodificarFotoBase64($datos['foto_base64'] ?? null);
+        if ($errorFoto !== null) {
+            Response::error($errorFoto, 422);
+            return;
+        }
+
         $producto->nombre        = trim($datos['nombre']);
         $producto->descripcion   = $datos['descripcion'] ?? null;
         $producto->tipo          = $datos['tipo'] ?? null;
         $producto->unidadNegocio = $datos['unidad_negocio'];
         $producto->precio        = (float) $datos['precio'];
         $producto->stock         = isset($datos['stock']) ? (int) $datos['stock'] : $producto->stock;
-        $producto->foto          = $datos['foto'] ?? $producto->foto;
+        $producto->fotoBinaria   = $fotoBinaria; // null si no se mandó una foto nueva.
         $producto->disponible    = isset($datos['disponible']) ? (bool) $datos['disponible'] : $producto->disponible;
 
         try {
@@ -133,6 +153,89 @@ class InventarioController
         } catch (Exception $e) {
             Response::error('No se pudo actualizar el producto: ' . $e->getMessage(), 500);
         }
+    }
+
+    /**
+     * fotoProducto($id)
+     * ------------------------------------------------------------
+     * GET /api/inventario/productos/{id}/foto
+     * Sirve la imagen guardada como un archivo binario real (no como
+     * JSON) — esta es la URL que se usa directo en el atributo `src`
+     * de una etiqueta <img>. Es PÚBLICA a propósito (sin Middleware de
+     * rol en routes.php): el catálogo de la tienda en línea también
+     * necesita mostrar estas imágenes sin que el cliente haya iniciado
+     * sesión.
+     */
+    public function fotoProducto(string $id): void
+    {
+        $bytes = Producto::obtenerFotoBinaria((int) $id);
+
+        // Igual que Response::json(): descarta cualquier cosa que se
+        // haya colado en el buffer de salida (warnings, notices) antes
+        // de este punto, para que la imagen no salga corrupta.
+        if (ob_get_level() > 0) {
+            ob_clean();
+        }
+
+        if ($bytes === null) {
+            http_response_code(404);
+            header('Content-Type: text/plain');
+            echo 'Este producto no tiene una foto guardada.';
+            return;
+        }
+
+        // Detecta el tipo real de imagen a partir de los bytes (funciona
+        // sin importar si se subió un .jpg, .png, .webp, etc.), en vez
+        // de confiar en la extensión del archivo original.
+        $mime = 'image/jpeg';
+        if (function_exists('finfo_open')) {
+            $info = finfo_open(FILEINFO_MIME_TYPE);
+            $detectado = finfo_buffer($info, $bytes);
+            finfo_close($info);
+            if ($detectado) {
+                $mime = $detectado;
+            }
+        }
+
+        header('Content-Type: ' . $mime);
+        header('Content-Length: ' . strlen($bytes));
+        header('Cache-Control: public, max-age=86400'); // el navegador puede cachearla un día.
+        echo $bytes;
+    }
+
+    /**
+     * decodificarFotoBase64($valor)
+     * ------------------------------------------------------------
+     * Convierte el string base64 que manda el formulario en bytes
+     * binarios reales, listos para guardar en la columna MEDIUMBLOB.
+     * Acepta tanto un "data URL" completo (data:image/png;base64,...)
+     * como un base64 crudo. Devuelve [bytes, null] si todo bien, o
+     * [null, 'mensaje de error'] si el valor es inválido o muy pesado.
+     *
+     * @return array{0: ?string, 1: ?string}
+     */
+    private function decodificarFotoBase64(?string $valor): array
+    {
+        if ($valor === null || trim($valor) === '') {
+            return [null, null]; // No se mandó foto nueva — no es un error.
+        }
+
+        // Quita el prefijo "data:image/xxx;base64," si viene incluido.
+        if (str_contains($valor, ',') && str_starts_with($valor, 'data:')) {
+            $valor = substr($valor, strpos($valor, ',') + 1);
+        }
+
+        $bytes = base64_decode($valor, true);
+        if ($bytes === false) {
+            return [null, 'La imagen enviada no tiene un formato base64 válido.'];
+        }
+
+        $maxBytes = 4 * 1024 * 1024; // 4MB — de sobra para una foto de producto.
+        if (strlen($bytes) > $maxBytes) {
+            return [null, 'La imagen es demasiado pesada (máximo 4MB).'];
+        }
+
+        return [$bytes, null];
     }
 
     /**

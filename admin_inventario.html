@@ -42,6 +42,7 @@
           <table class="db-table">
             <thead>
               <tr>
+                <th style="width: 56px;"></th>
                 <th>Producto</th>
                 <th>Precio</th>
                 <th>Unidad</th>
@@ -69,6 +70,17 @@
         <form id="form-modal-producto">
           <input type="hidden" id="prod-id">
           <div class="modal-body">
+            <div class="mb-3 text-center">
+              <img id="prod-foto-preview" src="" alt="Vista previa" style="width: 96px; height: 96px; object-fit: cover; border-radius: var(--db-radius-sm); display: none; border: 1px solid var(--db-border);">
+              <div id="prod-foto-placeholder" class="d-flex align-items-center justify-content-center mx-auto" style="width: 96px; height: 96px; border-radius: var(--db-radius-sm); background: var(--db-bg-light); color: var(--db-espresso-suave); font-size: 1.6rem;">
+                <i class="bi bi-image"></i>
+              </div>
+              <label for="prod-foto" class="btn btn-db-outline btn-sm mt-2">
+                <i class="bi bi-upload me-1"></i>Subir foto
+              </label>
+              <input type="file" id="prod-foto" accept="image/png, image/jpeg, image/webp" class="d-none">
+              <div class="form-text">Opcional. JPG, PNG o WEBP — máximo 4MB.</div>
+            </div>
             <div class="mb-3">
               <label for="prod-nombre" class="small text-muted d-block mb-1">Nombre del producto:</label>
               <input type="text" class="form-control form-db" id="prod-nombre" required placeholder="ej: Torta Selva Negra">

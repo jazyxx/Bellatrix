@@ -81,7 +81,7 @@ class CatalogoController
             'tipo'           => $p->tipo,
             'unidad_negocio' => $p->unidadNegocio,
             'precio'         => $p->precio,
-            'foto'           => $p->foto,
+            'tiene_foto'     => $p->tieneFoto,
             'agotado'        => !$p->disponible || $p->stock <= 0,
         ];
     }

@@ -27,7 +27,14 @@ class Producto
     public string $unidadNegocio;   // ENUM: 'Pastelería' | 'Heladería'
     public float $precio;
     public int $stock;
-    public ?string $foto;
+    /** Solo indica SI existe una foto guardada — nunca trae los bytes
+     *  (evita cargar imágenes completas en cada listado del catálogo). */
+    public bool $tieneFoto;
+    /** Bytes crudos de una foto NUEVA a guardar. Se llena desde el
+     *  controlador (tras decodificar el base64 que manda el formulario)
+     *  justo antes de llamar a crear()/actualizar() — nunca se llena
+     *  leyendo de la base de datos. */
+    public ?string $fotoBinaria = null;
     public bool $disponible;
 
     /** Conexión PDO reutilizada en todos los métodos de esta clase. */
@@ -51,7 +58,8 @@ class Producto
         $this->unidadNegocio = $datos['unidad_negocio'] ?? 'Pastelería';
         $this->precio       = isset($datos['precio']) ? (float)$datos['precio'] : 0.0;
         $this->stock        = isset($datos['stock']) ? (int)$datos['stock'] : 0;
-        $this->foto         = $datos['foto']          ?? null;
+        // 'tiene_foto' llega calculado desde el SQL como (foto IS NOT NULL) — ver más abajo.
+        $this->tieneFoto    = !empty($datos['tiene_foto']);
         // MySQL guarda booleanos como 0/1 (tinyint), aquí los convertimos a true/false de PHP.
         $this->disponible   = isset($datos['disponible']) ? (bool)$datos['disponible'] : true;
     }
@@ -138,7 +146,7 @@ class Producto
             'unidad_negocio' => $this->unidadNegocio,
             'precio'         => $this->precio,
             'stock'          => $this->stock,
-            'foto'           => $this->foto,
+            'tiene_foto'     => $this->tieneFoto,
             'disponible'     => $this->disponible,
         ];
     }
@@ -185,11 +193,13 @@ class Producto
         $stmt->bindValue(':unidad_negocio', $this->unidadNegocio);
         $stmt->bindValue(':precio', $this->precio);
         $stmt->bindValue(':stock', $this->stock, PDO::PARAM_INT);
-        $stmt->bindValue(':foto', $this->foto);
+        // PARAM_LOB es el tipo correcto para escribir en una columna BLOB.
+        $stmt->bindValue(':foto', $this->fotoBinaria, $this->fotoBinaria !== null ? PDO::PARAM_LOB : PDO::PARAM_NULL);
         $stmt->bindValue(':disponible', $this->disponible ? 1 : 0, PDO::PARAM_INT);
         $stmt->execute();
 
         $this->idProducto = (int)$this->pdo->lastInsertId();
+        $this->tieneFoto = $this->fotoBinaria !== null;
         return $this->idProducto;
     }
 
@@ -198,6 +208,12 @@ class Producto
      * Guarda en la base de datos TODOS los cambios hechos sobre las
      * propiedades del objeto (a diferencia de actualizarStock() o
      * modificarPrecio(), que solo tocan un campo puntual).
+     *
+     * La columna `foto` es la ÚNICA que se actualiza de forma
+     * condicional: si el Administrador no seleccionó una foto nueva
+     * ($fotoBinaria sigue en null), la foto que ya estaba guardada NO
+     * se toca — de lo contrario, cada vez que se editara el precio o
+     * el stock se borraría la imagen sin querer.
      */
     public function actualizar(): bool
     {
@@ -208,9 +224,13 @@ class Producto
                     unidad_negocio = :unidad_negocio,
                     precio = :precio,
                     stock = :stock,
-                    foto = :foto,
-                    disponible = :disponible
-                WHERE id_producto = :id";
+                    disponible = :disponible";
+
+        if ($this->fotoBinaria !== null) {
+            $sql .= ", foto = :foto";
+        }
+
+        $sql .= " WHERE id_producto = :id";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':nombre', $this->nombre);
@@ -219,11 +239,17 @@ class Producto
         $stmt->bindValue(':unidad_negocio', $this->unidadNegocio);
         $stmt->bindValue(':precio', $this->precio);
         $stmt->bindValue(':stock', $this->stock, PDO::PARAM_INT);
-        $stmt->bindValue(':foto', $this->foto);
         $stmt->bindValue(':disponible', $this->disponible ? 1 : 0, PDO::PARAM_INT);
+        if ($this->fotoBinaria !== null) {
+            $stmt->bindValue(':foto', $this->fotoBinaria, PDO::PARAM_LOB);
+        }
         $stmt->bindValue(':id', $this->idProducto, PDO::PARAM_INT);
 
-        return $stmt->execute();
+        $ok = $stmt->execute();
+        if ($ok && $this->fotoBinaria !== null) {
+            $this->tieneFoto = true;
+        }
+        return $ok;
     }
 
     /**
@@ -245,6 +271,20 @@ class Producto
     // =================================================================
 
     /**
+     * COLUMNAS_SIN_FOTO
+     * ------------------------------------------------------------
+     * Lista de columnas reutilizada en TODAS las consultas de abajo.
+     * A propósito nunca seleccionamos `foto` completa aquí: en vez de
+     * eso pedimos "(foto IS NOT NULL) AS tiene_foto" — así un listado
+     * de 50 productos no arrastra 50 imágenes completas a PHP solo
+     * para mostrar una tabla o una grilla. Los bytes reales de la foto
+     * se piden aparte, solo cuando hacen falta, con
+     * obtenerFotoBinaria().
+     */
+    private const COLUMNAS_SIN_FOTO = "id_producto, nombre, descripcion, tipo, unidad_negocio,
+                                        precio, stock, disponible, (foto IS NOT NULL) AS tiene_foto";
+
+    /**
      * obtenerPorId($id)
      * Busca un producto por su llave primaria y devuelve un objeto
      * Producto ya "armado", o null si no existe.
@@ -252,12 +292,31 @@ class Producto
     public static function obtenerPorId(int $id): ?Producto
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM productos WHERE id_producto = :id");
+        $stmt = $pdo->prepare("SELECT " . self::COLUMNAS_SIN_FOTO . " FROM productos WHERE id_producto = :id");
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
 
         $fila = $stmt->fetch();
         return $fila ? new Producto($fila) : null;
+    }
+
+    /**
+     * obtenerFotoBinaria($id)
+     * ------------------------------------------------------------
+     * ÚNICO método de esta clase que trae los bytes reales de la foto.
+     * Lo usa InventarioController::fotoProducto() para servir la
+     * imagen como un archivo binario (no como JSON). Devuelve null si
+     * el producto no existe o no tiene foto guardada.
+     */
+    public static function obtenerFotoBinaria(int $id): ?string
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare("SELECT foto FROM productos WHERE id_producto = :id");
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $foto = $stmt->fetchColumn();
+        return ($foto !== false && $foto !== null) ? $foto : null;
     }
 
     /**
@@ -272,7 +331,7 @@ class Producto
     {
         $pdo = Database::getConnection();
 
-        $sql = "SELECT * FROM productos";
+        $sql = "SELECT " . self::COLUMNAS_SIN_FOTO . " FROM productos";
         if ($soloDisponibles) {
             $sql .= " WHERE disponible = 1";
         }
@@ -292,7 +351,7 @@ class Producto
     public static function listarPorUnidadNegocio(string $unidad): array
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM productos WHERE unidad_negocio = :unidad ORDER BY nombre ASC");
+        $stmt = $pdo->prepare("SELECT " . self::COLUMNAS_SIN_FOTO . " FROM productos WHERE unidad_negocio = :unidad ORDER BY nombre ASC");
         $stmt->bindValue(':unidad', $unidad);
         $stmt->execute();
 
@@ -306,7 +365,7 @@ class Producto
     public static function buscarPorNombre(string $texto): array
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM productos WHERE nombre LIKE :texto ORDER BY nombre ASC");
+        $stmt = $pdo->prepare("SELECT " . self::COLUMNAS_SIN_FOTO . " FROM productos WHERE nombre LIKE :texto ORDER BY nombre ASC");
         $stmt->bindValue(':texto', '%' . $texto . '%');
         $stmt->execute();
 
