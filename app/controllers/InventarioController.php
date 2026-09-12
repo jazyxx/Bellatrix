@@ -385,8 +385,8 @@ class InventarioController
      *
      * Además de ajustar el stock, implementa la parte "activa" del
      * CU019: si tras el ajuste el insumo queda en stock bajo, se
-     * genera automáticamente una AlertaStock (evitando duplicados si
-     * ya existe una alerta activa para ese mismo insumo).
+     * genera automáticamente una AlertaStock. Si el stock se recupera,
+     * se desactivan las alertas previas.
      */
     public function ajustarStockMateria(string $id): void
     {
@@ -412,7 +412,15 @@ class InventarioController
                 $materia->descontarStock($cantidad);
             }
 
-            AlertaStock::generarSiAplica($materia);
+            // --- EL DISPARADOR INTELIGENTE ---
+            if ($materia->tieneStockBajo()) {
+                // Si el stock quedó bajo, enciende la alerta
+                AlertaStock::generarSiAplica($materia);
+            } else {
+                // Si el stock es seguro, usamos la función que creamos para apagar alertas
+                AlertaStock::desactivarPorMateria($materia->idMateria);
+            }
+            // ---------------------------------
 
             Response::exito($this->serializarMateria($materia), 'Stock de materia prima actualizado exitosamente.');
         } catch (Exception $e) {

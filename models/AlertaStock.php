@@ -64,42 +64,6 @@ class AlertaStock
     }
 
     /**
-     * marcarComoAtendida()
-     * El Administrador la usa cuando ya resolvió la alerta (por
-     * ejemplo, ya compró más harina).
-     */
-    public function marcarComoAtendida(): bool
-    {
-        $sql = "UPDATE alerta_stock SET atendida = 1, activa = 0 WHERE id_alerta = :id";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':id', $this->idAlerta, PDO::PARAM_INT);
-        $ok = $stmt->execute();
-
-        if ($ok) {
-            $this->atendida = true;
-            $this->activa = false;
-        }
-
-        return $ok;
-    }
-
-    /**
-     * obtenerPorId($id)
-     * Añadido en la Fase 3: lo usa InventarioController para cargar
-     * una alerta puntual antes de marcarla como atendida.
-     */
-    public static function obtenerPorId(int $id): ?AlertaStock
-    {
-        $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM alerta_stock WHERE id_alerta = :id");
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $fila = $stmt->fetch();
-        return $fila ? new AlertaStock($fila) : null;
-    }
-
-    /**
      * obtenerActivaPorMateria($idMateria)
      * ------------------------------------------------------------
      * Añadido en la Fase 3: antes de crear una alerta nueva por
@@ -185,5 +149,20 @@ class AlertaStock
         }
         
         return $alertas;
+    }
+
+    /**
+     * Desactiva y marca como atendidas TODAS las alertas de un insumo.
+     * Se usa cuando el stock vuelve a estar por encima del mínimo.
+     */
+    public static function desactivarPorMateria(int $idMateria): void
+    {
+        $pdo = Database::getConnection();
+        $sql = "UPDATE alerta_stock 
+                SET activa = 0, atendida = 1 
+                WHERE id_materia = :id AND atendida = 0";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $idMateria, PDO::PARAM_INT);
+        $stmt->execute();
     }
 }

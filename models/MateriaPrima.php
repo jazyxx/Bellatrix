@@ -142,10 +142,16 @@ class MateriaPrima
         
         $ok = $stmt->execute();
 
-        // AQUÍ ESTÁ EL DISPARADOR: Después de actualizar, comprobamos si hay alerta
         if ($ok) {
             require_once __DIR__ . '/AlertaStock.php';
-            AlertaStock::generarSiAplica($this);
+            
+            if ($this->tieneStockBajo()) {
+                // Si el stock bajó o sigue bajo, genera la alerta
+                AlertaStock::generarSiAplica($this);
+            } else {
+                // Si el stock ya es suficiente, limpia TODAS las alertas de este insumo en la BD
+                AlertaStock::desactivarPorMateria($this->idMateria);
+            }
         }
 
         return $ok;

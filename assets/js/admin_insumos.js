@@ -223,7 +223,7 @@ async function cargarAlertasAbastecimiento() {
   if (!tbody) return;
 
   if (!resp.exito || !resp.datos || resp.datos.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3 text-muted"><i class="bi bi-check-circle-fill me-1"></i>No hay alertas de stock bajo activas ahora mismo. ¡Excelente control!</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-muted"><i class="bi bi-check-circle-fill me-1"></i>No hay alertas de stock bajo activas ahora mismo. ¡Excelente control!</td></tr>`;
     return;
   }
 
@@ -233,9 +233,6 @@ async function cargarAlertasAbastecimiento() {
       <td><strong>${escaparHtml(a.nombre_materia || 'Insumo')}</strong></td>
       <td><span class="text-dark small">${escaparHtml(a.mensaje)}</span></td>
       <td><span class="badge-pastel badge-pastel-danger">${a.estado}</span></td>
-      <td class="text-center">
-        <button class="btn btn-sm btn-db-success py-1 px-3 font-weight-bold" onclick="atenderAlertaStock(${a.id_alerta})"><i class="bi bi-check2 me-1"></i>Atender</button>
-      </td>
     </tr>
   `).join('');
 }
