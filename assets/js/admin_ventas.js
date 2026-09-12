@@ -21,9 +21,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const sub = document.getElementById('ventas-subtitulo');
   if (sub) {
     if (usuario.rol === 'Administrador') {
-      sub.textContent = 'Visualizando TODAS las transacciones registradas del sistema Ambrosía (Admin console, CU005).';
+      sub.textContent = 'Visualizando TODAS las transacciones registradas del sistema Ambrosía.';
     } else {
-      sub.textContent = 'Visualizando únicamente tus ventas registradas del día (CU005).';
+      sub.textContent = 'Visualizando únicamente tus ventas registradas del día.';
     }
   }
 
