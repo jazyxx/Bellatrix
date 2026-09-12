@@ -30,7 +30,7 @@ class CatalogoController
      * GET /api/catalogo/productos?unidad=Pastelería&buscar=torta
      * Público — sin Middleware.
      */
-    public function listar(): void
+public function listar(): void
     {
         $unidad = Request::query('unidad');
         $buscar = Request::query('buscar');
@@ -43,7 +43,20 @@ class CatalogoController
             $productos = Producto::listarTodos(false);
         }
 
-        $datos = array_map(fn(Producto $p) => $this->serializarParaCatalogo($p), $productos);
+        // Excluir tortas personalizadas del catálogo público
+        $productosFiltrados = array_filter($productos, function (Producto $p) {
+            $tipo   = strtolower(trim($p->tipo ?? ''));
+            $nombre = strtolower(trim($p->nombre ?? ''));
+
+            // Si 'personalizad' está presente en el tipo o en el nombre, se excluye del catálogo
+            if (strpos($tipo, 'personalizad') !== false || strpos($nombre, 'personalizad') !== false) {
+                return false;
+            }
+
+            return true;
+        });
+
+        $datos = array_map(fn(Producto $p) => $this->serializarParaCatalogo($p), array_values($productosFiltrados));
         Response::exito($datos, 'Catálogo obtenido correctamente.');
     }
 
