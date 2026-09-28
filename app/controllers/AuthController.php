@@ -297,14 +297,23 @@ class AuthController
         if ($cliente !== null) {
             $token = $cliente->recuperarContrasena();
 
+            // 1. Prepara el mensaje privado para el correo (con el token)
+            $mensajeCorreo = "Usa este código para restablecer tu contraseña: {$token}\n"
+                           . "Este código vence en 1 hora. Si tú no solicitaste esto, ignora este mensaje.";
+
+            // 2. Prepara el mensaje público para la app (sin el token)
+            $mensajeApp = "Hemos enviado las instrucciones y el código de recuperación a tu correo electrónico registrado.";
+
+            // 3. Guarda la notificación en la base de datos usando el mensaje seguro
             $notificacion = new Notificacion([
                 'id_cliente' => $cliente->idCliente,
                 'tipo'       => 'Recuperación de contraseña',
             ]);
-            $notificacion->mensaje = "Usa este código para restablecer tu contraseña: {$token}\n"
-                                    . "Este código vence en 1 hora. Si tú no solicitaste esto, ignora este mensaje.";
-            $notificacion->crear();
-            $notificacion->enviarCorreo($cliente->correo, $notificacion->mensaje);
+            $notificacion->mensaje = $mensajeApp;
+            $notificacion->crear(); 
+
+            // 4. Envia el correo usando la variable que sí contiene el token
+            $notificacion->enviarCorreo($cliente->correo, $mensajeCorreo);
         }
 
         Response::exito([], 'Si el correo está registrado en nuestro sistema, recibirás instrucciones para recuperar tu contraseña.');
