@@ -109,7 +109,10 @@
           <span class="fw-bold">TOTAL VENTA:</span>
           <strong class="text-success" id="detalle-total" style="font-size: 1.3rem;">-</strong>
         </div>
-
+        <!-- Botón imprimir recibo (Issue #30) -->
+        <button class="btn btn-outline-secondary w-100 py-2 mb-2" id="btn-imprimir-recibo" style="display: none;">
+          <i class="bi bi-printer-fill me-1"></i>Imprimir Recibo
+        </button>
         <!-- Botón para anular transacción (CU008) -->
         <button class="btn btn-db-danger w-100 py-2 font-weight-bold" id="btn-anular-venta" style="display: none;">
           <i class="bi bi-x-octagon-fill me-1"></i>Anular Transacción

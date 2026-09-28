@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recibo de Venta - Ambrosía</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Nunito Sans', sans-serif; background: #f8f9fa; padding: 20px; }
+.receipt-container { background: #fff; max-width: 600px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.brand-header { text-align: center; margin-bottom: 20px; border-bottom: 2px dashed #dee2e6; padding-bottom: 20px; }
+.brand-title { font-family: 'Fraunces', serif; color: #d63384; font-weight: 700; }
+@media print {
+  body { background: #fff; padding: 0; }
+  .receipt-container { box-shadow: none; max-width: 100%; padding: 0; }
+  .no-print { display: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="receipt-container" id="recibo-contenido">
+  <div class="text-center my-5 text-muted">
+    <div class="spinner-border spinner-border-sm text-secondary me-2" role="status"></div>Generando recibo...
+  </div>
+</div>
+
+<script src="assets/js/api.js"></script>
+<script>
+const $out = document.getElementById('recibo-contenido');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => '$' + Number(n || 0).toLocaleString('es-CO');
+const alerta = (tipo, html) => { $out.innerHTML = `<div class="alert alert-${tipo} text-center">${html}</div>`; };
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const id = new URLSearchParams(window.location.search).get('id');
+    if (!id) return alerta('danger', 'Error: No se especificó el número de venta.');
+
+    const r = await apiFetch(`api/ventas/${encodeURIComponent(id)}`);
+    if (!r.exito || !r.datos) return alerta('danger', 'Error al cargar la información de la venta.');
+    const v = r.datos;
+
+    // Una venta anulada no debe generar comprobante
+    if (/anulad/i.test(v.estado || '')) {
+      return alerta('warning', `<h4 class="alert-heading text-danger"><i class="bi bi-shield-lock"></i> Recibo no disponible</h4>
+        <p class="mb-0">La venta #${esc(v.id_venta ?? id)} está <strong>${esc(v.estado)}</strong>; no se puede emitir comprobante.</p>`);
+    }
+
+    const fechaRaw = v.fecha;
+    const fecha = fechaRaw ? new Date(fechaRaw).toLocaleString('es-CO', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
+    const canal = v.canal, unidad = v.unidad_negocio;
+    const empleado = v.nombre_empleado || (v.id_empleado ? 'Empleado #' + v.id_empleado : '');
+
+    const items = (v.detalles || v.productos || []).map(i => `
+      <tr><td>${esc(i.cantidad)}x</td><td>${esc(i.nombre || 'Producto')}</td>
+      <td class="text-end">${money(i.subtotal || (i.precio_unitario * i.cantidad))}</td></tr>`).join('');
+
+    const fila = (t, val) => val ? `<p class="mb-1"><strong>${t}:</strong> ${esc(val)}</p>` : '';
+
+    $out.innerHTML = `
+      <div class="no-print mb-3 text-end">
+        <button onclick="window.print()" class="btn btn-secondary btn-sm"><i class="bi bi-printer me-1"></i>Imprimir / Guardar PDF</button>
+      </div>
+      <div class="brand-header">
+        <h2 class="brand-title h3 mb-0">Pastelería Ambrosía</h2>
+        <p class="text-muted small mb-0">Recibo de Venta</p>
+      </div>
+      <div class="mb-4">
+        <p class="mb-1"><strong>Venta #:</strong> ${esc(v.id_venta ?? id)}</p>
+        <p class="mb-1"><strong>Fecha:</strong> ${esc(fecha)}</p>
+        ${fila('Canal', canal)}${fila('Unidad de negocio', unidad)}${fila('Atendido por', empleado)}
+      </div>
+      <table class="table table-sm table-borderless border-top border-bottom mb-4">
+        <thead><tr class="border-bottom"><th>Cant.</th><th>Descripción</th><th class="text-end">Subtotal</th></tr></thead>
+        <tbody>${items}</tbody>
+        <tfoot><tr class="border-top">
+          <th colspan="2" class="text-end pt-3">TOTAL:</th>
+          <th class="text-end pt-3 h5 mb-0 text-success">${money(v.total)}</th>
+        </tr></tfoot>
+      </table>
+      <div class="text-center mt-4 text-muted small"><p>¡Gracias por tu compra!<br>Conserva este recibo para cualquier duda o reclamo.</p></div>`;
+  } catch (e) {
+    console.error('Error generando recibo:', e);
+    alerta('danger', '<i class="bi bi-exclamation-triangle"></i> Hubo un problema al dibujar el recibo.');
+  }
+});
+</script>
+</body>
+</html>

@@ -134,6 +134,17 @@ async function verDetalleVenta(idVenta) {
     btnAnular.style.display = 'none';
   }
 
+  // Botón imprimir recibo (Issue #30): disponible para ventas no anuladas
+  const btnRecibo = document.getElementById('btn-imprimir-recibo');
+  if (btnRecibo) {
+    if (v.estado === 'Anulada') {
+      btnRecibo.style.display = 'none';
+    } else {
+      btnRecibo.style.display = 'block';
+      btnRecibo.onclick = () => window.open(`recibo_venta.html?id=${v.id_venta}`, '_blank', 'width=800,height=700');
+    }
+  }
+
   detailCard.scrollIntoView({ behavior: 'smooth' });
 }
 
