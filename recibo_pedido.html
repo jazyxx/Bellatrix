@@ -80,7 +80,7 @@
             itemsHtml += `
               <tr>
                 <td>${item.cantidad}x</td>
-                <td>${item.nombre || 'Producto'}</td>
+                <td>${item.nombre_producto || item.nombre || 'Producto'}</td>
                 <td class="text-end">$${Number(item.subtotal).toLocaleString('es-CO')}</td>
               </tr>
             `;

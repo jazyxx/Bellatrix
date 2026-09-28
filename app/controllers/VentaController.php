@@ -273,8 +273,10 @@ class VentaController
             'unidad_negocio' => $venta->unidadNegocio,
             'estado'         => $venta->estado,
             'id_empleado'    => $venta->idEmpleado,
+            'nombre_empleado' => $venta->nombreEmpleado ?? null,
             'detalles'       => array_map(fn($d) => [
                 'id_producto'     => $d->idProducto,
+                'nombre_producto' => $d->nombreProducto ?? null,
                 'cantidad'        => $d->cantidad,
                 'precio_unitario' => $d->precioUnitario,
                 'subtotal'        => $d->subtotal(),

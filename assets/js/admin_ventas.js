@@ -117,7 +117,7 @@ async function verDetalleVenta(idVenta) {
   if (v.detalles && v.detalles.length > 0) {
     list.innerHTML = v.detalles.map(item => `
       <li class="d-flex justify-content-between py-1 border-bottom small text-muted">
-        <span>${item.cantidad}x ${escaparHtml(item.nombre || 'Producto')}</span>
+        <span>${item.cantidad}x ${escaparHtml(item.nombre_producto || item.nombre || 'Producto')}</span>
         <span>${formatearPrecioCOP(item.subtotal || (item.precio_unitario * item.cantidad))}</span>
       </li>
     `).join('');

@@ -144,12 +144,13 @@
       document.getElementById('rem-fecha').textContent = new Date().toLocaleDateString('es-CO');
       
       let itemsHtml = '';
-      if (venta.productos && venta.productos.length > 0) {
-        venta.productos.forEach(item => {
+      const lineas = venta.detalles || venta.productos || [];
+      if (lineas.length > 0) {
+        lineas.forEach(item => {
           itemsHtml += `
             <tr>
               <td style="text-align:center;">${item.cantidad}</td>
-              <td>${item.nombre}</td>
+              <td>${item.nombre_producto || item.nombre || 'Producto'}</td>
               <td class="text-right">$${Number(item.subtotal).toLocaleString('es-CO')}</td>
             </tr>
           `;

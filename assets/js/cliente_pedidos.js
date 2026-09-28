@@ -98,7 +98,7 @@ async function verTracking(idPedido) {
   if (p.productos && p.productos.length > 0) {
     itemsContainer.innerHTML = p.productos.map(item => `
       <li class="d-flex justify-content-between py-1 border-bottom small text-muted">
-        <span>${item.cantidad}x ${escaparHtml(item.nombre || 'Producto')}</span>
+        <span>${item.cantidad}x ${escaparHtml(item.nombre_producto || item.nombre || 'Producto')}</span>
         <span>${formatearPrecioCOP(item.subtotal)}</span>
       </li>
     `).join('');

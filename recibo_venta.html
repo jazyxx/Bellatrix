@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const empleado = v.nombre_empleado || (v.id_empleado ? 'Empleado #' + v.id_empleado : '');
 
     const items = (v.detalles || v.productos || []).map(i => `
-      <tr><td>${esc(i.cantidad)}x</td><td>${esc(i.nombre || 'Producto')}</td>
+      <tr><td>${esc(i.cantidad)}x</td><td>${esc(i.nombre_producto || i.nombre || 'Producto')}</td>
       <td class="text-end">${money(i.subtotal || (i.precio_unitario * i.cantidad))}</td></tr>`).join('');
 
     const fila = (t, val) => val ? `<p class="mb-1"><strong>${t}:</strong> ${esc(val)}</p>` : '';

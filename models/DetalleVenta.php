@@ -17,6 +17,7 @@ class DetalleVenta
     public ?int $idProducto;
     public int $cantidad;
     public float $precioUnitario;
+    public ?string $nombreProducto;   // viene del JOIN con `productos`
 
     private PDO $pdo;
 
@@ -29,6 +30,7 @@ class DetalleVenta
         $this->idProducto     = $datos['id_producto']     ?? null;
         $this->cantidad       = isset($datos['cantidad']) ? (int)$datos['cantidad'] : 1;
         $this->precioUnitario = isset($datos['precio_unitario']) ? (float)$datos['precio_unitario'] : 0.0;
+        $this->nombreProducto = $datos['nombre_producto'] ?? null;
     }
 
     public function subtotal(): float
@@ -54,7 +56,12 @@ class DetalleVenta
     public static function listarPorVenta(int $idVenta): array
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM detalle_venta WHERE id_venta = :venta");
+        $stmt = $pdo->prepare("
+            SELECT d.*, p.nombre AS nombre_producto
+            FROM detalle_venta d
+            LEFT JOIN productos p ON d.id_producto = p.id_producto
+            WHERE d.id_venta = :venta
+        ");
         $stmt->bindValue(':venta', $idVenta, PDO::PARAM_INT);
         $stmt->execute();
 

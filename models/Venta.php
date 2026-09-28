@@ -22,6 +22,7 @@ class Venta
     public string $unidadNegocio;  // ENUM: 'Pastelería'|'Heladería'
     public string $estado;         // ENUM: 'Activa'|'Anulada'
     public ?int $idEmpleado;
+    public ?string $nombreEmpleado;   // viene del JOIN con `empleado`
 
     /** @var DetalleVenta[] */
     public array $detalles = [];
@@ -39,6 +40,7 @@ class Venta
         $this->unidadNegocio = $datos['unidad_negocio'] ?? 'Pastelería';
         $this->estado        = $datos['estado']         ?? 'Activa';
         $this->idEmpleado    = $datos['id_empleado']    ?? null;
+        $this->nombreEmpleado = $datos['nombre_empleado'] ?? null;
 
         if ($this->idVenta !== null) {
             $this->detalles = DetalleVenta::listarPorVenta($this->idVenta);
@@ -232,7 +234,7 @@ class Venta
     public static function obtenerPorId(int $id): ?Venta
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM ventas WHERE id_venta = :id");
+        $stmt = $pdo->prepare("SELECT v.*, e.nombre AS nombre_empleado FROM ventas v LEFT JOIN empleado e ON v.id_empleado = e.id_empleado WHERE v.id_venta = :id");
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
 
@@ -243,14 +245,14 @@ class Venta
     public static function listarTodas(): array
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->query("SELECT * FROM ventas ORDER BY fecha DESC");
+        $stmt = $pdo->query("SELECT v.*, e.nombre AS nombre_empleado FROM ventas v LEFT JOIN empleado e ON v.id_empleado = e.id_empleado ORDER BY v.fecha DESC");
         return array_map(fn($fila) => new Venta($fila), $stmt->fetchAll());
     }
 
     public static function obtenerPorEmpleado(int $idEmpleado): array
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM ventas WHERE id_empleado = :empleado ORDER BY fecha DESC");
+        $stmt = $pdo->prepare("SELECT v.*, e.nombre AS nombre_empleado FROM ventas v LEFT JOIN empleado e ON v.id_empleado = e.id_empleado WHERE v.id_empleado = :empleado ORDER BY v.fecha DESC");
         $stmt->bindValue(':empleado', $idEmpleado, PDO::PARAM_INT);
         $stmt->execute();
 
