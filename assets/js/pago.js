@@ -45,6 +45,12 @@ function inicializarVistaPago() {
   // Listeners del formulario
   document.getElementById('medio-pago').addEventListener('change', manejarCambioMedioPago);
   document.getElementById('form-pago').addEventListener('submit', procesarPago);
+
+  // NUEVO: Listener para el botón de simulación
+  const btnSimular = document.getElementById('btn-simular-pago');
+  if (btnSimular) {
+    btnSimular.addEventListener('click', simularPago);
+  }
 }
 
 /**
@@ -112,6 +118,58 @@ async function procesarPago(e) {
 }
 
 /**
+ * Ejecuta el flujo completo saltándose la pasarela real.
+ */
+async function simularPago(e) {
+  e.preventDefault();
+
+  const mensaje = document.getElementById('mensaje-pago');
+  const botonPagar = document.getElementById('btn-pagar');
+  const botonSimular = document.getElementById('btn-simular-pago');
+
+  mensaje.style.display = 'none';
+  botonPagar.disabled = true;
+  botonSimular.disabled = true;
+  botonSimular.textContent = 'Simulando...';
+
+  // 1. Iniciamos el pago con medio 'Otro'
+  const resInicio = await apiFetch('api/pagos', {
+    method: 'POST',
+    body: { id_pedido: Number(idPedidoActual), medio_pago: 'Otro' },
+  });
+
+  if (!resInicio.exito) {
+    mensaje.textContent = resInicio.mensaje || 'Error al iniciar simulación.';
+    mensaje.style.display = 'block';
+    botonPagar.disabled = false;
+    botonSimular.disabled = false;
+    botonSimular.textContent = 'Simular Pago Aprobado (Prueba)';
+    return;
+  }
+
+  // 2. Confirmamos el pago simulando la respuesta del banco
+  const resConfirmar = await apiFetch(`api/pagos/${resInicio.datos.id_pago}/confirmar`, {
+    method: 'POST',
+    body: { 
+      aprobado: true, 
+      referencia_pasarela: 'SIM-PRUEBA-' + Math.floor(Math.random() * 100000) 
+    }
+  });
+
+  if (!resConfirmar.exito) {
+    mensaje.textContent = resConfirmar.mensaje || 'Error al confirmar simulación.';
+    mensaje.style.display = 'block';
+    botonPagar.disabled = false;
+    botonSimular.disabled = false;
+    botonSimular.textContent = 'Simular Pago Aprobado (Prueba)';
+    return;
+  }
+
+  // 3. Mostrar pantalla
+  mostrarPantallaExito('Simulación');
+}
+
+/**
  * mostrarPantallaExito()
  * Reemplaza el formulario con un mensaje de estado vacío (similar
  * a la confirmación en carrito.js) informando los siguientes pasos.
@@ -122,13 +180,22 @@ function mostrarPantallaExito(medioPago) {
 
   if (medioPago === 'Nequi') {
     textoSecundario = '¡Notificación enviada! Revisa la app de Nequi en tu celular para aprobar el cobro. Cuando lo aceptes, procesaremos tu pedido automáticamente.';
+  } else if (medioPago === 'Simulación') {
+    textoSecundario = '¡Pago simulado con éxito! Tu pedido ha sido confirmado en la base de datos de pruebas.';
   }
 
   contenedor.innerHTML = `
-    <div class="col-12 estado-vacio">
+    <div class="col-12 estado-vacio text-center">
       <div class="estado-vacio__icono"><i class="bi bi-check-circle"></i></div>
-      <h2 class="h4 fuente-display mt-3">¡Transacción iniciada!</h2>
-      <p class="text-muted">${textoSecundario}</p>
-      <a href="catalogo.html" class="btn-ambrosia mt-3">Volver al catálogo</a>
+      
+      <!-- Se añadieron los colores claros (var(--crema)) y opacidad para mejorar el contraste -->
+      <h2 class="h4 mt-3" style="color: var(--crema, #FDFBF7); font-family: var(--fuente-display);">
+        ¡Transacción Completada!
+      </h2>
+      <p class="mt-2 mb-4" style="color: var(--crema, #FDFBF7); opacity: 0.85;">
+        ${textoSecundario}
+      </p>
+      
+      <a href="catalogo.html" class="btn-ambrosia">Volver al catálogo</a>
     </div>`;
 }
