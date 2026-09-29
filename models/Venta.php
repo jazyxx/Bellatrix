@@ -3,6 +3,7 @@ require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/DetalleVenta.php';
 require_once __DIR__ . '/Producto.php';
 require_once __DIR__ . '/Receta.php';
+require_once __DIR__ . '/GestorVentas.php';
 
 /**
  * ==========================================================================
@@ -23,6 +24,7 @@ class Venta
     public string $estado;         // ENUM: 'Activa'|'Anulada'
     public ?int $idEmpleado;
     public ?string $nombreEmpleado;   // viene del JOIN con `empleado`
+    public ?int $idPedido;            // pedido en línea de origen (NULL en ventas POS)
 
     /** @var DetalleVenta[] */
     public array $detalles = [];
@@ -41,6 +43,7 @@ class Venta
         $this->estado        = $datos['estado']         ?? 'Activa';
         $this->idEmpleado    = $datos['id_empleado']    ?? null;
         $this->nombreEmpleado = $datos['nombre_empleado'] ?? null;
+        $this->idPedido      = isset($datos['id_pedido']) ? (int)$datos['id_pedido'] : null;
 
         if ($this->idVenta !== null) {
             $this->detalles = DetalleVenta::listarPorVenta($this->idVenta);
@@ -223,6 +226,174 @@ class Venta
         } catch (Exception $e) {
             // Si hay un error, echa todo para atrás re triste
             $this->pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * registrarDesdePedido($pedido, $idEmpleado)
+     * ------------------------------------------------------------
+     * Issue #37: cuando un pedido en línea se PAGA (sale de 'Pendiente
+     * de pago') se convierte en venta: aparece en el historial de
+     * ventas y su ingreso se suma a la caja 'En línea' del día.
+     *
+     *  - Descuenta el stock del PRODUCTO TERMINADO. (La materia prima
+     *    se sigue descontando al pasar a 'Listo para recoger'.)
+     *  - Como `ventas.unidad_negocio` y la caja diaria son por unidad,
+     *    si el pedido mezcla Pastelería y Heladería se crea UNA venta
+     *    por unidad (cada una con su ingreso en su caja).
+     *  - Es idempotente: si el pedido ya tiene venta, no hace nada.
+     *  - Si ya hay una transacción abierta (Pedido::cambiarEstado),
+     *    se une a ella; si el stock no alcanza lanza excepción y todo
+     *    se revierte.
+     *
+     * @return int[] ids de las ventas creadas (vacío si ya existían)
+     */
+    public static function registrarDesdePedido($pedido, ?int $idEmpleado = null): array
+    {
+        $pdo = Database::getConnection();
+
+        $chk = $pdo->prepare("SELECT COUNT(*) FROM ventas WHERE id_pedido = :p");
+        $chk->bindValue(':p', $pedido->idPedido, PDO::PARAM_INT);
+        $chk->execute();
+        if ((int)$chk->fetchColumn() > 0) {
+            return [];
+        }
+
+        // Agrupar las líneas del pedido por unidad de negocio del producto.
+        $grupos = [];
+        foreach ($pedido->productos as $linea) {
+            $producto = Producto::obtenerPorId((int)$linea->idProducto);
+            $unidad = $producto ? $producto->unidadNegocio : 'Pastelería';
+            $grupos[$unidad][] = $linea;
+        }
+        if (empty($grupos)) {
+            throw new Exception("El pedido no tiene productos para registrar como venta.");
+        }
+
+        $propia = !$pdo->inTransaction();
+        if ($propia) {
+            $pdo->beginTransaction();
+        }
+        try {
+            $ids = [];
+            foreach ($grupos as $unidad => $lineas) {
+                $total = 0.0;
+                foreach ($lineas as $l) {
+                    $total += $l->subtotal();
+                }
+
+                $ins = $pdo->prepare("INSERT INTO ventas (total, canal, unidad_negocio, estado, id_empleado, id_pedido)
+                                      VALUES (:total, 'En línea', :unidad, 'Activa', :empleado, :pedido)");
+                $ins->bindValue(':total', $total);
+                $ins->bindValue(':unidad', $unidad);
+                $ins->bindValue(':empleado', $idEmpleado, PDO::PARAM_INT);
+                $ins->bindValue(':pedido', $pedido->idPedido, PDO::PARAM_INT);
+                $ins->execute();
+                $idVenta = (int)$pdo->lastInsertId();
+
+                foreach ($lineas as $l) {
+                    $det = $pdo->prepare("INSERT INTO detalle_venta (id_venta, id_producto, cantidad, precio_unitario)
+                                          VALUES (:venta, :producto, :cantidad, :precio)");
+                    $det->bindValue(':venta', $idVenta, PDO::PARAM_INT);
+                    $det->bindValue(':producto', $l->idProducto, PDO::PARAM_INT);
+                    $det->bindValue(':cantidad', $l->cantidad, PDO::PARAM_INT);
+                    $det->bindValue(':precio', $l->precioUnitario);
+                    $det->execute();
+
+                    // Stock del producto terminado (lanza excepción si no alcanza).
+                    $prod = Producto::obtenerPorId((int)$l->idProducto);
+                    if ($prod) {
+                        $prod->actualizarStock(-(int)$l->cantidad);
+                    }
+                }
+
+                // Ingreso en la caja del día (canal En línea + unidad).
+                $caja = GestorVentas::obtenerOCrearCajaDelDia('En línea', $unidad, date('Y-m-d'), $idEmpleado);
+                $caja->registrarIngreso($total);
+
+                $ids[] = $idVenta;
+            }
+            if ($propia) {
+                $pdo->commit();
+            }
+            return $ids;
+        } catch (Exception $e) {
+            if ($propia && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * anularDesdePedido($pedido, $estadoAnterior)
+     * ------------------------------------------------------------
+     * Issue #37: si un pedido ya pagado se CANCELA (hay reembolso),
+     * se revierte todo lo que registrarDesdePedido() hizo:
+     *   - las ventas del pedido pasan a 'Anulada',
+     *   - se devuelve el stock del producto terminado,
+     *   - se devuelve la materia prima solo si ya se había descontado
+     *     (el pedido llegó a 'Listo para recoger' o 'Entregado'),
+     *   - se resta el ingreso de la caja donde se registró.
+     */
+    public static function anularDesdePedido($pedido, string $estadoAnterior): void
+    {
+        $pdo = Database::getConnection();
+
+        $q = $pdo->prepare("SELECT id_venta, total, canal, unidad_negocio, fecha
+                            FROM ventas WHERE id_pedido = :p AND estado = 'Activa'");
+        $q->bindValue(':p', $pedido->idPedido, PDO::PARAM_INT);
+        $q->execute();
+        $ventas = $q->fetchAll();
+        if (empty($ventas)) {
+            return;
+        }
+
+        $materiaDescontada = in_array($estadoAnterior, ['Listo para recoger', 'Entregado'], true);
+
+        $propia = !$pdo->inTransaction();
+        if ($propia) {
+            $pdo->beginTransaction();
+        }
+        try {
+            foreach ($ventas as $v) {
+                $up = $pdo->prepare("UPDATE ventas SET estado = 'Anulada' WHERE id_venta = :id");
+                $up->bindValue(':id', $v['id_venta'], PDO::PARAM_INT);
+                $up->execute();
+
+                foreach (DetalleVenta::listarPorVenta((int)$v['id_venta']) as $d) {
+                    // Devolver stock del producto terminado.
+                    $prod = Producto::obtenerPorId((int)$d->idProducto);
+                    if ($prod) {
+                        $prod->actualizarStock((int)$d->cantidad);
+                    }
+
+                    // Devolver materia prima (solo si ya se había descontado).
+                    if ($materiaDescontada) {
+                        foreach (Receta::obtenerPorProducto((int)$d->idProducto) as $linea) {
+                            if ($linea->idMateria !== null && $linea->cantidad !== null) {
+                                $mp = $pdo->prepare("UPDATE materia_prima SET stock_actual = stock_actual + :c WHERE id_materia = :m");
+                                $mp->bindValue(':c', $linea->cantidad * $d->cantidad, PDO::PARAM_STR);
+                                $mp->bindValue(':m', $linea->idMateria, PDO::PARAM_INT);
+                                $mp->execute();
+                            }
+                        }
+                    }
+                }
+
+                // Restar el ingreso de la caja del día en que se registró.
+                $fecha = date('Y-m-d', strtotime($v['fecha']));
+                $caja = GestorVentas::obtenerOCrearCajaDelDia($v['canal'], $v['unidad_negocio'], $fecha, null);
+                $caja->revertirIngreso((float)$v['total']);
+            }
+            if ($propia) {
+                $pdo->commit();
+            }
+        } catch (Exception $e) {
+            if ($propia && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             throw $e;
         }
     }

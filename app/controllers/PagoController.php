@@ -145,7 +145,13 @@ class PagoController
         $aprobado = (bool) ($datos['aprobado'] ?? false);
         $referenciaPasarela = $datos['referencia_pasarela'] ?? null;
 
-        $pago->confirmarTransaccion($aprobado, $referenciaPasarela);
+        try {
+            $pago->confirmarTransaccion($aprobado, $referenciaPasarela);
+        } catch (Exception $e) {
+            // Ej.: stock insuficiente al confirmar el pedido.
+            Response::error('No se pudo confirmar el pago: ' . $e->getMessage(), 422);
+            return;
+        }
 
         $mensaje = $aprobado
             ? 'Pago aprobado. Tu pedido fue confirmado exitosamente.'
@@ -240,7 +246,11 @@ class PagoController
         
         if ($pago) {
             $aprobado = (strtoupper($estadoNequi) === 'APPROVED');
-            $pago->confirmarTransaccion($aprobado, $referenciaPasarela);
+            try {
+                $pago->confirmarTransaccion($aprobado, $referenciaPasarela);
+            } catch (Exception $e) {
+                error_log('Webhook Nequi: no se pudo confirmar el pago: ' . $e->getMessage());
+            }
         }
 
         http_response_code(200);

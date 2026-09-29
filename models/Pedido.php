@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/DetallePedido.php';
+require_once __DIR__ . '/Venta.php';
 require_once __DIR__ . '/CarritoDeCompras.php';
 
 /**
@@ -141,12 +142,44 @@ class Pedido
             throw new Exception("Estado de pedido no válido: '{$nuevoEstado}'.");
         }
 
-        $sql = "UPDATE pedido SET estado = :estado, id_empleado_gestion = :empleado WHERE id_pedido = :id";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':estado', $nuevoEstado);
-        $stmt->bindValue(':empleado', $this->idEmpleadoGestion, PDO::PARAM_INT);
-        $stmt->bindValue(':id', $this->idPedido, PDO::PARAM_INT);
-        $ok = $stmt->execute();
+        $estadoAnterior = $this->estado;
+        if ($estadoAnterior === 'Cancelado' && $nuevoEstado !== 'Cancelado') {
+            throw new Exception("Un pedido cancelado no puede reactivarse.");
+        }
+
+        // Issue #37: el cambio de estado y sus efectos contables van juntos.
+        $propia = !$this->pdo->inTransaction();
+        if ($propia) {
+            $this->pdo->beginTransaction();
+        }
+        try {
+            $sql = "UPDATE pedido SET estado = :estado, id_empleado_gestion = :empleado WHERE id_pedido = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':estado', $nuevoEstado);
+            $stmt->bindValue(':empleado', $this->idEmpleadoGestion, PDO::PARAM_INT);
+            $stmt->bindValue(':id', $this->idPedido, PDO::PARAM_INT);
+            $ok = $stmt->execute();
+
+            if ($ok) {
+                if ($estadoAnterior === 'Pendiente de pago'
+                    && !in_array($nuevoEstado, ['Pendiente de pago', 'Cancelado'], true)) {
+                    // Pedido pagado/confirmado -> venta + stock + ingreso en caja.
+                    Venta::registrarDesdePedido($this, $this->idEmpleadoGestion !== null ? (int)$this->idEmpleadoGestion : null);
+                } elseif ($nuevoEstado === 'Cancelado'
+                    && !in_array($estadoAnterior, ['Pendiente de pago', 'Cancelado'], true)) {
+                    // Pedido ya pagado que se cancela -> se revierte todo.
+                    Venta::anularDesdePedido($this, $estadoAnterior);
+                }
+            }
+            if ($propia) {
+                $this->pdo->commit();
+            }
+        } catch (Exception $e) {
+            if ($propia && $this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
 
         if ($ok) {
             $this->estado = $nuevoEstado;

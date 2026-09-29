@@ -117,6 +117,29 @@ class GestorVentas
     }
 
     /**
+     * revertirIngreso($monto)
+     * Resta de la caja un ingreso ya registrado (p. ej. un pedido en
+     * línea pagado que luego se cancela y se reembolsa). Nunca deja
+     * `total_ventas` en negativo.
+     */
+    public function revertirIngreso(float $monto): bool
+    {
+        $nuevoTotal = max(0.0, $this->totalVentas - $monto);
+
+        $sql = "UPDATE gestor_ventas SET total_ventas = :total WHERE id_gestor = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':total', $nuevoTotal);
+        $stmt->bindValue(':id', $this->idGestor, PDO::PARAM_INT);
+        $ok = $stmt->execute();
+
+        if ($ok) {
+            $this->totalVentas = $nuevoTotal;
+            $this->saldo = $this->totalVentas - $this->totalEgresos;
+        }
+        return $ok;
+    }
+
+    /**
      * registrarEgreso($monto)
      * ------------------------------------------------------------
      * IMPLEMENTA EL CU018: "Bloqueo de egresos si superan el saldo

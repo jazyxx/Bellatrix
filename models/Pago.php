@@ -82,24 +82,42 @@ class Pago
      */
     public function confirmarTransaccion(bool $aprobado, ?string $referenciaPasarela = null): bool
     {
-        $this->estado = $aprobado ? 'Aprobado' : 'Rechazado';
-        if ($referenciaPasarela !== null) {
-            $this->referencia = $referenciaPasarela;
+        // Issue #37: pago y confirmación del pedido (venta + stock + caja) van
+        // en una sola transacción; si el stock no alcanza, el pago NO queda aprobado.
+        $propia = !$this->pdo->inTransaction();
+        if ($propia) {
+            $this->pdo->beginTransaction();
         }
-
-        $sql = "UPDATE pago SET estado = :estado, referencia = :referencia WHERE id_pago = :id";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':estado', $this->estado);
-        $stmt->bindValue(':referencia', $this->referencia);
-        $stmt->bindValue(':id', $this->idPago, PDO::PARAM_INT);
-        $ok = $stmt->execute();
-
-        if ($ok && $aprobado) {
-            // El pago fue aprobado -> el pedido pasa de "Pendiente de pago" a "Confirmado".
-            $pedido = Pedido::obtenerPorId($this->idPedido);
-            if ($pedido) {
-                $pedido->cambiarEstado('Confirmado');
+        $estadoPrevio = $this->estado;
+        try {
+            $this->estado = $aprobado ? 'Aprobado' : 'Rechazado';
+            if ($referenciaPasarela !== null) {
+                $this->referencia = $referenciaPasarela;
             }
+
+            $sql = "UPDATE pago SET estado = :estado, referencia = :referencia WHERE id_pago = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':estado', $this->estado);
+            $stmt->bindValue(':referencia', $this->referencia);
+            $stmt->bindValue(':id', $this->idPago, PDO::PARAM_INT);
+            $ok = $stmt->execute();
+
+            if ($ok && $aprobado) {
+                // El pago fue aprobado -> el pedido pasa de "Pendiente de pago" a "Confirmado".
+                $pedido = Pedido::obtenerPorId($this->idPedido);
+                if ($pedido) {
+                    $pedido->cambiarEstado('Confirmado');
+                }
+            }
+            if ($propia) {
+                $this->pdo->commit();
+            }
+        } catch (Exception $e) {
+            if ($propia && $this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            $this->estado = $estadoPrevio;
+            throw $e;
         }
 
         return $ok;

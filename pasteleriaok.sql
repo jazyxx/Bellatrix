@@ -427,7 +427,8 @@ CREATE TABLE `ventas` (
   `canal` enum('Presencial','En línea') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Presencial',
   `unidad_negocio` enum('Pastelería','Heladería') COLLATE utf8mb4_general_ci NOT NULL,
   `estado` enum('Activa','Anulada') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Activa',
-  `id_empleado` int DEFAULT NULL
+  `id_empleado` int DEFAULT NULL,
+  `id_pedido` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -573,7 +574,8 @@ ALTER TABLE `recetas`
 --
 ALTER TABLE `ventas`
   ADD PRIMARY KEY (`id_venta`),
-  ADD KEY `fk_venta_empleado` (`id_empleado`);
+  ADD KEY `fk_venta_empleado` (`id_empleado`),
+  ADD UNIQUE KEY `uq_venta_pedido_unidad` (`id_pedido`,`unidad_negocio`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas

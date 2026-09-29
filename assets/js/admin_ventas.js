@@ -127,7 +127,7 @@ async function verDetalleVenta(idVenta) {
 
   // Configurar botón de anulación (CU008)
   const btnAnular = document.getElementById('btn-anular-venta');
-  if (v.estado === 'Activa') {
+  if (v.estado === 'Activa' && !v.id_pedido) {
     btnAnular.style.display = 'block';
     btnAnular.onclick = () => anularTransaccionVenta(v.id_venta);
   } else {

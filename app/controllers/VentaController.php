@@ -212,6 +212,11 @@ class VentaController
             return;
         }
 
+        if ($venta->idPedido !== null) {
+            Response::error('Esta venta proviene de un pedido en línea. Para revertirla cancela el pedido desde Gestión de pedidos.', 409);
+            return;
+        }
+
         try {
             $venta->anularVenta();
             Response::exito($this->serializarVenta($venta), 'Venta anulada exitosamente.');
@@ -274,6 +279,7 @@ class VentaController
             'estado'         => $venta->estado,
             'id_empleado'    => $venta->idEmpleado,
             'nombre_empleado' => $venta->nombreEmpleado ?? null,
+            'id_pedido'      => $venta->idPedido ?? null,
             'detalles'       => array_map(fn($d) => [
                 'id_producto'     => $d->idProducto,
                 'nombre_producto' => $d->nombreProducto ?? null,
