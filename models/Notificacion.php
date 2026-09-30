@@ -179,6 +179,101 @@ class Notificacion
         self::$pendientes = [];
     }
 
+    // =================================================================
+    //  PLANTILLA COMÚN DE CORREOS (misma imagen para TODOS los correos)
+    // =================================================================
+
+    /** Píldora de color con el estado/título (mismo estilo que los avisos de pedido). */
+    private static function etiquetaHtml(string $texto, string $color): string
+    {
+        return '<p style="margin:0 0 16px;"><span style="display:inline-block;background:' . $color
+            . ';color:#fff;padding:6px 14px;border-radius:20px;font-size:14px;font-weight:bold;">'
+            . htmlspecialchars($texto, ENT_QUOTES, 'UTF-8') . '</span></p>';
+    }
+
+    /**
+     * plantillaBase($nombreCliente, $contenido)
+     * Marco visual compartido: encabezado de marca, saludo, contenido y pie.
+     * $contenido ya debe venir como HTML seguro (escapado por quien lo arma).
+     */
+    private static function plantillaBase(string $nombreCliente, string $contenido): string
+    {
+        $nombre = htmlspecialchars($nombreCliente, ENT_QUOTES, 'UTF-8');
+
+        return '<!DOCTYPE html><html lang="es"><body style="margin:0;padding:0;background:#f6f1ee;font-family:Arial,Helvetica,sans-serif;color:#333;">'
+            . '<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px;">'
+            . '<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:10px;overflow:hidden;">'
+            . '<tr><td style="background:#8b4a5c;color:#ffffff;padding:18px 24px;font-size:20px;font-weight:bold;">Ambrosía · Pastelería y Heladería</td></tr>'
+            . '<tr><td style="padding:24px;">'
+            . '<p style="margin:0 0 12px;font-size:16px;">Hola, <strong>' . $nombre . '</strong>:</p>'
+            . $contenido
+            . '<p style="margin:16px 0 0;font-size:12px;color:#888;">Este es un mensaje automático, por favor no respondas a este correo.</p>'
+            . '</td></tr></table></td></tr></table></body></html>';
+    }
+
+    /**
+     * armarCorreoMarca(...)
+     * ------------------------------------------------------------
+     * Correo genérico con la misma imagen que los avisos de pedido.
+     * Sirve para registro de cuenta, recuperación de contraseña, etc.
+     *
+     * @param string      $etiqueta Texto de la píldora (ej. "¡Bienvenido(a)!").
+     * @param string      $color    Color hex de la píldora.
+     * @param string      $mensaje  Texto principal (texto plano; aquí se escapa).
+     * @param string|null $codigo   Código destacado en una caja (ej. token de recuperación).
+     * @param string|null $nota     Aviso secundario en letra pequeña.
+     * @return array{0: string, 1: string} [html, texto]
+     */
+    public function armarCorreoMarca(
+        string $nombreCliente,
+        string $etiqueta,
+        string $color,
+        string $mensaje,
+        ?string $codigo = null,
+        ?string $nota = null
+    ): array {
+        $e = fn(string $t): string => htmlspecialchars($t, ENT_QUOTES, 'UTF-8');
+
+        $contenido = self::etiquetaHtml($etiqueta, $color)
+            . '<p style="margin:0 0 16px;font-size:14px;line-height:1.5;">' . nl2br($e($mensaje)) . '</p>';
+
+        if ($codigo !== null && $codigo !== '') {
+            $contenido .= '<p style="margin:0 0 16px;text-align:center;">'
+                . '<span style="display:inline-block;background:#f6f1ee;border:1px dashed #8b4a5c;border-radius:8px;'
+                . 'padding:12px 20px;font-size:22px;letter-spacing:2px;font-weight:bold;color:#8b4a5c;">'
+                . $e($codigo) . '</span></p>';
+        }
+        if ($nota !== null && $nota !== '') {
+            $contenido .= '<p style="margin:0;font-size:13px;line-height:1.5;color:#666;">' . nl2br($e($nota)) . '</p>';
+        }
+
+        $html  = self::plantillaBase($nombreCliente, $contenido);
+        $texto = "Hola, {$nombreCliente}:\n\n{$mensaje}\n\n"
+               . ($codigo !== null && $codigo !== '' ? "{$codigo}\n\n" : '')
+               . ($nota !== null && $nota !== '' ? "{$nota}\n\n" : '')
+               . "Ambrosía - Pastelería y Heladería";
+
+        return [$html, $texto];
+    }
+
+    /**
+     * enviarCorreoMarca(...)
+     * Atajo: arma el correo con la plantilla común y lo envía.
+     */
+    public function enviarCorreoMarca(
+        string $destinatario,
+        string $nombreCliente,
+        string $asunto,
+        string $etiqueta,
+        string $color,
+        string $mensaje,
+        ?string $codigo = null,
+        ?string $nota = null
+    ): bool {
+        [$html, $texto] = $this->armarCorreoMarca($nombreCliente, $etiqueta, $color, $mensaje, $codigo, $nota);
+        return $this->enviarCorreo($destinatario, $texto, $asunto, $html);
+    }
+
     /**
      * armarCorreoPedido($pedido, $nombreCliente)
      * ------------------------------------------------------------
@@ -232,18 +327,13 @@ class Notificacion
             . '<td align="right" style="padding-top:10px;font-weight:bold;">' . $moneda((float)$pedido->total) . '</td></tr>'
             . '</table>';
 
-        $html = '<!DOCTYPE html><html lang="es"><body style="margin:0;padding:0;background:#f6f1ee;font-family:Arial,Helvetica,sans-serif;color:#333;">'
-            . '<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px;">'
-            . '<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:10px;overflow:hidden;">'
-            . '<tr><td style="background:#8b4a5c;color:#ffffff;padding:18px 24px;font-size:20px;font-weight:bold;">Ambrosía · Pastelería y Heladería</td></tr>'
-            . '<tr><td style="padding:24px;">'
-            . '<p style="margin:0 0 12px;font-size:16px;">Hola, <strong>' . $e($nombreCliente) . '</strong>:</p>'
-            . '<p style="margin:0 0 16px;font-size:14px;">Novedades de tu pedido <strong>#' . $num . '</strong></p>'
-            . '<p style="margin:0 0 16px;"><span style="display:inline-block;background:' . $color . ';color:#fff;padding:6px 14px;border-radius:20px;font-size:14px;font-weight:bold;">' . $e($estado) . '</span></p>'
+        $contenido =
+              '<p style="margin:0 0 16px;font-size:14px;">Novedades de tu pedido <strong>#' . $num . '</strong></p>'
+            . self::etiquetaHtml($estado, $color)
             . '<p style="margin:0;font-size:14px;line-height:1.5;">' . $e($this->mensaje) . '</p>'
-            . $tabla
-            . '<p style="margin:16px 0 0;font-size:12px;color:#888;">Este es un mensaje automático, por favor no respondas a este correo. Puedes consultar tu pedido en cualquier momento desde tu cuenta en Ambrosía.</p>'
-            . '</td></tr></table></td></tr></table></body></html>';
+            . $tabla;
+
+        $html = self::plantillaBase($nombreCliente, $contenido);
 
         $texto = "Hola, {$nombreCliente}:\n\n"
             . "Novedades de tu pedido #{$num}\nEstado: {$estado}\n\n"

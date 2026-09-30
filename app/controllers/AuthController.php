@@ -224,7 +224,16 @@ class AuthController
         ]);
         $notificacion->mensaje = "¡Bienvenido(a) a Ambrosía, {$cliente->nombre}! Tu cuenta fue creada exitosamente.";
         $notificacion->crear();
-        $notificacion->enviarCorreo($cliente->correo, $notificacion->mensaje);
+        $notificacion->enviarCorreoMarca(
+            $cliente->correo,
+            $cliente->nombre,
+            'Te damos la bienvenida a Ambrosía',
+            '¡Bienvenido(a)!',
+            '#2f855a',
+            "Tu cuenta en Ambrosía fue creada exitosamente. Ya puedes iniciar sesión, explorar nuestro catálogo y hacer tus pedidos en línea.",
+            null,
+            'Te avisaremos por este medio cada vez que cambie el estado de tus pedidos.'
+        );
     }
 
     /**
@@ -297,9 +306,7 @@ class AuthController
         if ($cliente !== null) {
             $token = $cliente->recuperarContrasena();
 
-            // 1. Prepara el mensaje privado para el correo (con el token)
-            $mensajeCorreo = "Usa este código para restablecer tu contraseña: {$token}\n"
-                           . "Este código vence en 1 hora. Si tú no solicitaste esto, ignora este mensaje.";
+            // 1. El correo (con el token) se arma más abajo con la plantilla de marca.
 
             // 2. Prepara el mensaje público para la app (sin el token)
             $mensajeApp = "Hemos enviado las instrucciones y el código de recuperación a tu correo electrónico registrado.";
@@ -313,7 +320,16 @@ class AuthController
             $notificacion->crear(); 
 
             // 4. Envia el correo usando la variable que sí contiene el token
-            $notificacion->enviarCorreo($cliente->correo, $mensajeCorreo);
+            $notificacion->enviarCorreoMarca(
+                $cliente->correo,
+                $cliente->nombre,
+                'Código para restablecer tu contraseña - Ambrosía',
+                'Recuperación de contraseña',
+                '#b7791f',
+                'Recibimos una solicitud para restablecer la contraseña de tu cuenta. Usa este código:',
+                $token,
+                'Este código vence en 1 hora. Si tú no solicitaste esto, ignora este mensaje.'
+            );
         }
 
         Response::exito([], 'Si el correo está registrado en nuestro sistema, recibirás instrucciones para recuperar tu contraseña.');
