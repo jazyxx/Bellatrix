@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/Pedido.php';
+require_once __DIR__ . '/Notificacion.php';
 
 /**
  * ==========================================================================
@@ -111,11 +112,15 @@ class Pago
             }
             if ($propia) {
                 $this->pdo->commit();
+                // Ya con el pago y el pedido confirmados en BD, salen los correos.
+                Notificacion::despacharPendientes();
             }
         } catch (Exception $e) {
             if ($propia && $this->pdo->inTransaction()) {
                 $this->pdo->rollBack();
             }
+            // Si hubo rollback, el cliente NO debe recibir el aviso de "Confirmado".
+            Notificacion::descartarPendientes();
             $this->estado = $estadoPrevio;
             throw $e;
         }

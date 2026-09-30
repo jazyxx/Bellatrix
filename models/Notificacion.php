@@ -85,19 +85,29 @@ class Notificacion
     }
 
     /**
-     * enviarCorreo($destinatario, $cuerpo)
+     * enviarCorreo($destinatario, $cuerpo, $asunto = null, $html = null)
      * ------------------------------------------------------------
      * Envía el correo REAL vía SMTP usando PHPMailer, con la
-     * configuración de config/Mail.php. Si el envío falla (SMTP mal
-     * configurado, sin internet, etc.), NO lanza excepción hacia
-     * arriba: registra el error en el log y devuelve false, para que
-     * el flujo de recuperación de contraseña nunca se rompa por un
-     * problema de correo (el token ya quedó guardado en la BD de
-     * todas formas).
+     * configuración de config/Mail.php.
+     *
+     *  - $cuerpo : texto plano (AltBody). Si no se pasa $html, también
+     *              se usa como cuerpo HTML.
+     *  - $asunto : opcional; por defecto se usa el tipo de notificación.
+     *  - $html   : opcional; cuerpo HTML ya armado (ej. plantilla del pedido).
+     *
+     * Si el envío falla (SMTP mal configurado, sin internet, etc.), NO
+     * lanza excepción hacia arriba: registra el error en el log y devuelve
+     * false, para que ningún flujo (recuperación de contraseña, cambio de
+     * estado de un pedido) se rompa por un problema de correo.
      */
-    public function enviarCorreo(string $destinatario, string $cuerpo): bool
+    public function enviarCorreo(string $destinatario, string $cuerpo, ?string $asunto = null, ?string $html = null): bool
     {
-        $config = require __DIR__ . '/../config/Mail.php';
+        $archivoConfig = __DIR__ . '/../config/Mail.php';
+        if (!is_file($archivoConfig)) {
+            error_log("[ERROR DE CORREO] Falta config/Mail.php (copia config/Mail.example.php y completa las credenciales).");
+            return false;
+        }
+        $config = require $archivoConfig;
 
         $mail = new PHPMailer(true);
         try {
@@ -110,6 +120,7 @@ class Notificacion
             $mail->SMTPSecure = $config['MAIL_CIFRADO']; // 'tls' o 'ssl'
             $mail->Port       = $config['MAIL_PUERTO'];
             $mail->CharSet    = 'UTF-8';
+            $mail->Timeout    = 15; // no dejar la petición colgada si el SMTP no responde
             $mail->SMTPDebug  = $config['MAIL_DEBUG'] ? 2 : 0;
 
             // --- Remitente y destinatario ---
@@ -117,9 +128,9 @@ class Notificacion
             $mail->addAddress($destinatario);
 
             // --- Contenido del mensaje ---
-            $mail->Subject = $this->tipo !== '' ? $this->tipo : 'Notificación de Ambrosía';
-            $mail->Body    = nl2br(htmlspecialchars($cuerpo));   // versión HTML
-            $mail->AltBody = $cuerpo;                            // versión texto plano
+            $mail->Subject = $asunto ?? ($this->tipo !== '' ? $this->tipo : 'Notificación de Ambrosía');
+            $mail->Body    = $html ?? nl2br(htmlspecialchars($cuerpo));   // versión HTML
+            $mail->AltBody = $cuerpo;                                     // versión texto plano
             $mail->isHTML(true);
 
             $mail->send();
@@ -127,7 +138,120 @@ class Notificacion
         } catch (PHPMailerException $e) {
             error_log("[ERROR DE CORREO] No se pudo enviar a {$destinatario}: {$mail->ErrorInfo}");
             return false;
+        } catch (\Throwable $e) {
+            error_log("[ERROR DE CORREO] Fallo inesperado enviando a {$destinatario}: " . $e->getMessage());
+            return false;
         }
+    }
+
+    // =================================================================
+    //  COLA DE ENVÍOS (correos que esperan a que se haga commit)
+    // =================================================================
+
+    /** @var array<int, array{n: Notificacion, correo: string, asunto: string, html: string, texto: string}> */
+    private static array $pendientes = [];
+
+    /**
+     * encolarCorreo()
+     * Cuando el cambio de estado ocurre DENTRO de una transacción mayor
+     * (ej. Pago::confirmarTransaccion), el correo no debe salir hasta que
+     * esa transacción haga commit: si luego hace rollback (p. ej. stock
+     * insuficiente) el cliente habría recibido un aviso falso.
+     */
+    public static function encolarCorreo(Notificacion $n, string $correo, string $asunto, string $html, string $texto): void
+    {
+        self::$pendientes[] = ['n' => $n, 'correo' => $correo, 'asunto' => $asunto, 'html' => $html, 'texto' => $texto];
+    }
+
+    /** Envía los correos en cola. Llamar DESPUÉS del commit. */
+    public static function despacharPendientes(): void
+    {
+        $cola = self::$pendientes;
+        self::$pendientes = [];
+        foreach ($cola as $p) {
+            $p['n']->enviarCorreo($p['correo'], $p['texto'], $p['asunto'], $p['html']);
+        }
+    }
+
+    /** Descarta los correos en cola. Llamar si la transacción hizo rollback. */
+    public static function descartarPendientes(): void
+    {
+        self::$pendientes = [];
+    }
+
+    /**
+     * armarCorreoPedido($pedido, $nombreCliente)
+     * ------------------------------------------------------------
+     * Arma asunto, HTML y texto plano del correo que recibe el cliente
+     * cuando su pedido se crea o cambia de estado.
+     *
+     * @return array{0: string, 1: string, 2: string} [asunto, html, texto]
+     */
+    public function armarCorreoPedido(object $pedido, string $nombreCliente): array
+    {
+        $e      = fn(string $t): string => htmlspecialchars($t, ENT_QUOTES, 'UTF-8');
+        $moneda = fn(float $v): string => '$' . number_format($v, 0, ',', '.');
+
+        $num    = (int)$pedido->idPedido;
+        $estado = (string)$pedido->estado;
+
+        $asunto = ($this->tipo === 'Confirmación de pedido')
+            ? "Recibimos tu pedido #{$num} - Ambrosía"
+            : "Tu pedido #{$num} ahora está: {$estado} - Ambrosía";
+
+        $colores = [
+            'Pendiente de pago'  => '#b7791f',
+            'Confirmado'         => '#2b6cb0',
+            'En preparación'     => '#6b46c1',
+            'Listo para recoger' => '#2f855a',
+            'Entregado'          => '#2f855a',
+            'Cancelado'          => '#c53030',
+        ];
+        $color = $colores[$estado] ?? '#555555';
+
+        $filas = '';
+        $lineasTexto = '';
+        foreach ($pedido->productos as $d) {
+            $nombre = $d->nombreProducto ?? 'Producto';
+            $filas .= '<tr>'
+                . '<td style="padding:6px 0;border-bottom:1px solid #eee;">' . $e($nombre) . '</td>'
+                . '<td style="padding:6px 0;border-bottom:1px solid #eee;text-align:center;">' . (int)$d->cantidad . '</td>'
+                . '<td style="padding:6px 0;border-bottom:1px solid #eee;text-align:right;">' . $moneda($d->subtotal()) . '</td>'
+                . '</tr>';
+            $lineasTexto .= "  - {$nombre} x{$d->cantidad}: " . $moneda($d->subtotal()) . "\n";
+        }
+
+        $tabla = $filas === '' ? '' :
+            '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:14px;margin:16px 0;">'
+            . '<tr style="color:#888;font-size:12px;text-transform:uppercase;">'
+            . '<th align="left" style="padding-bottom:6px;">Producto</th>'
+            . '<th style="padding-bottom:6px;">Cant.</th>'
+            . '<th align="right" style="padding-bottom:6px;">Subtotal</th></tr>'
+            . $filas
+            . '<tr><td colspan="2" style="padding-top:10px;font-weight:bold;">Total</td>'
+            . '<td align="right" style="padding-top:10px;font-weight:bold;">' . $moneda((float)$pedido->total) . '</td></tr>'
+            . '</table>';
+
+        $html = '<!DOCTYPE html><html lang="es"><body style="margin:0;padding:0;background:#f6f1ee;font-family:Arial,Helvetica,sans-serif;color:#333;">'
+            . '<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px;">'
+            . '<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:10px;overflow:hidden;">'
+            . '<tr><td style="background:#8b4a5c;color:#ffffff;padding:18px 24px;font-size:20px;font-weight:bold;">Ambrosía · Pastelería y Heladería</td></tr>'
+            . '<tr><td style="padding:24px;">'
+            . '<p style="margin:0 0 12px;font-size:16px;">Hola, <strong>' . $e($nombreCliente) . '</strong>:</p>'
+            . '<p style="margin:0 0 16px;font-size:14px;">Novedades de tu pedido <strong>#' . $num . '</strong></p>'
+            . '<p style="margin:0 0 16px;"><span style="display:inline-block;background:' . $color . ';color:#fff;padding:6px 14px;border-radius:20px;font-size:14px;font-weight:bold;">' . $e($estado) . '</span></p>'
+            . '<p style="margin:0;font-size:14px;line-height:1.5;">' . $e($this->mensaje) . '</p>'
+            . $tabla
+            . '<p style="margin:16px 0 0;font-size:12px;color:#888;">Este es un mensaje automático, por favor no respondas a este correo. Puedes consultar tu pedido en cualquier momento desde tu cuenta en Ambrosía.</p>'
+            . '</td></tr></table></td></tr></table></body></html>';
+
+        $texto = "Hola, {$nombreCliente}:\n\n"
+            . "Novedades de tu pedido #{$num}\nEstado: {$estado}\n\n"
+            . $this->mensaje . "\n\n"
+            . ($lineasTexto !== '' ? "Detalle:\n{$lineasTexto}Total: " . $moneda((float)$pedido->total) . "\n\n" : '')
+            . "Ambrosía - Pastelería y Heladería";
+
+        return [$asunto, $html, $texto];
     }
 
     /**

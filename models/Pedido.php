@@ -186,8 +186,12 @@ class Pedido
 
         if ($ok) {
             $this->estado = $nuevoEstado;
-            // CU016: cada cambio de estado genera una notificación automática.
-            $this->notificarCliente();
+            // CU016: cada cambio de estado genera una notificación automática
+            // (registro en BD + correo al cliente). Si el estado no cambió
+            // realmente, no se vuelve a avisar al cliente.
+            if ($estadoAnterior !== $nuevoEstado) {
+                $this->notificarCliente();
+            }
         }
 
         return $ok;
@@ -197,13 +201,18 @@ class Pedido
      * notificarCliente()
      * ------------------------------------------------------------
      * Crea el registro de Notificación correspondiente al estado
-     * actual del pedido. El ENVÍO real del correo (con PHPMailer o
-     * la librería que se elija) se conecta en la Fase 4, pero el
-     * modelo ya deja preparada la creación del registro en la BD.
+     * actual del pedido Y envía el correo al cliente (CU016).
+     *
+     * El envío nunca rompe el flujo: si el correo falla, queda el
+     * registro con enviado = 0 y el error en el log del servidor.
+     * Si hay una transacción abierta (ej. confirmación de pago), el
+     * correo se encola y sale cuando quien abrió la transacción haga
+     * commit y llame a Notificacion::despacharPendientes().
      */
     public function notificarCliente(): bool
     {
         require_once __DIR__ . '/Notificacion.php';
+        require_once __DIR__ . '/Cliente.php';
 
         $tipo = ($this->estado === 'Pendiente de pago')
             ? 'Confirmación de pedido'
@@ -221,6 +230,26 @@ class Pedido
 
         $notificacion->mensaje = $mensaje;
         $notificacion->crear();
+
+        // --- Envío del correo al cliente ---
+        $cliente = Cliente::obtenerPorId($this->idCliente);
+        if ($cliente === null || !filter_var($cliente->correo, FILTER_VALIDATE_EMAIL)) {
+            error_log("[NOTIFICACIÓN] Pedido #{$this->idPedido}: el cliente no tiene un correo válido; no se envió el aviso.");
+            return true;
+        }
+
+        // El pedido puede venir sin nombres de producto si se construyó a mano.
+        if (empty($this->productos) && $this->idPedido !== null) {
+            $this->productos = DetallePedido::listarPorPedido($this->idPedido);
+        }
+
+        [$asunto, $html, $texto] = $notificacion->armarCorreoPedido($this, $cliente->nombre);
+
+        if ($this->pdo->inTransaction()) {
+            Notificacion::encolarCorreo($notificacion, $cliente->correo, $asunto, $html, $texto);
+        } else {
+            $notificacion->enviarCorreo($cliente->correo, $texto, $asunto, $html);
+        }
 
         return true;
     }
