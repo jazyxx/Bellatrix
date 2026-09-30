@@ -22,6 +22,7 @@ class CarritoItem
     public int $idProducto;
     public int $cantidad;
     public float $precioUnitario;
+    public ?string $nombreProducto; // Se llena al hacer JOIN con la tabla de productos
 
     private PDO $pdo;
 
@@ -34,6 +35,7 @@ class CarritoItem
         $this->idProducto     = $datos['id_producto']     ?? 0;
         $this->cantidad       = isset($datos['cantidad']) ? (int)$datos['cantidad'] : 1;
         $this->precioUnitario = isset($datos['precio_unitario']) ? (float)$datos['precio_unitario'] : 0.0;
+        $this->nombreProducto = $datos['nombre_producto'] ?? null;
     }
 
     /** Subtotal de esta línea = cantidad * precio unitario. */
@@ -97,7 +99,15 @@ class CarritoItem
     public static function listarPorCarrito(int $idCarrito): array
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM carrito_items WHERE id_carrito = :carrito");
+        
+        // Modificamos el SQL para hacer un JOIN con la tabla 'productos' 
+        // y traer la columna del nombre del producto (asumiendo que se llama 'nombre')
+        $sql = "SELECT ci.*, p.nombre AS nombre_producto 
+                FROM carrito_items ci
+                INNER JOIN productos p ON ci.id_producto = p.id_producto
+                WHERE ci.id_carrito = :carrito";
+                
+        $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':carrito', $idCarrito, PDO::PARAM_INT);
         $stmt->execute();
 

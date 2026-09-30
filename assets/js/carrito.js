@@ -61,7 +61,7 @@ function pintarItems(carrito) {
   lista.innerHTML = carrito.items.map((item) => `
     <div class="fila-carrito d-flex align-items-center justify-content-between flex-wrap gap-3" data-id-producto="${item.id_producto}">
       <div>
-        <p class="mb-0 fw-bold">Producto #${item.id_producto}</p>
+        <p class="mb-0 fw-bold">${item.nombre_producto || `Producto #${item.id_producto}`}</p>
         <p class="mb-0 small text-muted">${formatearPrecioCOP(item.precio_unitario)} c/u</p>
       </div>
       <div class="d-flex align-items-center gap-3">

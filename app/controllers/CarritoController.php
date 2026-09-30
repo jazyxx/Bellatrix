@@ -121,6 +121,7 @@ class CarritoController
             'subtotal'   => $carrito->subtotal,
             'items'      => array_map(fn($item) => [
                 'id_producto'     => $item->idProducto,
+                'nombre_producto' => $item->nombreProducto,
                 'cantidad'        => $item->cantidad,
                 'precio_unitario' => $item->precioUnitario,
                 'subtotal'        => $item->subtotal(),
