@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 12-09-2026 a las 16:35:20
+-- Tiempo de generación: 30-09-2026 a las 20:28:45
 -- Versión del servidor: 8.0.46
 -- Versión de PHP: 8.2.12
 
@@ -64,7 +64,7 @@ CREATE TABLE `alerta_stock` (
 
 CREATE TABLE `cajero` (
   `id_cajero` int NOT NULL,
-  `turno` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL
+  `turno` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -86,7 +86,7 @@ CREATE TABLE `carrito` (
 --
 
 INSERT INTO `carrito` (`id_carrito`, `id_cliente`, `subtotal`, `creado_en`, `actualizado`) VALUES
-(1, 1, 0.00, '2026-08-17 17:09:50', '2026-08-29 09:09:34');
+(6, 1, 0.00, '2026-09-30 12:28:30', '2026-09-30 12:28:30');
 
 -- --------------------------------------------------------
 
@@ -110,14 +110,14 @@ CREATE TABLE `carrito_items` (
 
 CREATE TABLE `cliente` (
   `id_cliente` int NOT NULL,
-  `nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `correo` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `contraseña` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `telefono` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `direccion_entrega` text COLLATE utf8mb4_general_ci,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `correo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `contraseña` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `telefono` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `direccion_entrega` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `activo` tinyint(1) NOT NULL DEFAULT '1',
   `fecha_registro` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `token_recuperacion` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `token_recuperacion` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `token_expiracion` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -142,16 +142,6 @@ CREATE TABLE `detalle_pedido` (
   `precio_unitario` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `detalle_pedido`
---
-
-INSERT INTO `detalle_pedido` (`id_detalle_pedido`, `id_pedido`, `id_producto`, `cantidad`, `precio_unitario`) VALUES
-(1, 1, 1, 1, 67000.00),
-(2, 2, 1, 1, 67000.00),
-(3, 3, 1, 1, 67000.00),
-(5, 4, 14, 1, 11000.00);
-
 -- --------------------------------------------------------
 
 --
@@ -166,20 +156,6 @@ CREATE TABLE `detalle_venta` (
   `precio_unitario` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `detalle_venta`
---
-
-INSERT INTO `detalle_venta` (`id_detalle`, `id_venta`, `id_producto`, `cantidad`, `precio_unitario`) VALUES
-(1, 2, 16, 1, 13000.00),
-(2, 2, 10, 1, 32000.00),
-(3, 3, 13, 1, 10000.00),
-(4, 3, 11, 1, 12000.00),
-(5, 3, 3, 1, 35000.00),
-(6, 3, 17, 1, 11000.00),
-(7, 4, 8, 1, 38000.00),
-(8, 4, 12, 1, 15000.00);
-
 -- --------------------------------------------------------
 
 --
@@ -188,14 +164,14 @@ INSERT INTO `detalle_venta` (`id_detalle`, `id_venta`, `id_producto`, `cantidad`
 
 CREATE TABLE `empleado` (
   `id_empleado` int NOT NULL,
-  `nombre` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `apellido` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `usuario` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `correo` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `contraseña` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `rol` enum('Administrador','Cajero') COLLATE utf8mb4_general_ci NOT NULL,
+  `nombre` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `apellido` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `usuario` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `correo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `contraseña` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `rol` enum('Administrador','Cajero') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `activo` tinyint(1) NOT NULL DEFAULT '1',
-  `telefono` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `telefono` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `salario` decimal(10,2) DEFAULT NULL,
   `fecha_contratacion` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -217,8 +193,8 @@ INSERT INTO `empleado` (`id_empleado`, `nombre`, `apellido`, `usuario`, `correo`
 
 CREATE TABLE `gestor_ventas` (
   `id_gestor` int NOT NULL,
-  `canal` enum('Presencial','En línea') COLLATE utf8mb4_general_ci NOT NULL,
-  `unidad_negocio` enum('Pastelería','Heladería') COLLATE utf8mb4_general_ci NOT NULL,
+  `canal` enum('Presencial','En línea') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `unidad_negocio` enum('Pastelería','Heladería') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `fecha` date NOT NULL,
   `total_ventas` decimal(10,2) NOT NULL DEFAULT '0.00',
   `total_egresos` decimal(10,2) NOT NULL DEFAULT '0.00',
@@ -231,20 +207,8 @@ CREATE TABLE `gestor_ventas` (
 --
 
 INSERT INTO `gestor_ventas` (`id_gestor`, `canal`, `unidad_negocio`, `fecha`, `total_ventas`, `total_egresos`, `id_empleado`) VALUES
-(1, 'Presencial', 'Pastelería', '2026-08-20', 134000.00, 67000.00, 1),
-(2, 'En línea', 'Heladería', '2026-08-20', 0.00, 0.00, 1),
-(3, 'En línea', 'Pastelería', '2026-08-20', 0.00, 0.00, 1),
-(4, 'Presencial', 'Heladería', '2026-08-20', 0.00, 0.00, 1),
-(5, 'Presencial', 'Pastelería', '2026-08-21', 67000.00, 0.00, 1),
-(6, 'Presencial', 'Pastelería', '2026-08-26', 0.00, 0.00, 1),
-(7, 'Presencial', 'Pastelería', '2026-08-27', 166000.00, 0.00, 1),
-(8, 'Presencial', 'Heladería', '2026-08-27', 0.00, 0.00, 1),
-(9, 'En línea', 'Heladería', '2026-08-27', 0.00, 0.00, 1),
-(10, 'En línea', 'Pastelería', '2026-08-27', 0.00, 0.00, 1),
-(11, 'Presencial', 'Pastelería', '2026-08-29', 0.00, 0.00, 1),
-(12, 'Presencial', 'Pastelería', '2026-09-03', 0.00, 0.00, 1),
-(13, 'Presencial', 'Pastelería', '2026-09-04', 0.00, 0.00, 1),
-(14, 'Presencial', 'Pastelería', '2026-09-12', 0.00, 0.00, 1);
+(18, 'Presencial', 'Pastelería', '2026-09-30', 0.00, 0.00, 1),
+(19, 'En línea', 'Pastelería', '2026-09-30', 0.00, 0.00, 1);
 
 -- --------------------------------------------------------
 
@@ -260,14 +224,6 @@ CREATE TABLE `interaccion_ia` (
   `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `interaccion_ia`
---
-
-INSERT INTO `interaccion_ia` (`id_interaccion`, `id_empleado`, `rol_mensaje`, `mensaje`, `creado_en`) VALUES
-(67, 1, 'usuario', 'hola amor', '2026-09-03 21:53:01'),
-(68, 1, 'asistente', '¡Hola! ¿En qué puedo ayudarte con los reportes financieros de Ambrosía?', '2026-09-03 21:53:04');
-
 -- --------------------------------------------------------
 
 --
@@ -276,8 +232,8 @@ INSERT INTO `interaccion_ia` (`id_interaccion`, `id_empleado`, `rol_mensaje`, `m
 
 CREATE TABLE `materia_prima` (
   `id_materia` int NOT NULL,
-  `nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `unidad_medida` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `unidad_medida` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `stock_actual` decimal(10,2) NOT NULL DEFAULT '0.00',
   `stock_minimo` decimal(10,2) NOT NULL DEFAULT '0.00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -299,9 +255,9 @@ CREATE TABLE `notificacion` (
   `id_notificacion` int NOT NULL,
   `id_cliente` int NOT NULL,
   `id_pedido` int DEFAULT NULL,
-  `tipo` enum('Confirmación de registro','Confirmación de pedido','Cambio de estado','Recuperación de contraseña') COLLATE utf8mb4_general_ci NOT NULL,
-  `canal_envio` enum('Correo','Mensaje') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Correo',
-  `mensaje` text COLLATE utf8mb4_general_ci NOT NULL,
+  `tipo` enum('Confirmación de registro','Confirmación de pedido','Cambio de estado','Recuperación de contraseña') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `canal_envio` enum('Correo','Mensaje') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Correo',
+  `mensaje` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `enviado` tinyint(1) NOT NULL DEFAULT '0',
   `fecha_envio` datetime DEFAULT NULL,
   `creado_en` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -312,8 +268,7 @@ CREATE TABLE `notificacion` (
 --
 
 INSERT INTO `notificacion` (`id_notificacion`, `id_cliente`, `id_pedido`, `tipo`, `canal_envio`, `mensaje`, `enviado`, `fecha_envio`, `creado_en`) VALUES
-(1, 1, NULL, 'Confirmación de registro', 'Correo', '¡Bienvenido(a) a Ambrosía, Angel Jimenez! Tu cuenta fue creada exitosamente.', 1, '2026-08-17 17:09:40', '2026-08-17 17:09:40'),
-(2, 1, NULL, 'Recuperación de contraseña', 'Correo', 'Usa este código para restablecer tu contraseña: b0f9bf688344308c9ffc379ac06daf9775673626af1d0be47674dea3cc18abf6\nEste código vence en 1 hora. Si tú no solicitaste esto, ignora este mensaje.', 1, '2026-08-27 16:09:21', '2026-08-27 16:09:17');
+(1, 1, NULL, 'Confirmación de registro', 'Correo', '¡Bienvenido(a) a Ambrosía, Angel Jimenez! Tu cuenta fue creada exitosamente.', 1, '2026-08-17 17:09:40', '2026-08-17 17:09:40');
 
 -- --------------------------------------------------------
 
@@ -325,9 +280,9 @@ CREATE TABLE `pago` (
   `id_pago` int NOT NULL,
   `id_pedido` int NOT NULL,
   `monto` decimal(10,2) NOT NULL,
-  `medio_pago` enum('PSE','Tarjeta crédito','Tarjeta débito','Nequi','Otro') COLLATE utf8mb4_general_ci NOT NULL,
-  `estado` enum('Pendiente','Aprobado','Rechazado','Error') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Pendiente',
-  `referencia` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `medio_pago` enum('PSE','Tarjeta crédito','Tarjeta débito','Nequi','Otro') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `estado` enum('Pendiente','Aprobado','Rechazado','Error') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Pendiente',
+  `referencia` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `fecha` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -340,23 +295,13 @@ CREATE TABLE `pago` (
 CREATE TABLE `pedido` (
   `id_pedido` int NOT NULL,
   `id_cliente` int NOT NULL,
-  `estado` enum('Pendiente de pago','Confirmado','En preparación','Listo para recoger','Entregado','Cancelado') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Pendiente de pago',
-  `direccion_entrega` text COLLATE utf8mb4_general_ci NOT NULL,
+  `estado` enum('Pendiente de pago','Confirmado','En preparación','Listo para recoger','Entregado','Cancelado') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Pendiente de pago',
+  `direccion_entrega` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `total` decimal(10,2) NOT NULL DEFAULT '0.00',
   `fecha_creacion` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `fecha_actualizacion` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `id_empleado_gestion` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `pedido`
---
-
-INSERT INTO `pedido` (`id_pedido`, `id_cliente`, `estado`, `direccion_entrega`, `total`, `fecha_creacion`, `fecha_actualizacion`, `id_empleado_gestion`) VALUES
-(1, 1, 'Pendiente de pago', 'calle 67', 67000.00, '2026-08-20 11:31:14', '2026-08-20 11:31:14', NULL),
-(2, 1, 'Pendiente de pago', 'si', 67000.00, '2026-08-20 12:05:21', '2026-08-20 12:05:21', NULL),
-(3, 1, 'Pendiente de pago', '123', 136000.00, '2026-08-20 14:06:52', '2026-08-20 14:06:52', NULL),
-(4, 1, 'Pendiente de pago', 'calle 123', 11000.00, '2026-08-29 09:09:34', '2026-08-29 09:09:34', NULL);
 
 -- --------------------------------------------------------
 
@@ -366,10 +311,10 @@ INSERT INTO `pedido` (`id_pedido`, `id_cliente`, `estado`, `direccion_entrega`, 
 
 CREATE TABLE `productos` (
   `id_producto` int NOT NULL,
-  `nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `descripcion` text COLLATE utf8mb4_general_ci,
-  `tipo` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `unidad_negocio` enum('Pastelería','Heladería') COLLATE utf8mb4_general_ci NOT NULL,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `descripcion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `tipo` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `unidad_negocio` enum('Pastelería','Heladería') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `precio` decimal(10,2) NOT NULL,
   `stock` int NOT NULL DEFAULT '0',
   `foto` mediumblob,
@@ -387,13 +332,13 @@ INSERT INTO `productos` (`id_producto`, `nombre`, `descripcion`, `tipo`, `unidad
 (5, 'Tres Leches Tradicional', 'Bizcocho esponjoso bañado en mezcla de tres leches y coronado con merengue.', 'Tortas', 'Pastelería', 28000.00, 6, NULL, 1),
 (6, 'Cheesecake de Frutos Rojos', 'Base crujiente de galleta, crema horneada y mermelada artesanal de frutos del bosque.', 'Tortas', 'Pastelería', 34000.00, 5, NULL, 1),
 (7, 'Pastel de Zanahoria', 'Bizcocho especiado con nueces, zanahoria rallada y frosting de queso crema.', 'Tortas', 'Pastelería', 30000.00, 5, NULL, 1),
-(8, 'Chocolatoso Extremo', 'Relleno y cubierto con ganache denso de chocolate 70% cacao.', 'Tortas', 'Pastelería', 38000.00, 3, NULL, 1),
+(8, 'Chocolatoso Extremo', 'Relleno y cubierto con ganache denso de chocolate 70% cacao.', 'Tortas', 'Pastelería', 38000.00, 7, NULL, 1),
 (9, 'Tartaleta de Limón', 'Base crujiente con crema de limón ácida y merengue suizo dorado.', 'Tortas', 'Pastelería', 25000.00, 6, NULL, 1),
 (10, 'Pastel de Maracuyá', 'Capas de bizcocho de vainilla con mousseline de maracuyá y chocolate blanco.', 'Tortas', 'Pastelería', 32000.00, 3, NULL, 1),
 (11, 'Dulce de Leche Veteado', 'Base cremosa de leche con vetas gruesas de dulce de leche repostero.', 'Postres', 'Heladería', 12000.00, 12, NULL, 1),
 (12, 'Gelato de Pistacho', 'Elaborado con pasta pura de pistacho y trozos tostados por encima.', 'Helados', 'Heladería', 15000.00, 7, NULL, 1),
 (13, 'Sorbete de Mango y Maracuyá', 'Opción a base de agua y fruta natural, ligera y sin lácteos.', 'Bebidas', 'Heladería', 10000.00, 10, NULL, 1),
-(14, 'Menta con Chispas', 'Helado refrescante de menta con escamas de chocolate negro.', 'Helados', 'Heladería', 11000.00, 8, NULL, 1),
+(14, 'Menta con Chispas', 'Helado refrescante de menta con escamas de chocolate negro.', 'Helados', 'Heladería', 11000.00, 7, NULL, 1),
 (15, 'Vainilla de Madagascar', 'Crema helada clásica con semillas visibles de vaina de vainilla natural.', 'Tortas', 'Pastelería', 11000.00, 10, NULL, 1),
 (16, 'Caramelo Salado y Brownie', 'Base de caramelo con toque de sal marina y trozos de brownie húmedo.', 'Helados', 'Heladería', 13000.00, 9, NULL, 1),
 (17, 'Cookies & Cream', 'Helado de crema suave cargado con trozos generosos de galleta de chocolate.', 'Helados', 'Heladería', 11000.00, 12, NULL, 1),
@@ -424,22 +369,12 @@ CREATE TABLE `ventas` (
   `id_venta` int NOT NULL,
   `fecha` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `total` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `canal` enum('Presencial','En línea') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Presencial',
-  `unidad_negocio` enum('Pastelería','Heladería') COLLATE utf8mb4_general_ci NOT NULL,
-  `estado` enum('Activa','Anulada') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Activa',
+  `canal` enum('Presencial','En línea') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Presencial',
+  `unidad_negocio` enum('Pastelería','Heladería') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `estado` enum('Activa','Anulada') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Activa',
   `id_empleado` int DEFAULT NULL,
   `id_pedido` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `ventas`
---
-
-INSERT INTO `ventas` (`id_venta`, `fecha`, `total`, `canal`, `unidad_negocio`, `estado`, `id_empleado`) VALUES
-(1, '2026-08-20 11:29:42', 0.00, 'Presencial', 'Pastelería', 'Activa', 1),
-(2, '2026-08-27 11:38:01', 45000.00, 'Presencial', 'Pastelería', 'Activa', 1),
-(3, '2026-08-27 11:38:32', 68000.00, 'Presencial', 'Pastelería', 'Activa', 1),
-(4, '2026-08-27 11:40:30', 53000.00, 'Presencial', 'Pastelería', 'Activa', 1);
 
 --
 -- Índices para tablas volcadas
@@ -574,8 +509,8 @@ ALTER TABLE `recetas`
 --
 ALTER TABLE `ventas`
   ADD PRIMARY KEY (`id_venta`),
-  ADD KEY `fk_venta_empleado` (`id_empleado`),
-  ADD UNIQUE KEY `uq_venta_pedido_unidad` (`id_pedido`,`unidad_negocio`);
+  ADD UNIQUE KEY `uq_venta_pedido_unidad` (`id_pedido`,`unidad_negocio`),
+  ADD KEY `fk_venta_empleado` (`id_empleado`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -591,13 +526,13 @@ ALTER TABLE `alerta_stock`
 -- AUTO_INCREMENT de la tabla `carrito`
 --
 ALTER TABLE `carrito`
-  MODIFY `id_carrito` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_carrito` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `carrito_items`
 --
 ALTER TABLE `carrito_items`
-  MODIFY `id_item` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_item` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `cliente`
@@ -609,13 +544,13 @@ ALTER TABLE `cliente`
 -- AUTO_INCREMENT de la tabla `detalle_pedido`
 --
 ALTER TABLE `detalle_pedido`
-  MODIFY `id_detalle_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_detalle_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_venta`
 --
 ALTER TABLE `detalle_venta`
-  MODIFY `id_detalle` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_detalle` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `empleado`
@@ -627,7 +562,7 @@ ALTER TABLE `empleado`
 -- AUTO_INCREMENT de la tabla `gestor_ventas`
 --
 ALTER TABLE `gestor_ventas`
-  MODIFY `id_gestor` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id_gestor` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `interaccion_ia`
@@ -645,19 +580,19 @@ ALTER TABLE `materia_prima`
 -- AUTO_INCREMENT de la tabla `notificacion`
 --
 ALTER TABLE `notificacion`
-  MODIFY `id_notificacion` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_notificacion` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `pago`
 --
 ALTER TABLE `pago`
-  MODIFY `id_pago` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_pago` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `pedido`
 --
 ALTER TABLE `pedido`
-  MODIFY `id_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
@@ -675,7 +610,7 @@ ALTER TABLE `recetas`
 -- AUTO_INCREMENT de la tabla `ventas`
 --
 ALTER TABLE `ventas`
-  MODIFY `id_venta` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_venta` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Restricciones para tablas volcadas

@@ -161,9 +161,12 @@ class Pedido
             $ok = $stmt->execute();
 
             if ($ok) {
-                if ($estadoAnterior === 'Pendiente de pago'
-                    && !in_array($nuevoEstado, ['Pendiente de pago', 'Cancelado'], true)) {
+                if (!in_array($nuevoEstado, ['Pendiente de pago', 'Cancelado'], true)) {
                     // Pedido pagado/confirmado -> venta + stock + ingreso en caja.
+                    // Issue #38: se intenta en CUALQUIER avance (no solo al salir de
+                    // 'Pendiente de pago'). registrarDesdePedido() es idempotente: si el
+                    // pedido ya tiene venta no hace nada, y si es un pedido que se pagó
+                    // antes de existir esta lógica (sin venta), se regulariza aquí.
                     Venta::registrarDesdePedido($this, $this->idEmpleadoGestion !== null ? (int)$this->idEmpleadoGestion : null);
                 } elseif ($nuevoEstado === 'Cancelado'
                     && !in_array($estadoAnterior, ['Pendiente de pago', 'Cancelado'], true)) {
