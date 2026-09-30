@@ -14,7 +14,6 @@
 <body>
 
   <!-- Contenido principal -->
-  <!-- Contenido principal -->
   <div class="row mb-4">
     <div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-3">
       <div class="d-flex align-items-center gap-2">
@@ -24,37 +23,22 @@
           <p class="text-muted mb-0">Gestiona el ciclo de preparación y despacho de pedidos.</p>
         </div>
       </div>
-      <div class="w-100 d-md-block" style="max-width: 250px;">
-        <select class="form-select form-db form-select-sm w-100" id="pedidos-estado-filtro" onchange="cargarPedidosBandeja()">
-          <option value="Confirmado">Confirmados (Por preparar)</option>
-          <option value="En preparación">En preparación</option>
-          <option value="Listo para recoger">Listos para Recoger / Despachar</option>
-          <option value="Entregado">Entregados</option>
-          <option value="Pendiente de pago">Pendientes de Pago</option>
-          <option value="Cancelado">Cancelados</option>
-        </select>
-      </div>
     </div>
   </div>
 
   <!-- Contenedor donde aparecerán las notificaciones de cancelación -->
   <div id="alertas-cancelaciones"></div>
-        <!-- Aquí empieza tu tabla actual de gestión de pedidos -->
-        <div class="db-card db-card--primary">
-        <!-- ... tu tabla ... -->
-         
-      <div>
-        <!-- Selector de estados para filtrado de bandeja de trabajo -->
-        <select class="form-select form-db form-select-sm" id="pedidos-estado-filtro" onchange="cargarPedidosBandeja()">
-          <option value="Confirmado">Confirmados (Por preparar)</option>
-          <option value="En preparación">En preparación</option>
-          <option value="Listo para recoger">Listos para Recoger / Despachar</option>
-          <option value="Entregado">Entregados</option>
-          <option value="Pendiente de pago">Pendientes de Pago</option>
-          <option value="Cancelado">Cancelados</option>
-        </select>
-      </div>
-    </div>
+
+  <!-- Filtro de estado de la bandeja (único selector; lo lee cargarPedidosBandeja) -->
+  <div class="db-card db-card--primary">
+    <select class="form-select form-db form-select-sm" id="pedidos-estado-filtro" onchange="cargarPedidosBandeja()">
+      <option value="Confirmado">Confirmados (Por preparar)</option>
+      <option value="En preparación">En preparación</option>
+      <option value="Listo para recoger">Listos para Recoger / Despachar</option>
+      <option value="Entregado">Entregados</option>
+      <option value="Pendiente de pago">Pendientes de Pago</option>
+      <option value="Cancelado">Cancelados</option>
+    </select>
   </div>
 
   <div class="row">
