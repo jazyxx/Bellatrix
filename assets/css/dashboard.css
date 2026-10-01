@@ -882,3 +882,10 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 @media (prefers-reduced-motion: reduce) {
   .modal.fade .db-modal-content, .modal.show .db-modal-content { transition: none; transform: none; }
 }
+
+/* Este ajuste SOLO afecta a la tabla de Historial de Ventas */
+#tabla-ventas-historial td,
+.db-card:has(#tabla-ventas-historial) th {
+  padding: 0.5rem 0.35rem !important;
+  font-size: 0.85rem;
+}
