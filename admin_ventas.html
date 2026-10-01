@@ -33,12 +33,15 @@
             <span class="db-card-icono db-card-icono--primary"><i class="bi bi-receipt"></i></span>
             <h3 class="h5 mb-0 fuente-display">Ventas Registradas</h3>
           </div>
-          <div class="d-flex gap-2">
-            <select class="form-select form-db form-select-sm" id="ventas-filtro-canal" onchange="filtrarVentasLocales()" style="width: 140px;">
-              <option value="todos">Todos los canales</option>
-              <option value="Presencial">Presencial</option>
-              <option value="En línea">En línea</option>
-            </select>
+          <div class="dropdown">
+            <button class="btn filtro-select-custom dropdown-toggle d-flex align-items-center justify-content-between gap-2" type="button" id="btnCanales" data-bs-toggle="dropdown" aria-expanded="false">Todos los canales</button>
+            <input type="hidden" id="ventas-filtro-canal" value="todos">
+
+            <ul class= "dropdown-menu shadow-sm border-0 mt-1" aria-labelledby="btnCanales">
+              <li><a class="dropdown-item opcion-canal py-2" href="#" data-value="todos">Todos los canales</a></li>
+              <li><a class="dropdown-item opcion-canal py-2" href="#" data-value="Presencial">Presencial</a></li>
+              <li><a class="dropdown-item opcion-canal py-2" href="#" data-value="En línea">En línea</a></li>
+            </ul>
           </div>
         </div>
         <hr class="my-2">

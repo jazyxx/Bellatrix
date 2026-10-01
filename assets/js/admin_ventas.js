@@ -29,6 +29,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 4. Cargar historial
   await cargarHistorialVentas();
+
+  // 5. ESCUCHAR EL FILTRO DROPDOWN PERSONALIZADO (Agrega esto aquí)
+  document.querySelectorAll('.opcion-canal').forEach(opcion => {
+    opcion.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      const texto = this.innerText;
+      const valor = this.getAttribute('data-value');
+
+      // Actualizar el texto del botón visible
+      const btn = document.getElementById('btnCanales');
+      if (btn) btn.innerText = texto;
+
+      // Actualizar el input oculto o directamente filtrar
+      const input = document.getElementById('ventas-filtro-canal');
+      if (input) input.value = valor;
+
+      // Disparar el filtro de la tabla de Bellatrix
+      filtrarVentasLocales();
+    });
+  });
 });
 
 async function cargarHistorialVentas() {
@@ -82,11 +103,14 @@ function renderizarVentasTabla(ventas) {
 }
 
 function filtrarVentasLocales() {
-  const canal = document.getElementById('ventas-filtro-canal').value;
+  const elFiltro = document.getElementById('ventas-filtro-canal');
+  if (!elFiltro) return;
+
+  const canal = elFiltro.value;
   let filtradas = ventasLocales;
 
   if (canal !== 'todos') {
-    filtradas = filtradas.filter(v => v.canal === canal);
+    filtradas = filtradas.filter(v => v.canal.toLowerCase() === canal.toLowerCase());
   }
 
   renderizarVentasTabla(filtradas);

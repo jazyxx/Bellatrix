@@ -925,7 +925,48 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 .contenedor-tabla-scroll thead th {
   position: sticky;
   top: 0;
-  background-color: #ffffff; /* Asegúrate de que coincida con el fondo de tu db-card */
+  background-color: #ffffff; 
   z-index: 10;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Agrega una pequeña sombra para separarlo visualmente de las filas que suben */
+}
+
+/* Estilo minimalista y compacto para el botón de filtro */
+.filtro-select-custom {
+  width: 145px;                  /* Ajuste exacto para que quepa "Todos los canales" sin sobrar espacio */
+  padding: 0.35rem 0.6rem;       /* Reducimos el relleno interno para hacerlo más estrecho */
+  background-color: #faf8f5;
+  border: 1px solid #e5d8cd;
+  border-radius: 8px;
+  color: #4a3e3d;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover suave */
+.filtro-select-custom:hover {
+  background-color: #ffffff;
+  border-color: #d4beae;
+}
+
+/* Estado activo/focus */
+.filtro-select-custom:focus {
+  border-color: #c9a892;
+  box-shadow: 0 0 0 0.2rem rgba(201, 168, 146, 0.25);
+  outline: none;
+}
+
+/* Ahora puedes aplicar exactamente los colores de la marca de Ambrosía */
+.dropdown-menu .opcion-canal:hover,
+.dropdown-menu .opcion-canal:focus {
+  background-color: #f8e8e1; /* Cambia esto por tu color deseado */
+  color: #333;  
+}
+
+/* Opcional: Para que el botón se vea más como un select de formulario */
+#btnCanales {
+  text-align: left;
+  background-color: #fff;
+  border-color: #ced4da; /* Borde estándar de Bootstrap inputs */
 }
