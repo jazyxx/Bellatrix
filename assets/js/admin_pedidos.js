@@ -72,22 +72,22 @@ async function cargarPedidosBandeja() {
     if (p.estado === 'Confirmado') {
       botonesGestion = `
         <div class="d-flex flex-wrap justify-content-end gap-2">
-          <button class="btn btn-sm btn-db-primary py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'En preparación')"><i class="bi bi-fire me-1"></i>Preparar</button>
-          <button class="btn btn-sm btn-db-danger py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
+          <button class="btn btn-sm text-nowrap btn-db-primary py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'En preparación')"><i class="bi bi-fire me-1"></i>Preparar</button>
+          <button class="btn btn-sm text-nowrap btn-db-danger py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
         </div>
       `;
     } else if (p.estado === 'En preparación') {
       botonesGestion = `
         <div class="d-flex flex-wrap justify-content-end gap-2">
-          <button class="btn btn-sm btn-db-success py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Listo para recoger')"><i class="bi bi-check2-square me-1"></i>Marcar Listo</button>
-          <button class="btn btn-sm btn-db-danger py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
+          <button class="btn btn-sm text-nowrap btn-db-success py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Listo para recoger')"><i class="bi bi-check2-square me-1"></i>Marcar Listo</button>
+          <button class="btn btn-sm text-nowrap btn-db-danger py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
         </div>
       `;
     } else if (p.estado === 'Listo para recoger') {
       botonesGestion = `
         <div class="d-flex flex-wrap justify-content-end gap-2">
-          <button class="btn btn-sm btn-db-success py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Entregado')"><i class="bi bi-truck me-1"></i>Despachar/Entregar</button>
-          <button class="btn btn-sm btn-db-danger py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
+          <button class="btn btn-sm text-nowrap btn-db-success py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Entregado')"><i class="bi bi-truck me-1"></i>Despachar/Entregar</button>
+          <button class="btn btn-sm text-nowrap btn-db-danger py-1 font-weight-bold shadow-sm" onclick="cambiarEstadoPedido(${p.id_pedido}, 'Cancelado')"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
         </div>
       `;
     } else if (p.estado === 'Pendiente de pago') {
@@ -102,21 +102,21 @@ async function cargarPedidosBandeja() {
 
     return `
       <tr class="align-middle">
-        <td><strong>#${p.id_pedido}</strong></td>
-        <td>
+        <td class="text-nowrap"><strong>#${p.id_pedido}</strong></td>
+        <td class="text-nowrap">
            <div class="small fw-bold text-dark">${formatearFecha(p.fecha_creacion || '')}</div>
         </td>
         <td>
           <div class="fw-bold text-dark">${escaparHtml(clienteNombre)}</div>
-          <div class="text-muted small"><i class="bi bi-telephone-fill me-1"></i>${escaparHtml(telefonoCliente)}</div>
+          <div class="text-muted small text-nowrap"><i class="bi bi-telephone-fill me-1"></i>${escaparHtml(telefonoCliente)}</div>
         </td>
         <td>
-          <span class="small d-block pe-2">${escaparHtml(p.direccion_entrega || 'Recoge en Tienda')}</span>
+          <span class="small d-block pe-2" style="min-width: 120px; max-width: 220px; white-space: normal; overflow-wrap: anywhere;">${escaparHtml(p.direccion_entrega || 'Recoge en Tienda')}</span>
         </td>
         <td>
-          <div class="d-flex flex-column justify-content-center">${itemsHTML}</div>
+          <div class="d-flex flex-column justify-content-center" style="min-width: 160px;">${itemsHTML}</div>
         </td>
-        <td><strong class="text-success h6 mb-0">${formatearPrecioCOP(p.total)}</strong></td>
+        <td class="text-nowrap"><strong class="text-success h6 mb-0">${formatearPrecioCOP(p.total)}</strong></td>
         <td class="text-end" style="min-width: 170px;">${botonesGestion}</td>
       </tr>
     `;
@@ -180,7 +180,7 @@ async function revisarCancelaciones() {
                         <strong>El cliente canceló el pedido #${p.id_pedido}</strong><br>
                         <span class="text-muted small">Total: <strong class="text-dark">${formatearPrecioCOP(p.total)}</strong>. Por favor, detén la preparación y verifica si requiere reembolso en caja/Nequi.</span>
                     </div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="descartarAlerta(this, ${p.id_pedido})">Descartar Alerta</button>
+                    <button class="btn btn-sm text-nowrap btn-outline-danger" onclick="descartarAlerta(this, ${p.id_pedido})">Descartar Alerta</button>
                 </div>
             `).join('');
             return;
