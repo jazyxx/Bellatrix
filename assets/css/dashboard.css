@@ -159,6 +159,9 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 /* Main Content Wrapper */
 .dashboard-main {
   flex-grow: 1;
+  /* Sin esto, un ítem flex no baja de su ancho mínimo de contenido: una tabla ancha
+     estira todo el main más allá de la ventana y se recorta en vez de hacer scroll. */
+  min-width: 0;
   margin-left: 260px;
   padding: 2rem;
   min-height: 100vh;
