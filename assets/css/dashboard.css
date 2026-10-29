@@ -476,6 +476,12 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   outline: none;
 }
 
+/* Evita que la flecha del select se superponga al texto */
+.form-select.form-db {
+  padding-right: 2.2rem;   /* espacio suficiente para la flecha nativa */
+  background-position: right 0.6rem center;
+}
+
 /* POS Specific layouts */
 .pos-layout {
   display: grid;
