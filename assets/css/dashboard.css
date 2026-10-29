@@ -306,13 +306,18 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 
 /* Barra de acento de color arriba de cada tarjeta — rompe el "caja
    blanca plana" sin sobrecargar el contenido interno. */
-.db-card { position: relative; overflow: hidden; }
+.db-card { 
+  position: relative; 
+  overflow: visible;          /* ← permite que los dropdowns salgan del card */
+}
 .db-card::before {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 4px;
   background: var(--db-border);
+  border-radius: var(--db-radius) var(--db-radius) 0 0;  /* ← mantiene las esquinas redondeadas de la barra */
+  z-index: 1;
 }
 .db-card--primary::before { background: linear-gradient(90deg, var(--db-primary), var(--db-primary-dark)); }
 .db-card--success::before { background: linear-gradient(90deg, var(--db-success), var(--db-success-dark)); }
@@ -932,8 +937,10 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 
 /* Estilo minimalista y compacto para el botón de filtro */
 .filtro-select-custom {
-  width: 145px;                  /* Ajuste exacto para que quepa "Todos los canales" sin sobrar espacio */
-  padding: 0.35rem 0.6rem;       /* Reducimos el relleno interno para hacerlo más estrecho */
+  width: auto;
+  min-width: 145px;
+  max-width: 195px;              /* permite textos un poco más largos sin desbordar */
+  padding: 0.35rem 0.6rem 0.35rem 0.6rem;  /* más espacio a la derecha para la flecha */
   background-color: #faf8f5;
   border: 1px solid #e5d8cd;
   border-radius: 8px;
@@ -942,6 +949,11 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+
+  /* Truncar el texto si es demasiado largo */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Hover suave */

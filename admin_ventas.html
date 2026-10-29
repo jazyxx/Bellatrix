@@ -33,15 +33,44 @@
             <span class="db-card-icono db-card-icono--primary"><i class="bi bi-receipt"></i></span>
             <h3 class="h5 mb-0 fuente-display">Ventas Registradas</h3>
           </div>
-          <div class="dropdown">
-            <button class="btn filtro-select-custom dropdown-toggle d-flex align-items-center justify-content-between gap-2" type="button" id="btnCanales" data-bs-toggle="dropdown" aria-expanded="false">Todos los canales</button>
-            <input type="hidden" id="ventas-filtro-canal" value="todos">
 
-            <ul class= "dropdown-menu shadow-sm border-0 mt-1" aria-labelledby="btnCanales">
-              <li><a class="dropdown-item opcion-canal py-2" href="#" data-value="todos">Todos los canales</a></li>
-              <li><a class="dropdown-item opcion-canal py-2" href="#" data-value="Presencial">Presencial</a></li>
-              <li><a class="dropdown-item opcion-canal py-2" href="#" data-value="En línea">En línea</a></li>
-            </ul>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <!-- Filtro de Canal (existente) -->
+            <div class="dropdown">
+              <button class="btn filtro-select-custom dropdown-toggle d-flex align-items-center justify-content-between gap-2" 
+        type="button" id="btnCanales" data-bs-toggle="dropdown" 
+        data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false">Todos los canales</button>
+              <input type="hidden" id="ventas-filtro-canal" value="todos">
+              <ul class="dropdown-menu shadow-sm border-0 mt-1" aria-labelledby="btnCanales">
+                <li><a class="dropdown-item opcion-canal py-2" href="#" data-value="todos">Todos los canales</a></li>
+                <li><a class="dropdown-item opcion-canal py-2" href="#" data-value="Presencial">Presencial</a></li>
+                <li><a class="dropdown-item opcion-canal py-2" href="#" data-value="En línea">En línea</a></li>
+              </ul>
+            </div>
+
+            <!-- NUEVO: Filtro de Periodo -->
+            <div class="dropdown">
+              <button class="btn filtro-select-custom dropdown-toggle d-flex align-items-center justify-content-between gap-2" type="button" id="btnPeriodo" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false">Todos los periodos</button>
+              <input type="hidden" id="ventas-filtro-periodo" value="todos">
+              <ul class="dropdown-menu shadow-sm border-0 mt-1" aria-labelledby="btnPeriodo">
+                <li><a class="dropdown-item opcion-periodo py-2" href="#" data-value="todos">Todos los periodos</a></li>
+               <li><a class="dropdown-item opcion-periodo py-2" href="#" data-value="hoy">Hoy</a></li>
+               <li><a class="dropdown-item opcion-periodo py-2" href="#" data-value="semana">Esta semana</a></li>
+               <li><a class="dropdown-item opcion-periodo py-2" href="#" data-value="mes">Este mes</a></li>
+               <li><a class="dropdown-item opcion-periodo py-2" href="#" data-value="personalizado">Rango personalizado…</a></li>
+              </ul>
+            </div>
+         </div>
+        </div>
+
+        <!-- NUEVO: Controles de rango personalizado (ocultos por defecto) -->
+        <div id="filtro-rango-personalizado" class="d-none mb-3">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <label class="small text-muted mb-0">Desde:</label>
+            <input type="date" id="filtro-fecha-desde" class="form-control form-control-sm" style="width: auto;">
+            <label class="small text-muted mb-0">Hasta:</label>
+            <input type="date" id="filtro-fecha-hasta" class="form-control form-control-sm" style="width: auto;">
+            <button class="btn btn-sm btn-primary" id="btn-aplicar-rango">Aplicar</button>
           </div>
         </div>
         <hr class="my-2">

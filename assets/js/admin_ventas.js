@@ -50,6 +50,41 @@ document.addEventListener('DOMContentLoaded', async () => {
       filtrarVentasLocales();
     });
   });
+
+    // 6. ESCUCHAR EL FILTRO DE PERIODO
+  document.querySelectorAll('.opcion-periodo').forEach(opcion => {
+    opcion.addEventListener('click', function(e) {
+      e.preventDefault();
+
+      const texto = this.innerText;
+      const valor = this.getAttribute('data-value');
+
+      const btn = document.getElementById('btnPeriodo');
+      if (btn) btn.innerText = texto;
+
+      const input = document.getElementById('ventas-filtro-periodo');
+      if (input) input.value = valor;
+
+      // Mostrar / ocultar los inputs de rango personalizado
+      const contenedorRango = document.getElementById('filtro-rango-personalizado');
+      if (contenedorRango) {
+        if (valor === 'personalizado') {
+          contenedorRango.classList.remove('d-none');
+        } else {
+          contenedorRango.classList.add('d-none');
+          filtrarVentasLocales(); // aplicar inmediatamente
+        }
+      }
+    });
+  });
+
+  // 7. Botón "Aplicar" del rango personalizado
+  const btnAplicarRango = document.getElementById('btn-aplicar-rango');
+  if (btnAplicarRango) {
+    btnAplicarRango.addEventListener('click', () => {
+      filtrarVentasLocales();
+    });
+  }
 });
 
 async function cargarHistorialVentas() {
@@ -103,14 +138,64 @@ function renderizarVentasTabla(ventas) {
 }
 
 function filtrarVentasLocales() {
-  const elFiltro = document.getElementById('ventas-filtro-canal');
-  if (!elFiltro) return;
+  const elCanal = document.getElementById('ventas-filtro-canal');
+  const elPeriodo = document.getElementById('ventas-filtro-periodo');
+  if (!elCanal || !elPeriodo) return;
 
-  const canal = elFiltro.value;
-  let filtradas = ventasLocales;
+  const canal = elCanal.value;
+  const periodo = elPeriodo.value;
 
+  let filtradas = [...ventasLocales];
+
+  // 1. Filtro por canal
   if (canal !== 'todos') {
     filtradas = filtradas.filter(v => v.canal.toLowerCase() === canal.toLowerCase());
+  }
+
+  // 2. Filtro por periodo / fechas
+  if (periodo !== 'todos') {
+    const ahora = new Date();
+    let desde = null;
+    let hasta = null;
+
+    if (periodo === 'hoy') {
+      desde = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 0, 0, 0);
+      hasta = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 23, 59, 59);
+    } else if (periodo === 'semana') {
+      // Lunes de esta semana
+      const dia = ahora.getDay(); // 0 = domingo
+      const diff = dia === 0 ? 6 : dia - 1;
+      desde = new Date(ahora);
+      desde.setDate(ahora.getDate() - diff);
+      desde.setHours(0, 0, 0, 0);
+      hasta = new Date(desde);
+      hasta.setDate(desde.getDate() + 6);
+      hasta.setHours(23, 59, 59, 999);
+    } else if (periodo === 'mes') {
+      desde = new Date(ahora.getFullYear(), ahora.getMonth(), 1, 0, 0, 0);
+      hasta = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0, 23, 59, 59);
+    } else if (periodo === 'personalizado') {
+      const inputDesde = document.getElementById('filtro-fecha-desde');
+      const inputHasta = document.getElementById('filtro-fecha-hasta');
+
+      if (inputDesde && inputDesde.value) {
+        desde = new Date(inputDesde.value + 'T00:00:00');
+      }
+      if (inputHasta && inputHasta.value) {
+        hasta = new Date(inputHasta.value + 'T23:59:59');
+      }
+    }
+
+    if (desde || hasta) {
+      filtradas = filtradas.filter(v => {
+        if (!v.fecha) return false;
+        const fechaVenta = new Date(v.fecha);
+
+        if (desde && fechaVenta < desde) return false;
+        if (hasta && fechaVenta > hasta) return false;
+        return true;
+      });
+    }
   }
 
   renderizarVentasTabla(filtradas);
