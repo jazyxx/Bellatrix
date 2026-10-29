@@ -75,15 +75,15 @@ function renderizarProductosVitrina(productos) {
           </div>
         </td>
         <td class="text-end">
-          <div class="dropdown">
-            <button class="btn btn-sm btn-db-outline py-1 px-2" type="button" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
-            <ul class="dropdown-menu dropdown-menu-end small shadow border-0" style="border-radius: var(--db-radius-sm);">
-              <li><a class="dropdown-item fw-bold" href="#" onclick="abrirEditarProducto(${p.id_producto}); return false;"><i class="bi bi-pencil-fill me-1"></i>Editar</a></li>
-              ${esAdministrador ? `
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="eliminarProducto(${p.id_producto}); return false;"><i class="bi bi-trash-fill me-1"></i>Eliminar</a></li>
-              ` : ''}
-            </ul>
+          <div class="d-flex align-items-center justify-content-end gap-1">
+            <button class="btn btn-sm btn-light border py-1 px-2" title="Editar producto" onclick="abrirEditarProducto(${p.id_producto})">
+              <i class="bi bi-pencil-fill"></i>
+            </button>
+            ${esAdministrador ? `
+              <button class="btn btn-sm btn-light border py-1 px-2 text-danger" title="Eliminar producto" onclick="eliminarProducto(${p.id_producto})">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            ` : ''}
           </div>
         </td>
       </tr>
