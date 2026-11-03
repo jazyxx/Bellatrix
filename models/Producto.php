@@ -227,23 +227,37 @@ class Producto
         return array_map(fn($fila) => new Producto($fila), $filas);
     }
 
-    public static function listarPorUnidadNegocio(string $unidad): array
-    {
-        $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT " . self::COLUMNAS_SIN_FOTO . " FROM productos WHERE unidad_negocio = :unidad ORDER BY nombre ASC");
-        $stmt->bindValue(':unidad', $unidad);
-        $stmt->execute();
+    public static function listarPorUnidadNegocio(string $unidad, bool $soloDisponibles = false): array
+{
+    $pdo = Database::getConnection();
 
-        return array_map(fn($fila) => new Producto($fila), $stmt->fetchAll());
+    $sql = "SELECT " . self::COLUMNAS_SIN_FOTO . " FROM productos WHERE unidad_negocio = :unidad";
+    if ($soloDisponibles) {
+        $sql .= " AND disponible = 1";
     }
+    $sql .= " ORDER BY nombre ASC";
 
-    public static function buscarPorNombre(string $texto): array
-    {
-        $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT " . self::COLUMNAS_SIN_FOTO . " FROM productos WHERE nombre LIKE :texto ORDER BY nombre ASC");
-        $stmt->bindValue(':texto', '%' . $texto . '%');
-        $stmt->execute();
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':unidad', $unidad);
+    $stmt->execute();
 
-        return array_map(fn($fila) => new Producto($fila), $stmt->fetchAll());
+    return array_map(fn($fila) => new Producto($fila), $stmt->fetchAll());
+}
+
+    public static function buscarPorNombre(string $texto, bool $soloDisponibles = false): array
+{
+    $pdo = Database::getConnection();
+
+    $sql = "SELECT " . self::COLUMNAS_SIN_FOTO . " FROM productos WHERE nombre LIKE :texto";
+    if ($soloDisponibles) {
+        $sql .= " AND disponible = 1";
     }
+    $sql .= " ORDER BY nombre ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':texto', '%' . $texto . '%');
+    $stmt->execute();
+
+    return array_map(fn($fila) => new Producto($fila), $stmt->fetchAll());
+}
 }
