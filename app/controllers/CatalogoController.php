@@ -12,11 +12,12 @@ public function listar(): void
         $buscar = Request::query('buscar');
 
         if ($buscar !== null && trim($buscar) !== '') {
-        $productos = Producto::buscarPorNombre(trim($buscar), true);   
+            $productos = Producto::buscarPorNombre(trim($buscar));
         } elseif ($unidad !== null && trim($unidad) !== '') {
          $productos = Producto::listarPorUnidadNegocio(trim($unidad), true); 
+            $productos = Producto::listarPorUnidadNegocio(trim($unidad));
         } else {
-         $productos = Producto::listarTodos(true);  
+            $productos = Producto::listarTodos(false);
         }
 
         
