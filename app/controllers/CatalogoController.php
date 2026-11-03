@@ -14,7 +14,7 @@ public function listar(): void
         if ($buscar !== null && trim($buscar) !== '') {
         $productos = Producto::buscarPorNombre(trim($buscar), true);   
         } elseif ($unidad !== null && trim($unidad) !== '') {
-         $productos = Producto::listarPorUnidadNegocio(trim($unidad), true);  /
+         $productos = Producto::listarPorUnidadNegocio(trim($unidad), true); 
         } else {
          $productos = Producto::listarTodos(true);  
         }

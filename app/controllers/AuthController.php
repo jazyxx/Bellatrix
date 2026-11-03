@@ -6,39 +6,9 @@ require_once BASE_PATH . '/app/core/Request.php';
 require_once BASE_PATH . '/app/core/Response.php';
 require_once BASE_PATH . '/app/core/Sesion.php';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class AuthController
 {
     
-
-
-
-
-
-
-
-
-
-
-
     public function login(): void
     {
         $datos = Request::jsonBody();
