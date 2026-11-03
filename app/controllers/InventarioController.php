@@ -19,8 +19,8 @@ class InventarioController
         } elseif ($unidad !== null && trim($unidad) !== '') {
             $productos = Producto::listarPorUnidadNegocio(trim($unidad));
         } else {
-            $productos = Producto::listarTodos(false);
-        }
+    $productos = Producto::listarTodos(true);  
+}
 
         $datos = array_map(fn(Producto $p) => $p->obtenerDatos(), $productos);
         Response::exito($datos, 'Productos obtenidos correctamente.');
@@ -159,7 +159,7 @@ class InventarioController
     {
         $producto = Producto::obtenerPorId((int) $id);
         if ($producto === null) {
-            Response::error('El producto solicitado no existe.', 404);
+            Response::error('No se pudo eliminar el producto.', 409);
             return;
         }
 

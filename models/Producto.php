@@ -169,12 +169,18 @@ class Producto
     }
 
     public function eliminar(): bool
-    {
-        $sql = "DELETE FROM productos WHERE id_producto = :id";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':id', $this->idProducto, PDO::PARAM_INT);
-        return $stmt->execute();
+{
+    $sql = "UPDATE productos SET disponible = 0, stock = 0 WHERE id_producto = :id";
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->bindValue(':id', $this->idProducto, PDO::PARAM_INT);
+    $ok = $stmt->execute();
+
+    if ($ok) {
+        $this->disponible = false;
+        $this->stock = 0;
     }
+    return $ok;
+}
 
    
     private const COLUMNAS_SIN_FOTO = "id_producto, nombre, descripcion, tipo, unidad_negocio,
