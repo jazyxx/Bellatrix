@@ -1,27 +1,11 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
 
-/**
- * ==========================================================================
- *  MateriaPrima.php
- * ==========================================================================
- *  Representa un insumo de cocina (harina, leche, azúcar, etc.), mapeado
- *  desde la tabla `materia_prima`.
- *
- *  Esta clase no aparece con ese nombre exacto en el Diagrama de Clases,
- *  pero es INDISPENSABLE porque:
- *    - CU019 (Gestionar Materias Primas) pide administrar estos insumos
- *      y definir un stock mínimo para alertas.
- *    - CU008 (Actualización automatizada de stock) necesita descontar
- *      materia prima según la "receta" de cada producto vendido.
- *  Trabaja de la mano con Receta.php y AlertaStock.php.
- * ==========================================================================
- */
 class MateriaPrima
 {
     public ?int $idMateria;
     public string $nombre;
-    public ?string $unidadMedida; // ej: "kg", "litros", "unidades"
+    public ?string $unidadMedida; 
     public float $stockActual;
     public float $stockMinimo;
 
@@ -38,15 +22,6 @@ class MateriaPrima
         $this->stockMinimo  = isset($datos['stock_minimo']) ? (float)$datos['stock_minimo'] : 0.0;
     }
 
-    /**
-     * descontarStock($cantidad)
-     * ------------------------------------------------------------
-     * Resta una cantidad del stock actual del insumo. Se usa cuando
-     * se vende un producto que "consume" esta materia prima según
-     * su receta (ver Receta.php -> descontarInsumosPorVenta()).
-     *
-     * Ahora SÍ dispara la alerta (tabla `alerta_stock`) automáticamente.
-     */
     public function descontarStock(float $cantidad): bool
     {
         $nuevoStock = $this->stockActual - $cantidad;
@@ -63,8 +38,7 @@ class MateriaPrima
 
         if ($ok) {
             $this->stockActual = $nuevoStock;
-            
-            // AQUÍ ESTÁ EL DISPARADOR: Si tras la venta el stock es crítico, genera alerta
+                
             require_once __DIR__ . '/AlertaStock.php';
             AlertaStock::generarSiAplica($this);
         }
@@ -72,11 +46,6 @@ class MateriaPrima
         return $ok;
     }
 
-    /**
-     * aumentarStock($cantidad)
-     * Suma cantidad al stock (por ejemplo, al registrar una compra
-     * de insumos a un proveedor).
-     */
     public function aumentarStock(float $cantidad): bool
     {
         $nuevoStock = $this->stockActual + $cantidad;
@@ -94,21 +63,10 @@ class MateriaPrima
         return $ok;
     }
 
-    /**
-     * tieneStockBajo()
-     * Devuelve true si el stock actual ya llegó (o bajó) del umbral
-     * mínimo definido para este insumo. Este booleano es el que usará
-     * el futuro controlador de alertas para decidir si debe crear
-     * una fila nueva en `alerta_stock`.
-     */
     public function tieneStockBajo(): bool
     {
         return $this->stockActual <= $this->stockMinimo;
     }
-
-    // =================================================================
-    //  CRUD
-    // =================================================================
 
     public function crear(): int
     {
@@ -139,17 +97,17 @@ class MateriaPrima
         $stmt->bindValue(':stock_actual', $this->stockActual);
         $stmt->bindValue(':stock_minimo', $this->stockMinimo);
         $stmt->bindValue(':id', $this->idMateria, PDO::PARAM_INT);
-        
-        $ok = $stmt->execute();
+
+                $ok = $stmt->execute();
 
         if ($ok) {
             require_once __DIR__ . '/AlertaStock.php';
-            
-            if ($this->tieneStockBajo()) {
-                // Si el stock bajó o sigue bajo, genera la alerta
+
+                        if ($this->tieneStockBajo()) {
+                
                 AlertaStock::generarSiAplica($this);
             } else {
-                // Si el stock ya es suficiente, limpia TODAS las alertas de este insumo en la BD
+                
                 AlertaStock::desactivarPorMateria($this->idMateria);
             }
         }
@@ -183,12 +141,6 @@ class MateriaPrima
         return array_map(fn($fila) => new MateriaPrima($fila), $stmt->fetchAll());
     }
 
-    /**
-     * listarConStockBajo()
-     * Trae directamente de la BD (con SQL) solo los insumos cuyo
-     * stock actual ya está en el umbral mínimo o por debajo.
-     * Útil para el panel de alertas del Administrador.
-     */
     public static function listarConStockBajo(): array
     {
         $pdo = Database::getConnection();

@@ -1,23 +1,16 @@
-/**
- * assets/js/admin_ventas.js
- * Lógica del panel histórico de ventas (CU005).
- */
 
 let ventasLocales = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Guardia de sesión
   const usuario = await obtenerSesionActual();
   if (!usuario || (usuario.rol !== 'Administrador' && usuario.rol !== 'Cajero')) {
     window.location.href = 'login_empleado.html';
     return;
   }
 
-  // 2. Inyectar Layout del Dashboard
   const activeTabId = usuario.rol === 'Administrador' ? 'admin_ventas' : 'cajero_ventas';
   await injectDashboardLayout(usuario.rol, activeTabId);
 
-  // 3. Ajustar subtitulo de acuerdo al rol
   const sub = document.getElementById('ventas-subtitulo');
   if (sub) {
     if (usuario.rol === 'Administrador') {
@@ -27,31 +20,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // 4. Cargar historial
   await cargarHistorialVentas();
 
-  // 5. ESCUCHAR EL FILTRO DROPDOWN PERSONALIZADO (Agrega esto aquí)
   document.querySelectorAll('.opcion-canal').forEach(opcion => {
     opcion.addEventListener('click', function(e) {
       e.preventDefault();
-      
-      const texto = this.innerText;
+
+            const texto = this.innerText;
       const valor = this.getAttribute('data-value');
 
-      // Actualizar el texto del botón visible
       const btn = document.getElementById('btnCanales');
       if (btn) btn.innerText = texto;
 
-      // Actualizar el input oculto o directamente filtrar
       const input = document.getElementById('ventas-filtro-canal');
       if (input) input.value = valor;
 
-      // Disparar el filtro de la tabla de Bellatrix
       filtrarVentasLocales();
     });
   });
 
-    // 6. ESCUCHAR EL FILTRO DE PERIODO
   document.querySelectorAll('.opcion-periodo').forEach(opcion => {
     opcion.addEventListener('click', function(e) {
       e.preventDefault();
@@ -65,20 +52,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       const input = document.getElementById('ventas-filtro-periodo');
       if (input) input.value = valor;
 
-      // Mostrar / ocultar los inputs de rango personalizado
       const contenedorRango = document.getElementById('filtro-rango-personalizado');
       if (contenedorRango) {
         if (valor === 'personalizado') {
           contenedorRango.classList.remove('d-none');
         } else {
           contenedorRango.classList.add('d-none');
-          filtrarVentasLocales(); // aplicar inmediatamente
+          filtrarVentasLocales(); 
         }
       }
     });
   });
 
-  // 7. Botón "Aplicar" del rango personalizado
   const btnAplicarRango = document.getElementById('btn-aplicar-rango');
   if (btnAplicarRango) {
     btnAplicarRango.addEventListener('click', () => {
@@ -93,7 +78,6 @@ async function cargarHistorialVentas() {
 
   tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">Buscando historial de caja…</td></tr>`;
 
-  // Consultar ventas (el backend filtra automáticamente si es Cajero o Admin)
   const respuesta = await apiFetch('api/ventas');
 
   if (!respuesta.exito || !respuesta.datos) {
@@ -147,12 +131,10 @@ function filtrarVentasLocales() {
 
   let filtradas = [...ventasLocales];
 
-  // 1. Filtro por canal
   if (canal !== 'todos') {
     filtradas = filtradas.filter(v => v.canal.toLowerCase() === canal.toLowerCase());
   }
 
-  // 2. Filtro por periodo / fechas
   if (periodo !== 'todos') {
     const ahora = new Date();
     let desde = null;
@@ -162,8 +144,7 @@ function filtrarVentasLocales() {
       desde = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 0, 0, 0);
       hasta = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 23, 59, 59);
     } else if (periodo === 'semana') {
-      // Lunes de esta semana
-      const dia = ahora.getDay(); // 0 = domingo
+      const dia = ahora.getDay(); 
       const diff = dia === 0 ? 6 : dia - 1;
       desde = new Date(ahora);
       desde.setDate(ahora.getDate() - diff);
@@ -221,7 +202,6 @@ async function verDetalleVenta(idVenta) {
   document.getElementById('detalle-empleado').textContent = v.nombre_empleado || `Empleado #${v.id_empleado}`;
   document.getElementById('detalle-total').textContent = formatearPrecioCOP(v.total);
 
-  // Pintar productos vendidos
   const list = document.getElementById('detalle-productos-lista');
   if (v.detalles && v.detalles.length > 0) {
     list.innerHTML = v.detalles.map(item => `
@@ -234,7 +214,6 @@ async function verDetalleVenta(idVenta) {
     list.innerHTML = `<li class="small text-muted py-2 text-center">Sin productos listados</li>`;
   }
 
-  // Configurar botón de anulación (CU008)
   const btnAnular = document.getElementById('btn-anular-venta');
   if (v.estado === 'Activa' && !v.id_pedido) {
     btnAnular.style.display = 'block';
@@ -243,7 +222,6 @@ async function verDetalleVenta(idVenta) {
     btnAnular.style.display = 'none';
   }
 
-  // Botón imprimir recibo (Issue #30): disponible para ventas no anuladas
   const btnRecibo = document.getElementById('btn-imprimir-recibo');
   if (btnRecibo) {
     if (v.estado === 'Anulada') {

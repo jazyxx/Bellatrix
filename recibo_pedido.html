@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Recibo de Pedido - Ambrosía</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Agregamos los iconos de Bootstrap para que la alerta muestre el escudo -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -14,8 +13,8 @@
     .receipt-container { background: #fff; max-width: 600px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .brand-header { text-align: center; margin-bottom: 20px; border-bottom: 2px dashed #dee2e6; padding-bottom: 20px; }
     .brand-title { font-family: 'Fraunces', serif; color: #d63384; font-weight: 700; }
-    
-    @media print {
+
+        @media print {
       body { background: #fff; padding: 0; }
       .receipt-container { box-shadow: none; max-width: 100%; padding: 0; }
       .no-print { display: none !important; }
@@ -38,8 +37,8 @@
         // 1. Obtener el ID de la URL
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
-        
-        if (!id) {
+
+                if (!id) {
           document.getElementById('recibo-contenido').innerHTML = '<div class="alert alert-danger">Error: No se especificó el número de pedido.</div>';
           return;
         }
@@ -52,10 +51,7 @@
         }
 
         const p = respuesta.datos;
-        
-        // ====================================================================
-        // VALIDACIÓN ANTI-FRAUDE PARA RECIBOS
-        // ====================================================================
+
         if (p.estado === 'Pendiente de pago' || p.estado === 'Cancelado') {
           document.getElementById('recibo-contenido').innerHTML = `
             <div class="alert alert-warning text-center">
@@ -65,15 +61,12 @@
               <p class="mb-0 small text-muted">El recibo oficial solo se emite automáticamente cuando la pasarela de pagos confirma la transacción exitosa.</p>
             </div>
           `;
-          return; // Detenemos la ejecución
+          return; 
         }
-        // ====================================================================
-
-        // Formatear la fecha
+      
         const fechaObj = new Date(p.fecha_creacion);
         const fechaFormateada = fechaObj.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' });
 
-        // 3. Armar la lista de productos
         let itemsHtml = '';
         if (p.productos && p.productos.length > 0) {
           p.productos.forEach(item => {
@@ -87,7 +80,6 @@
           });
         }
 
-        // 4. Inyectar el HTML final del recibo
         const html = `
           <div class="no-print mb-3 text-end">
             <button onclick="window.print()" class="btn btn-secondary btn-sm"><i class="bi bi-printer me-1"></i>Imprimir / Guardar PDF</button>
@@ -96,15 +88,15 @@
             <h2 class="brand-title h3 mb-0">Pastelería Ambrosía</h2>
             <p class="text-muted small mb-0">Recibo de Compra Virtual</p>
           </div>
-          
-          <div class="mb-4">
+
+                    <div class="mb-4">
             <p class="mb-1"><strong>Pedido #:</strong> ${p.id_pedido}</p>
             <p class="mb-1"><strong>Fecha:</strong> ${fechaFormateada}</p>
             <p class="mb-1"><strong>Estado:</strong> ${p.estado}</p>
             <p class="mb-1"><strong>Entrega a:</strong> ${p.direccion_entrega || 'Recoge en Tienda física'}</p>
           </div>
-          
-          <table class="table table-sm table-borderless border-top border-bottom mb-4">
+
+                    <table class="table table-sm table-borderless border-top border-bottom mb-4">
             <thead>
               <tr class="border-bottom">
                 <th>Cant.</th>
@@ -122,13 +114,13 @@
               </tr>
             </tfoot>
           </table>
-          
-          <div class="text-center mt-4 text-muted small">
+
+                    <div class="text-center mt-4 text-muted small">
             <p>¡Gracias por tu compra!<br>Conserva este recibo digital para cualquier duda o reclamo.</p>
           </div>
         `;
-        
-        document.getElementById('recibo-contenido').innerHTML = html;
+
+                document.getElementById('recibo-contenido').innerHTML = html;
 
       } catch (error) {
         console.error("Error generando recibo:", error);

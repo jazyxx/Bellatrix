@@ -1,74 +1,37 @@
-/* ============================================================================
-   estilos.css — Sistema de diseño de Ambrosía (v3 — estructura original
-   restaurada, con el contraste y el balance de color corregidos)
-   ============================================================================
-   Mantiene el MISMO contrato de clases/IDs que usa el JavaScript
-   (api.js, componentes.js, catalogo.js, carrito.js, login.js,
-   registro.js) — nada de esos archivos cambió, solo la piel visual.
-
-   DIRECCIÓN DE DISEÑO (v3):
-   - Se restauró la estructura original: Hero con círculo decorativo
-     (.hero-mancha) y el borde festoneado tipo manga pastelera
-     (.festoneado) como elemento de firma del sitio.
-   - REGLA DE CONTRASTE (la corrección de esta versión): ninguna
-     sección de ancho completo usa un pastel saturado como fondo
-     detrás de texto. El fondo de página es crema/blanco casi neutro;
-     el color fuerte (--rosa-fuerte, --menta-fuerte) vive en los
-     ELEMENTOS — círculos, íconos, tarjetas, botones — siempre con
-     una sombra marcada que les da profundidad real, y siempre con
-     texto en --espresso (café oscuro) o blanco puro sobre esos
-     elementos saturados, nunca pastel-sobre-pastel.
-   - Color con SIGNIFICADO: rosa = Pastelería, menta = Heladería.
-   ============================================================================ */
 
 
-/* ============================================================
-   1. VARIABLES DE DISEÑO
-   ============================================================ */
 :root {
-  /* --- Paleta pastel (misma base de marca; ahora con variantes "fuertes"
-     para botones y acentos que necesitan más contraste/peso visual) --- */
   --rosa: #EDAFB8;
-  --rosa-fuerte: #E2899B;   /* CTA sólido de Pastelería */
-  --rosa-medio: #F3CFDC;    /* paso intermedio: profundidad en degradados y fondos con textura */
-  --rosa-suave: #FBEEF0;    /* fondo tintado muy leve */
+  --rosa-fuerte: #E2899B;   
+  --rosa-medio: #F3CFDC;    
+  --rosa-suave: #FBEEF0;    
   --menta: #D2EECF;
-  --menta-fuerte: #6FAE8C;  /* CTA sólido de Heladería */
-  --menta-suave: #EAF8ED;   /* fondo tintado muy leve */
+  --menta-fuerte: #6FAE8C;  
+  --menta-suave: #EAF8ED;   
   --salvia: #B0C4B1;
   --salvia-oscuro: #6F8A73;
 
-  /* --- Neutros, más blancos/limpios que la v1 --- */
-  --crema: #FFF9F6;         /* fondo general (cálido pero casi blanco) */
+  --crema: #FFF9F6;         
   --blanco: #FFFFFF;
   --borde-suave: #F1E6E2;
-  --espresso: #3B2A26;      /* texto principal */
-  --espresso-suave: #8A7770;/* texto secundario */
+  --espresso: #3B2A26;      
+  --espresso-suave: #8A7770;
 
-  /* --- Tipografía (se mantiene: sirve perfecto para "moderno con carácter") --- */
   --fuente-display: 'Fraunces', Georgia, serif;
   --fuente-cuerpo: 'Nunito Sans', 'Segoe UI', sans-serif;
 
-  /* --- Forma y profundidad --- */
   --radio-grande: 28px;
   --radio-suave: 18px;
   --radio-chico: 12px;
-  /* Sombras en DOS capas (contacto + ambiente): así es como cae la luz
-     realmente — una sombra tenue y cercana al objeto, y otra más difusa
-     y lejana. Una sola sombra grande se ve "pegada", plana. */
   --sombra-suave: 0 2px 4px -1px rgba(59, 42, 38, 0.08), 0 24px 48px -20px rgba(59, 42, 38, 0.28);
   --sombra-chica: 0 1px 2px -1px rgba(59, 42, 38, 0.07), 0 10px 22px -12px rgba(59, 42, 38, 0.18);
   --sombra-rosa: 0 1px 2px -1px rgba(226, 137, 155, 0.18), 0 16px 32px -14px rgba(226, 137, 155, 0.35);
   --sombra-menta: 0 1px 2px -1px rgba(111, 174, 140, 0.18), 0 16px 32px -14px rgba(111, 174, 140, 0.32);
 
-  /* --- Curvas de movimiento (nunca "ease" a secas: se sienten planas) --- */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-/* ============================================================
-   2. RESET LIGERO Y TIPOGRAFÍA BASE
-   ============================================================ */
 html { scroll-behavior: smooth; }
 
 body {
@@ -110,11 +73,7 @@ textarea:focus-visible, select:focus-visible {
 }
 
 
-/* ============================================================
-   3. COMPONENTES REUTILIZABLES (contrato con el JS — NO renombrar)
-   ============================================================ */
 
-/* --- Botones de marca --- */
 .btn-ambrosia {
   background: linear-gradient(155deg, var(--rosa-fuerte) 0%, #D6768A 100%);
   border: none;
@@ -170,7 +129,6 @@ textarea:focus-visible, select:focus-visible {
 .btn-ambrosia-sage:hover { background: linear-gradient(155deg, var(--espresso) 0%, #2A1E1B 100%); transform: translateY(-2px); box-shadow: var(--sombra-suave); }
 .btn-ambrosia-sage:active { transform: translateY(0) scale(0.97); }
 
-/* --- Tarjeta de producto --- */
 .tarjeta-producto {
   background: var(--blanco);
   border-radius: var(--radio-suave);
@@ -204,13 +162,10 @@ textarea:focus-visible, select:focus-visible {
   border-radius: var(--radio-chico);
   transition: transform 0.4s var(--ease-out);
 }
-/* Cuando la tarjeta muestra una foto real (<img>) en vez del
-   placeholder con la inicial (<div>), object-fit evita que la imagen
-   se estire fuera de proporción — se recorta en vez de deformarse. */
 img.tarjeta-producto__imagen {
   width: calc(100% - 1.7rem);
   object-fit: cover;
-  background: var(--rosa-suave); /* se ve mientras la imagen carga */
+  background: var(--rosa-suave); 
 }
 .tarjeta-producto__cuerpo {
   padding: 1rem 1.1rem 1.2rem;
@@ -226,7 +181,6 @@ img.tarjeta-producto__imagen {
   color: var(--espresso);
 }
 
-/* --- Insignias (color = información: rosa Pastelería, menta Heladería) --- */
 .badge-pasteleria {
   background-color: var(--rosa-suave);
   color: var(--rosa-fuerte);
@@ -261,7 +215,6 @@ img.tarjeta-producto__imagen {
   z-index: 2;
 }
 
-/* --- Formularios (login/registro, sin cambios funcionales) --- */
 .formulario-ambrosia {
   background: var(--blanco);
   border-radius: var(--radio-grande);
@@ -292,12 +245,8 @@ img.tarjeta-producto__imagen {
 .mensaje-formulario--error { background-color: #FBE2DF; color: #8A3B2E; }
 .mensaje-formulario--exito { background-color: var(--menta-suave); color: var(--menta-fuerte); }
 
-/* --- Estado vacío: definición completa vive en la sección 14 (Carrito) --- */
 
 
-/* ============================================================
-   4. HEADER / NAVEGACIÓN (con buscador central, estilo preview.webp)
-   ============================================================ */
 .header-ambrosia {
   background-color: var(--blanco);
   border-bottom: 1px solid var(--borde-suave);
@@ -368,22 +317,6 @@ img.tarjeta-producto__imagen {
 }
 
 
-/* ============================================================
-   5. HERO — círculos decorativos + borde festoneado (estructura
-   original), con el contraste CORREGIDO:
-   ============================================================
-   Antes: fondo de sección en rosa pastel claro + círculo en
-   degradado pastel claro + texto blanco = pastel sobre pastel,
-   poco contraste. Ahora:
-     - El fondo de la SECCIÓN vuelve a ser crema/blanco (nunca un
-       color pastel saturado detrás de texto).
-     - El color fuerte se concentra en el CÍRCULO decorativo
-       (degradado rosa-fuerte → menta-fuerte, ambos ya bastante
-       más saturados que --rosa/--menta) con una sombra pronunciada
-       para dar profundidad real, tal como pediste.
-     - Todo el texto de la sección usa --espresso (café oscuro),
-       porque ahora está sobre un fondo claro, no sobre el círculo.
-   ============================================================ */
 .hero-ambrosia {
   position: relative;
   background:
@@ -397,12 +330,10 @@ img.tarjeta-producto__imagen {
 .hero-ambrosia h1 {
   font-size: clamp(2.4rem, 5vw, 3.6rem);
   line-height: 1.05;
-  color: var(--espresso); /* texto siempre oscuro: aquí el fondo es claro */
+  color: var(--espresso); 
 }
 .hero-ambrosia p { color: var(--espresso-suave); }
 
-/* El círculo concentra el color fuerte y la sombra — es la única
-   pieza "saturada" de toda la sección, por eso resalta de verdad. */
 .hero-mancha {
   width: 100%;
   max-width: 420px;
@@ -413,7 +344,7 @@ img.tarjeta-producto__imagen {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 8px -2px rgba(59,42,38,0.2), 0 34px 60px -22px rgba(59, 42, 38, 0.42); /* sombra en dos capas = profundidad real */
+  box-shadow: 0 4px 8px -2px rgba(59,42,38,0.2), 0 34px 60px -22px rgba(59, 42, 38, 0.42); 
   position: relative;
   z-index: 1;
   animation: hero-float 7s var(--ease-in-out) infinite reverse;
@@ -421,19 +352,13 @@ img.tarjeta-producto__imagen {
 .hero-mancha__texto {
   font-family: var(--fuente-display);
   font-style: italic;
-  color: var(--blanco); /* blanco sobre el círculo saturado sí tiene buen contraste */
+  color: var(--blanco); 
   font-size: 1.3rem;
   text-align: center;
   padding: 1.5rem;
 }
 
 
-/* ============================================================
-   EL BORDE FESTONEADO — elemento de firma (estilo manga pastelera)
-   ============================================================
-   Separa secciones con un trazo ondulado en vez de una línea recta.
-   Sigue siendo un truco de CSS puro (gradiente radial repetido).
-   ============================================================ */
 .festoneado { height: 26px; width: 100%; }
 .festoneado--sobre-crema {
   background-image: radial-gradient(circle at 13px 0, transparent 13px, var(--crema) 14px);
@@ -448,20 +373,10 @@ img.tarjeta-producto__imagen {
 .festoneado--voltear { transform: rotate(180deg); }
 
 
-/* ============================================================
-   6. SECCIONES GENERALES
-   ============================================================
-   REGLA DE CONTRASTE: ninguna sección de ancho completo usa un
-   pastel saturado como fondo. --seccion--crema/--blanca alternan
-   crema/blanco (dos tonos casi neutros) para dar ritmo sin sacrificar
-   legibilidad. El color fuerte vive en los ELEMENTOS (íconos, tarjetas,
-   botones), nunca en el lienzo completo detrás del texto.
-   ============================================================ */
 .seccion { padding: 4.5rem 0; }
 .seccion--crema { background: radial-gradient(at 90% 0%, rgba(210,238,207,0.25) 0%, transparent 45%), var(--crema); }
-.seccion--blush { background: radial-gradient(at 8% 100%, rgba(243,207,220,0.30) 0%, transparent 45%), var(--blanco); } /* el rosa ya no vive en un fondo plano, sino en un acento sutil de esquina */
+.seccion--blush { background: radial-gradient(at 8% 100%, rgba(243,207,220,0.30) 0%, transparent 45%), var(--blanco); } 
 
-/* --- Nuestra promesa: círculo de color fuerte + sombra, texto oscuro --- */
 .icono-promesa {
   width: 60px;
   height: 60px;
@@ -473,17 +388,13 @@ img.tarjeta-producto__imagen {
   justify-content: center;
   font-size: 1.4rem;
   margin: 0 auto 1rem;
-  box-shadow: var(--sombra-menta); /* profundidad, no solo un círculo plano */
+  box-shadow: var(--sombra-menta); 
 }
-/* Alterna el color con significado por tarjeta, para que la sección respire
-   variedad de paleta en vez de un solo tono repetido cuatro veces. */
 .row.text-center > *:nth-child(4n+1) .icono-promesa { background: linear-gradient(155deg, var(--rosa-fuerte), #D6768A); box-shadow: var(--sombra-rosa); }
 .row.text-center > *:nth-child(4n+2) .icono-promesa { background: linear-gradient(155deg, var(--menta-fuerte), #5A9678); box-shadow: var(--sombra-menta); }
 .row.text-center > *:nth-child(4n+3) .icono-promesa { background: linear-gradient(155deg, var(--salvia-oscuro), #56705A); box-shadow: 0 1px 2px -1px rgba(111,138,115,0.2), 0 16px 32px -14px rgba(111,138,115,0.35); }
 .row.text-center > *:nth-child(4n+4) .icono-promesa { background: linear-gradient(155deg, var(--espresso), #2A1E1B); box-shadow: var(--sombra-suave); }
 
-/* --- Salón de Onces: tarjeta OSCURA sólida (alto contraste real,
-   texto claro sobre fondo oscuro — no pastel-sobre-pastel) --- */
 .onces-panel {
   background: radial-gradient(at 85% 15%, rgba(111,174,140,0.25) 0%, transparent 50%),
               radial-gradient(at 10% 90%, rgba(226,137,155,0.18) 0%, transparent 45%),
@@ -500,9 +411,6 @@ img.tarjeta-producto__imagen {
 .onces-panel p { color: rgba(255, 249, 246, 0.82); }
 
 
-/* ============================================================
-   7. FOOTER
-   ============================================================ */
 .footer-ambrosia { background-color: var(--espresso); color: var(--crema); padding: 3rem 0 1.5rem; }
 .footer-ambrosia a { color: var(--crema); opacity: 0.85; }
 .footer-ambrosia a:hover { opacity: 1; color: var(--menta); }
@@ -516,9 +424,6 @@ img.tarjeta-producto__imagen {
 }
 
 
-/* ============================================================
-   8. CATÁLOGO — barra de filtros
-   ============================================================ */
 .barra-filtros {
   background: var(--blanco);
   border-radius: var(--radio-grande);
@@ -526,12 +431,8 @@ img.tarjeta-producto__imagen {
   border: 1px solid var(--borde-suave);
   padding: 1.2rem 1.4rem;
 }
-/* .chip-filtro y sus estados viven en la sección 13 (Catálogo), estilo unificado */
 
 
-/* ============================================================
-   9. CARRITO (fila de producto, control de cantidad, resumen)
-   ============================================================ */
 .fila-carrito {
   background: var(--blanco);
   border: 1px solid var(--borde-suave);
@@ -554,9 +455,6 @@ img.tarjeta-producto__imagen {
 .resumen-carrito .btn-ambrosia { width: 100%; }
 
 
-/* ============================================================
-   10. AJUSTES RESPONSIVOS FINOS
-   ============================================================ */
 @media (max-width: 767.98px) {
   .seccion { padding: 3rem 0; }
   .onces-panel { padding: 2rem 1.4rem; }
@@ -565,13 +463,6 @@ img.tarjeta-producto__imagen {
 }
 
 
-/* ============================================================
-   11. MOVIMIENTO — aparición al hacer scroll y micro-detalles
-   ============================================================
-   Solo estados de entrada (transform + opacity, nunca layout).
-   Se desactiva por completo con prefers-reduced-motion (ver
-   regla global en la sección 2).
-   ============================================================ */
 .reveal {
   opacity: 0;
   transform: translateY(22px);
@@ -592,7 +483,6 @@ img.tarjeta-producto__imagen {
   .reveal, .reveal--stagger > * { opacity: 1 !important; transform: none !important; animation: none !important; }
 }
 
-/* --- Marca y nav: subrayado que crece desde el centro, no un color plano --- */
 .marca-ambrosia { transition: opacity 0.18s var(--ease-out); }
 .marca-ambrosia:hover { opacity: 0.75; }
 
@@ -619,12 +509,10 @@ img.tarjeta-producto__imagen {
 .icono-accion { transition: background-color 0.18s var(--ease-out), color 0.18s var(--ease-out), transform 0.18s var(--ease-out); }
 .icono-accion:hover { transform: translateY(-2px); }
 
-/* --- Ícono de "promesa": pequeño lift + sombra más marcada en hover --- */
 .icono-promesa { transition: transform 0.22s var(--ease-out), box-shadow 0.22s var(--ease-out); }
 .col-md-3:hover .icono-promesa,
 .col-6:hover .icono-promesa { transform: translateY(-4px) scale(1.05); box-shadow: var(--sombra-suave); }
 
-/* --- Hero: capa decorativa detrás del círculo, para que no flote solo en el vacío --- */
 .hero-ambrosia { position: relative; }
 .hero-mancha-wrap { position: relative; }
 .hero-mancha-wrap::before {
@@ -645,7 +533,6 @@ img.tarjeta-producto__imagen {
   .hero-mancha-wrap::before, .hero-mancha { animation: none; }
 }
 
-/* --- Estado de carga de "destacados": shimmer en vez de texto plano --- */
 #destacados-cargando {
   background: linear-gradient(100deg, var(--borde-suave) 30%, var(--blanco) 50%, var(--borde-suave) 70%);
   background-size: 200% 100%;
@@ -667,14 +554,6 @@ img.tarjeta-producto__imagen {
 }
 
 
-/* ============================================================
-   12. AUTENTICACIÓN — login, login de empleados, registro
-   ============================================================
-   Misma familia visual del hero (mesh sutil con la paleta),
-   pero cada público tiene su propio acento de color:
-   cliente = rosa (marca principal), empleado = menta (herramienta
-   interna), para que el usuario note de inmediato en qué portal está.
-   ============================================================ */
 .seccion-auth {
   position: relative;
   min-height: 75vh;
@@ -696,7 +575,6 @@ img.tarjeta-producto__imagen {
     var(--crema);
 }
 
-/* Insignia circular arriba del título — coherente con .icono-promesa */
 .icono-auth {
   width: 56px;
   height: 56px;
@@ -711,9 +589,6 @@ img.tarjeta-producto__imagen {
 .icono-auth--rosa { background: linear-gradient(155deg, var(--rosa-fuerte), #D6768A); box-shadow: var(--sombra-rosa); }
 .icono-auth--menta { background: linear-gradient(155deg, var(--menta-fuerte), #5A9678); box-shadow: var(--sombra-menta); }
 
-/* La tarjeta del formulario entra con un poco más de presencia que el
-   .reveal genérico: parte un poco más abajo y con leve escala, porque
-   es el foco único de la pantalla (no un elemento entre varios). */
 .formulario-ambrosia {
   animation: auth-entrar 0.55s var(--ease-out) both;
 }
@@ -725,8 +600,6 @@ img.tarjeta-producto__imagen {
   .formulario-ambrosia { animation: none; }
 }
 
-/* Íconos dentro de los campos (Bootstrap Icons) — mismo alto y radio
-   que .form-control para que el input-group se vea como una sola pieza. */
 .formulario-ambrosia .input-group .input-group-text {
   background: var(--crema);
   border: 1.5px solid var(--borde-suave);
@@ -744,9 +617,6 @@ img.tarjeta-producto__imagen {
 }
 
 
-/* ============================================================
-   13. CATÁLOGO
-   ============================================================ */
 .seccion-catalogo-hero {
   padding: 3rem 0 2.5rem;
   background:
@@ -755,13 +625,9 @@ img.tarjeta-producto__imagen {
     var(--crema);
 }
 
-/* Barra de filtros pegajosa con efecto "vidrio": se usa decenas de veces
-   por sesión, así que NO lleva animación de entrada/salida — solo un
-   tratamiento visual estático (glass) para que flote sobre la grilla
-   sin perder legibilidad. */
 .barra-filtros--sticky {
   position: sticky;
-  top: 78px; /* justo bajo el header sticky */
+  top: 78px; 
   z-index: 40;
   background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(10px);
@@ -786,9 +652,6 @@ img.tarjeta-producto__imagen {
 }
 
 
-/* ============================================================
-   14. CARRITO
-   ============================================================ */
 .seccion-carrito {
   min-height: 70vh;
   padding: 3.5rem 0;
@@ -798,9 +661,6 @@ img.tarjeta-producto__imagen {
     var(--crema);
 }
 
-/* Cada fila entra con una animación breve y escalonada — es contenido
-   que el usuario está a punto de revisar (no un elemento repetitivo de
-   navegación), así que aquí sí vale un poco de "vida" al pintarse. */
 .fila-carrito {
   background: var(--blanco);
   border: 1px solid var(--borde-suave);
@@ -826,7 +686,6 @@ img.tarjeta-producto__imagen {
 .control-cantidad button { transition: background-color 0.16s var(--ease-out), transform 0.1s var(--ease-out); }
 .control-cantidad button:active { transform: scale(0.9); }
 
-/* Resumen: degradado + halo decorativo en vez de un panel oscuro plano */
 .resumen-carrito {
   background: radial-gradient(at 85% 10%, rgba(111, 174, 140, 0.28) 0%, transparent 55%),
               linear-gradient(165deg, var(--espresso) 0%, #2A1E1B 100%);
@@ -839,7 +698,6 @@ img.tarjeta-producto__imagen {
 }
 .resumen-carrito .btn-ambrosia { width: 100%; }
 
-/* Estado vacío: ícono en insignia circular en vez de emoji suelto */
 .estado-vacio { text-align: center; padding: 4rem 1.5rem; color: var(--espresso-suave); animation: fila-entrar 0.5s var(--ease-out) both; }
 .estado-vacio__icono {
   width: 64px;
@@ -859,9 +717,6 @@ img.tarjeta-producto__imagen {
   .estado-vacio { animation: none; }
 }
 
-/* ============================================================
-   1. RESET Y BASE DEL DASHBOARD
-   ============================================================ */
 body {
   background: 
     radial-gradient(at 92% 0%, rgba(243, 207, 220, 0.28) 0%, transparent 40%),
@@ -882,9 +737,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   letter-spacing: -0.01em;
 }
 
-/* ============================================================
-   2. LAYOUT MAESTRO (Sidebar & Main Content)
-   ============================================================ */
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
@@ -982,9 +834,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   .dashboard-main { margin-left: 0; padding: 1.25rem; }
 }
 
-/* ============================================================
-   3. TARJETAS Y CONTENEDORES (Estética Ambrosía)
-   ============================================================ */
 .db-card {
   background-color: var(--blanco);
   border-radius: var(--radio-suave);
@@ -1020,9 +869,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   box-shadow: var(--sombra-menta);
 }
 
-/* ============================================================
-   4. FORMULARIOS Y CONTROLES (POS)
-   ============================================================ */
 .form-db {
   border: 1.5px solid var(--borde-suave);
   border-radius: var(--radio-chico);
@@ -1058,9 +904,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   border-radius: 0 var(--radio-chico) var(--radio-chico) 0;
 }
 
-/* ============================================================
-   5. BOTONES (Reutilizando ADN visual de Ambrosía)
-   ============================================================ */
 .btn-db-success {
   background: linear-gradient(155deg, var(--menta-fuerte) 0%, #5A9678 100%);
   color: var(--blanco);
@@ -1085,18 +928,15 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   cursor: not-allowed;
 }
 
-/* ============================================================
-   6. PUNTO DE VENTA (POS) - GRID Y CATEGORÍAS
-   ============================================================ */
 .pos-categories {
   display: flex;
   gap: 0.75rem;
   margin-bottom: 1.25rem;
   overflow-x: auto;
   padding-bottom: 0.5rem;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none; 
 }
-.pos-categories::-webkit-scrollbar { display: none; } /* Chrome */
+.pos-categories::-webkit-scrollbar { display: none; } 
 
 .pos-category-btn {
   background-color: var(--blanco);
@@ -1125,7 +965,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   box-shadow: var(--sombra-suave);
 }
 
-/* Grilla de productos (Izquierda) */
 .pos-item-card {
   background-color: var(--blanco);
   border: 1.5px solid var(--borde-suave);
@@ -1161,9 +1000,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   font-family: var(--fuente-display);
 }
 
-/* ============================================================
-   7. PUNTO DE VENTA (POS) - CARRITO Y TICKET
-   ============================================================ */
 .pos-cart-container {
   display: flex;
   flex-direction: column;
@@ -1215,7 +1051,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   opacity: 1;
 }
 
-/* Scrollbars estilizadas para el POS */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -1231,12 +1066,8 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   background: var(--rosa-fuerte);
 }
 
-/* ============================================================
-   FIX RESPONSIVE: HEADER LANDING PAGE 
-   ============================================================ */
 @media (max-width: 767.98px) {
-  
-  /* 1. Obligamos al contenedor del header a hacer "wrap" (salto de línea) */
+
   .header-ambrosia > div,
   .header-ambrosia nav {
     flex-wrap: wrap !important;
@@ -1245,12 +1076,10 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
     padding-bottom: 10px;
   }
 
-  /* 2. Centramos el logo para que sea el protagonista arriba */
   .header-ambrosia {
     text-align: center;
   }
 
-  /* 3. Achicamos sutilmente los botones para que quepan lado a lado */
   .header-ambrosia .btn,
   .header-ambrosia a.btn {
     font-size: 0.85rem !important;

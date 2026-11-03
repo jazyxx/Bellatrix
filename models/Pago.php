@@ -3,24 +3,13 @@ require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/Pedido.php';
 require_once __DIR__ . '/Notificacion.php';
 
-/**
- * ==========================================================================
- *  Pago.php
- * ==========================================================================
- *  Mapea la tabla `pago`. Corresponde a la clase "Pago" del Diagrama
- *  de Clases. Implementa la parte de datos del CU014 (Realizar Pago en
- *  Línea): la integración REAL con la pasarela (PSE, tarjetas, Nequi)
- *  se conectará en la Fase 4, pero el modelo ya deja lista la
- *  estructura para registrar el intento de pago y su resultado.
- * ==========================================================================
- */
 class Pago
 {
     public ?int $idPago;
     public int $idPedido;
     public float $monto;
-    public string $medioPago;  // ENUM: 'PSE'|'Tarjeta crédito'|'Tarjeta débito'|'Nequi'|'Otro'
-    public string $estado;     // ENUM: 'Pendiente'|'Aprobado'|'Rechazado'|'Error'
+    public string $medioPago;  
+    public string $estado;     
     public ?string $referencia;
     public ?string $fecha;
 
@@ -39,23 +28,10 @@ class Pago
         $this->fecha      = $datos['fecha']       ?? null;
     }
 
-    // =================================================================
-    //  MÉTODOS DE NEGOCIO (Diagrama de Clases)
-    // =================================================================
-
-    /**
-     * procesarPago()
-     * ------------------------------------------------------------
-     * Registra el intento de pago en la BD con estado 'Pendiente' y
-     * genera una referencia única interna. La conexión con la
-     * pasarela real (llamada HTTP externa) se implementa en Fase 4;
-     * este método deja la fila lista para que ese controlador la
-     * actualice después con confirmarTransaccion().
-     */
     public function procesarPago(): int
     {
         if ($this->referencia === null) {
-            // Referencia interna temporal, mientras llega la de la pasarela real.
+            
             $this->referencia = 'REF-' . strtoupper(bin2hex(random_bytes(6)));
         }
 
@@ -73,18 +49,10 @@ class Pago
         return $this->idPago;
     }
 
-    /**
-     * confirmarTransaccion($aprobado, $referenciaPasarela)
-     * ------------------------------------------------------------
-     * Actualiza el estado del pago según la respuesta de la pasarela
-     * (CU014). Si el pago fue aprobado, además avanza el Pedido
-     * asociado al estado 'Confirmado' (usando Pedido::cambiarEstado(),
-     * que a su vez dispara la notificación automática al cliente).
-     */
     public function confirmarTransaccion(bool $aprobado, ?string $referenciaPasarela = null): bool
     {
-        // Issue #37: pago y confirmación del pedido (venta + stock + caja) van
-        // en una sola transacción; si el stock no alcanza, el pago NO queda aprobado.
+        
+        
         $propia = !$this->pdo->inTransaction();
         if ($propia) {
             $this->pdo->beginTransaction();
@@ -104,7 +72,7 @@ class Pago
             $ok = $stmt->execute();
 
             if ($ok && $aprobado) {
-                // El pago fue aprobado -> el pedido pasa de "Pendiente de pago" a "Confirmado".
+                
                 $pedido = Pedido::obtenerPorId($this->idPedido);
                 if ($pedido) {
                     $pedido->cambiarEstado('Confirmado');
@@ -112,14 +80,14 @@ class Pago
             }
             if ($propia) {
                 $this->pdo->commit();
-                // Ya con el pago y el pedido confirmados en BD, salen los correos.
+                
                 Notificacion::despacharPendientes();
             }
         } catch (Exception $e) {
             if ($propia && $this->pdo->inTransaction()) {
                 $this->pdo->rollBack();
             }
-            // Si hubo rollback, el cliente NO debe recibir el aviso de "Confirmado".
+            
             Notificacion::descartarPendientes();
             $this->estado = $estadoPrevio;
             throw $e;
@@ -128,14 +96,6 @@ class Pago
         return $ok;
     }
 
-    /**
-     * generarComprobante()
-     * ------------------------------------------------------------
-     * Devuelve los datos estructurados del comprobante de pago.
-     * La generación del ARCHIVO físico (PDF) se hará en una fase
-     * posterior usando una librería de PDFs; aquí se entrega el
-     * arreglo de datos que ese generador va a necesitar.
-     */
     public function generarComprobante(): array
     {
         return [

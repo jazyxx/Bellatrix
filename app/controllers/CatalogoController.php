@@ -3,33 +3,9 @@ require_once __DIR__ . '/../../models/Producto.php';
 require_once __DIR__ . '/../core/Request.php';
 require_once __DIR__ . '/../core/Response.php';
 
-/**
- * ==========================================================================
- *  CatalogoController.php
- * ==========================================================================
- *  Implementa el CU011: "Ver Catálogo de Productos". A diferencia de
- *  InventarioController (Fase 3), este controlador es PÚBLICO — no
- *  requiere sesión — porque cualquier visitante de la tienda en línea
- *  debe poder ver los productos antes de registrarse o iniciar sesión.
- *
- *  DECISIÓN DE DISEÑO IMPORTANTE:
- *  El CU011 dice textualmente: "el sistema marca automáticamente como
- *  'Agotado' lo que no tiene stock" — es decir, los productos agotados
- *  SE SIGUEN MOSTRANDO en el catálogo, solo que marcados como
- *  agotados, no se ocultan. Por eso este controlador usa
- *  Producto::listarTodos(false) (TODOS los productos) y agrega un
- *  campo calculado 'agotado' en la respuesta, en vez de filtrar por
- *  la columna `disponible` (que en la Fase 1 se apaga automáticamente
- *  cuando el stock llega a 0, vía Producto::marcarAgotado()).
- * ==========================================================================
- */
 class CatalogoController
 {
-    /**
-     * listar()
-     * GET /api/catalogo/productos?unidad=Pastelería&buscar=torta
-     * Público — sin Middleware.
-     */
+ 
 public function listar(): void
     {
         $unidad = Request::query('unidad');
@@ -43,12 +19,12 @@ public function listar(): void
             $productos = Producto::listarTodos(false);
         }
 
-        // Excluir tortas personalizadas del catálogo público
+        
         $productosFiltrados = array_filter($productos, function (Producto $p) {
             $tipo   = strtolower(trim($p->tipo ?? ''));
             $nombre = strtolower(trim($p->nombre ?? ''));
 
-            // Si 'personalizad' está presente en el tipo o en el nombre, se excluye del catálogo
+            
             if (strpos($tipo, 'personalizad') !== false || strpos($nombre, 'personalizad') !== false) {
                 return false;
             }
@@ -60,11 +36,6 @@ public function listar(): void
         Response::exito($datos, 'Catálogo obtenido correctamente.');
     }
 
-    /**
-     * ver($id)
-     * GET /api/catalogo/productos/{id}
-     * Público — sin Middleware.
-     */
     public function ver(string $id): void
     {
         $producto = Producto::obtenerPorId((int) $id);
@@ -76,15 +47,6 @@ public function listar(): void
         Response::exito($this->serializarParaCatalogo($producto));
     }
 
-    /**
-     * serializarParaCatalogo()
-     * ------------------------------------------------------------
-     * A diferencia de Producto::obtenerDatos() (usado en el panel
-     * interno de InventarioController), esta versión pública agrega
-     * el campo 'agotado' explícito y NO expone el campo 'disponible'
-     * crudo de la base de datos, para no filtrar detalles internos
-     * innecesarios al frontend público.
-     */
     private function serializarParaCatalogo(Producto $p): array
     {
         return [

@@ -3,17 +3,6 @@ require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/CarritoItem.php';
 require_once __DIR__ . '/Producto.php';
 
-/**
- * ==========================================================================
- *  CarritoDeCompras.php
- * ==========================================================================
- *  Mapea la tabla `carrito` (cabecera) + se apoya en CarritoItem.php
- *  (líneas). Corresponde a la clase "CarritoDeCompras" del Diagrama de
- *  Clases, incluyendo su relación 1 a 1 con Cliente ("carrito" tiene
- *  una restricción UNIQUE sobre id_cliente: cada cliente tiene UN solo
- *  carrito activo, tal como indica la BD).
- * ==========================================================================
- */
 class CarritoDeCompras
 {
     public ?int $idCarrito;
@@ -22,7 +11,7 @@ class CarritoDeCompras
     public ?string $creadoEn;
     public ?string $actualizado;
 
-    /** @var CarritoItem[] Lista de líneas del carrito. */
+    
     public array $items = [];
 
     private PDO $pdo;
@@ -42,13 +31,6 @@ class CarritoDeCompras
         }
     }
 
-    /**
-     * obtenerOCrearParaCliente($idCliente)
-     * ------------------------------------------------------------
-     * Como cada cliente tiene máximo UN carrito (restricción UNIQUE
-     * en la BD), este método busca su carrito existente o, si nunca
-     * ha comprado, le crea uno vacío automáticamente.
-     */
     public static function obtenerOCrearParaCliente(int $idCliente): CarritoDeCompras
     {
         $pdo = Database::getConnection();
@@ -61,7 +43,7 @@ class CarritoDeCompras
             return new CarritoDeCompras($fila);
         }
 
-        // No existía carrito -> se crea uno nuevo vacío.
+        
         $insertar = $pdo->prepare("INSERT INTO carrito (id_cliente, subtotal) VALUES (:cliente, 0)");
         $insertar->bindValue(':cliente', $idCliente, PDO::PARAM_INT);
         $insertar->execute();
@@ -72,18 +54,6 @@ class CarritoDeCompras
         return $nuevoCarrito;
     }
 
-    // =================================================================
-    //  MÉTODOS DE NEGOCIO (Diagrama de Clases)
-    // =================================================================
-
-    /**
-     * agregarProducto($idProducto, $cantidad)
-     * ------------------------------------------------------------
-     * Agrega un producto al carrito. Si el producto YA estaba en el
-     * carrito, simplemente incrementa la cantidad en lugar de crear
-     * una línea duplicada (respetando la restricción UNIQUE de la BD).
-     * Valida que haya stock disponible antes de agregar (CU012).
-     */
     public function agregarProducto(int $idProducto, int $cantidad): bool
     {
         $producto = Producto::obtenerPorId($idProducto);
@@ -105,7 +75,7 @@ class CarritoDeCompras
                 'id_carrito'      => $this->idCarrito,
                 'id_producto'     => $idProducto,
                 'cantidad'        => $cantidad,
-                'precio_unitario' => $producto->precio, // Se "congela" el precio actual.
+                'precio_unitario' => $producto->precio, 
             ]);
             $nuevoItem->crear();
         }
@@ -115,10 +85,6 @@ class CarritoDeCompras
         return true;
     }
 
-    /**
-     * eliminarProducto($idProducto)
-     * Quita por completo un producto del carrito.
-     */
     public function eliminarProducto(int $idProducto): bool
     {
         $item = CarritoItem::obtenerPorCarritoYProducto($this->idCarrito, $idProducto);
@@ -134,11 +100,6 @@ class CarritoDeCompras
         return $ok;
     }
 
-    /**
-     * modificarCantidad($idProducto, $cantidad)
-     * Cambia la cantidad de un producto ya existente en el carrito
-     * (por ejemplo, cuando el cliente usa los botones +/- en la UI).
-     */
     public function modificarCantidad(int $idProducto, int $cantidad): void
     {
         if ($cantidad <= 0) {
@@ -159,12 +120,6 @@ class CarritoDeCompras
         }
     }
 
-    /**
-     * calcularSubtotal()
-     * Suma el subtotal de cada línea (cantidad * precio_unitario) y
-     * lo guarda tanto en la propiedad del objeto como en la BD, para
-     * que el frontend pueda leerlo directamente sin recalcularlo.
-     */
     public function calcularSubtotal(): float
     {
         $total = 0.0;
@@ -183,17 +138,13 @@ class CarritoDeCompras
         return $this->subtotal;
     }
 
-    /**
-     * vaciarCarrito()
-     * Elimina todas las líneas del carrito (ej. después de convertirlo
-     * exitosamente en un Pedido, o si el cliente lo cancela manualmente).
-     */
+    
     public function vaciarCarrito(): bool
     {
         $ok = CarritoItem::vaciarPorCarrito($this->idCarrito);
         if ($ok) {
             $this->items = [];
-            $this->calcularSubtotal(); // Queda en 0.
+            $this->calcularSubtotal(); 
         }
         return $ok;
     }

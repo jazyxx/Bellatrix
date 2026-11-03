@@ -1,8 +1,3 @@
-/**
- * ============================================================================
- *  registro.js — Lógica exclusiva de registro.html (CU010)
- * ============================================================================
- */
 
 document.addEventListener('DOMContentLoaded', () => {
   const formulario = document.getElementById('form-registro');

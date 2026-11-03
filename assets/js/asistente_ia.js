@@ -1,26 +1,3 @@
-/**
- * ============================================================================
- *  asistente_ia.js — Widget del Asistente Financiero con IA.
- *  Vive exclusivamente en admin_caja.html (rol Administrador). Consume:
- *    GET    /api/asistente-ia/historial
- *    POST   /api/asistente-ia/mensaje    { mensaje }
- *    DELETE /api/asistente-ia/historial
- *
- *  IMPORTANTE — por qué esto NO es un listener de 'DOMContentLoaded':
- *  admin_caja.js reconstruye TODO el <body> dentro de su propio
- *  DOMContentLoaded (vía injectDashboardLayout(), en dashboard_components.js,
- *  que hace document.body.innerHTML = '...'). Si este archivo enganchara
- *  sus addEventListener() en su propio DOMContentLoaded, se engancharían
- *  a los nodos VIEJOS del DOM, que quedan destruidos un instante después
- *  cuando el body se reconstruye — el botón quedaría con el mismo HTML
- *  pero CERO listeners, y el clic no haría nada (justo el bug reportado).
- *
- *  Por eso, en vez de auto-ejecutarse, este archivo solo DEFINE
- *  inicializarAsistenteIA(), y es admin_caja.js quien la llama a mano,
- *  justo DESPUÉS de que injectDashboardLayout() ya terminó de reconstruir
- *  el DOM — exactamente el mismo patrón que ya usa inicializarAdminCaja().
- * ============================================================================
- */
 
 function inicializarAsistenteIA() {
   const boton   = document.getElementById('ia-widget-boton');
@@ -32,7 +9,7 @@ function inicializarAsistenteIA() {
   const input   = document.getElementById('ia-widget-input');
   const enviar  = document.getElementById('ia-widget-enviar');
 
-  if (!boton || !panel) return; // Esta página no tiene el widget montado.
+  if (!boton || !panel) return; 
 
   let historialCargado = false;
 

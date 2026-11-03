@@ -6,40 +6,9 @@ require_once __DIR__ . '/../../models/AlertaStock.php';
 require_once __DIR__ . '/../core/Request.php';
 require_once __DIR__ . '/../core/Response.php';
 
-/**
- * ==========================================================================
- *  InventarioController.php
- * ==========================================================================
- *  Implementa 3 Casos de Uso relacionados con el control de existencias:
- *
- *    - CU002: Gestionar Inventario (crear/actualizar/eliminar productos).
- *    - CU009: Consultar Inventario (listar/ver productos y su stock).
- *    - CU019: Gestionar Materias Primas (insumos, umbrales, alertas).
- *
- *  NOTA: el descuento AUTOMÁTICO de stock al finalizar una venta (CU008)
- *  no está aquí, sino en VentaController::finalizar(), porque es ahí
- *  donde ocurre el evento que lo dispara (una venta finalizada). Este
- *  controlador se encarga de la gestión MANUAL del inventario (que un
- *  Administrador/Cajero dan de alta o editan productos e insumos).
- *
- *  Todas las rutas de este controlador están protegidas con
- *  Middleware::rol([...]) en routes.php — ver ese archivo para saber
- *  exactamente qué rol puede hacer qué.
- * ==========================================================================
- */
 class InventarioController
 {
-    // =================================================================
-    //  PRODUCTOS (CU002 / CU009)
-    // =================================================================
-
-    /**
-     * listarProductos()
-     * GET /api/inventario/productos?unidad=Pastelería&buscar=torta
-     * Soporta filtros opcionales por unidad de negocio o por texto de búsqueda.
-     * Trae TODOS los productos (incluso los no disponibles), a diferencia
-     * del catálogo público que se construirá en la Fase 5 (CU011).
-     */
+   
     public function listarProductos(): void
     {
         $unidad = Request::query('unidad');
@@ -57,10 +26,6 @@ class InventarioController
         Response::exito($datos, 'Productos obtenidos correctamente.');
     }
 
-    /**
-     * verProducto($id)
-     * GET /api/inventario/productos/{id}
-     */
     public function verProducto(string $id): void
     {
         $producto = Producto::obtenerPorId((int) $id);
@@ -72,14 +37,6 @@ class InventarioController
         Response::exito($producto->obtenerDatos());
     }
 
-    /**
-     * crearProducto()
-     * POST /api/inventario/productos
-     * Body: { nombre, descripcion?, tipo?, unidad_negocio, precio, stock?, foto_base64? }
-     * `foto_base64` es opcional: una cadena "data:image/...;base64,XXXX"
-     * (lo que produce FileReader.readAsDataURL() en el navegador) o un
-     * base64 crudo sin ese prefijo — ambos formatos se aceptan.
-     */
     public function crearProducto(): void
     {
         $datos = Request::jsonBody();
@@ -105,18 +62,6 @@ class InventarioController
         }
     }
 
-    /**
-     * actualizarProducto($id)
-     * PUT /api/inventario/productos/{id}
-     * Actualiza TODOS los campos del producto a la vez. Para cambios
-     * puntuales de solo el stock existe un endpoint más específico
-     * abajo (ajustarStockProducto), que reutiliza la validación de
-     * negocio de Producto::actualizarStock() de la Fase 1.
-     *
-     * Si el body NO trae `foto_base64`, la foto que ya estaba guardada
-     * se conserva tal cual (ver Producto::actualizar()) — así se puede
-     * editar precio/stock/nombre sin tener que volver a subir la foto.
-     */
     public function actualizarProducto(string $id): void
     {
         $producto = Producto::obtenerPorId((int) $id);
@@ -144,7 +89,7 @@ class InventarioController
         $producto->unidadNegocio = $datos['unidad_negocio'];
         $producto->precio        = (float) $datos['precio'];
         $producto->stock         = isset($datos['stock']) ? (int) $datos['stock'] : $producto->stock;
-        $producto->fotoBinaria   = $fotoBinaria; // null si no se mandó una foto nueva.
+        $producto->fotoBinaria   = $fotoBinaria; 
         $producto->disponible    = isset($datos['disponible']) ? (bool) $datos['disponible'] : $producto->disponible;
 
         try {
@@ -155,24 +100,10 @@ class InventarioController
         }
     }
 
-    /**
-     * fotoProducto($id)
-     * ------------------------------------------------------------
-     * GET /api/inventario/productos/{id}/foto
-     * Sirve la imagen guardada como un archivo binario real (no como
-     * JSON) — esta es la URL que se usa directo en el atributo `src`
-     * de una etiqueta <img>. Es PÚBLICA a propósito (sin Middleware de
-     * rol en routes.php): el catálogo de la tienda en línea también
-     * necesita mostrar estas imágenes sin que el cliente haya iniciado
-     * sesión.
-     */
     public function fotoProducto(string $id): void
     {
         $bytes = Producto::obtenerFotoBinaria((int) $id);
 
-        // Igual que Response::json(): descarta cualquier cosa que se
-        // haya colado en el buffer de salida (warnings, notices) antes
-        // de este punto, para que la imagen no salga corrupta.
         if (ob_get_level() > 0) {
             ob_clean();
         }
@@ -184,9 +115,6 @@ class InventarioController
             return;
         }
 
-        // Detecta el tipo real de imagen a partir de los bytes (funciona
-        // sin importar si se subió un .jpg, .png, .webp, etc.), en vez
-        // de confiar en la extensión del archivo original.
         $mime = 'image/jpeg';
         if (function_exists('finfo_open')) {
             $info = finfo_open(FILEINFO_MIME_TYPE);
@@ -199,28 +127,17 @@ class InventarioController
 
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . strlen($bytes));
-        header('Cache-Control: public, max-age=86400'); // el navegador puede cachearla un día.
+        header('Cache-Control: public, max-age=86400'); 
         echo $bytes;
     }
 
-    /**
-     * decodificarFotoBase64($valor)
-     * ------------------------------------------------------------
-     * Convierte el string base64 que manda el formulario en bytes
-     * binarios reales, listos para guardar en la columna MEDIUMBLOB.
-     * Acepta tanto un "data URL" completo (data:image/png;base64,...)
-     * como un base64 crudo. Devuelve [bytes, null] si todo bien, o
-     * [null, 'mensaje de error'] si el valor es inválido o muy pesado.
-     *
-     * @return array{0: ?string, 1: ?string}
-     */
     private function decodificarFotoBase64(?string $valor): array
     {
         if ($valor === null || trim($valor) === '') {
-            return [null, null]; // No se mandó foto nueva — no es un error.
+            return [null, null]; 
         }
 
-        // Quita el prefijo "data:image/xxx;base64," si viene incluido.
+        
         if (str_contains($valor, ',') && str_starts_with($valor, 'data:')) {
             $valor = substr($valor, strpos($valor, ',') + 1);
         }
@@ -230,7 +147,7 @@ class InventarioController
             return [null, 'La imagen enviada no tiene un formato base64 válido.'];
         }
 
-        $maxBytes = 4 * 1024 * 1024; // 4MB — de sobra para una foto de producto.
+        $maxBytes = 4 * 1024 * 1024; 
         if (strlen($bytes) > $maxBytes) {
             return [null, 'La imagen es demasiado pesada (máximo 4MB).'];
         }
@@ -238,10 +155,6 @@ class InventarioController
         return [$bytes, null];
     }
 
-    /**
-     * eliminarProducto($id)
-     * DELETE /api/inventario/productos/{id}
-     */
     public function eliminarProducto(string $id): void
     {
         $producto = Producto::obtenerPorId((int) $id);
@@ -254,20 +167,13 @@ class InventarioController
             $producto->eliminar();
             Response::exito([], 'Producto eliminado exitosamente.');
         } catch (Exception $e) {
-            // Si el producto ya tiene ventas/pedidos asociados, la BD
-            // rechaza el borrado por llave foránea. Se traduce a un
-            // mensaje amigable en vez del error crudo de SQL.
+            
+            
+            
             Response::error('No se pudo eliminar: es posible que el producto ya tenga ventas o pedidos asociados.', 409);
         }
     }
 
-    /**
-     * ajustarStockProducto($id)
-     * POST /api/inventario/productos/{id}/ajustar-stock
-     * Body: { "cantidad": 10 }  (positivo para sumar, negativo para restar)
-     * Reutiliza Producto::actualizarStock() de la Fase 1, que ya valida
-     * que el stock nunca pueda quedar negativo.
-     */
     public function ajustarStockProducto(string $id): void
     {
         $producto = Producto::obtenerPorId((int) $id);
@@ -305,11 +211,6 @@ class InventarioController
         return $errores;
     }
 
-    // =================================================================
-    //  MATERIAS PRIMAS (CU019)
-    // =================================================================
-
-    /** GET /api/inventario/materias-primas */
     public function listarMateriasPrimas(): void
     {
         $materias = MateriaPrima::listarTodas();
@@ -317,7 +218,7 @@ class InventarioController
         Response::exito($datos);
     }
 
-    /** GET /api/inventario/materias-primas/bajo-stock */
+    
     public function listarMateriasBajoStock(): void
     {
         $materias = MateriaPrima::listarConStockBajo();
@@ -325,7 +226,6 @@ class InventarioController
         Response::exito($datos, 'Insumos con stock igual o por debajo del mínimo.');
     }
 
-    /** POST /api/inventario/materias-primas — Body: { nombre, unidad_medida?, stock_actual?, stock_minimo } */
     public function crearMateriaPrima(): void
     {
         $datos = Request::jsonBody();
@@ -343,7 +243,7 @@ class InventarioController
         Response::exito($this->serializarMateria($materia), 'Materia prima registrada exitosamente.', 201);
     }
 
-    /** PUT /api/inventario/materias-primas/{id} */
+    
     public function actualizarMateriaPrima(string $id): void
     {
         $materia = MateriaPrima::obtenerPorId((int) $id);
@@ -361,7 +261,6 @@ class InventarioController
         Response::exito($this->serializarMateria($materia), 'Materia prima actualizada exitosamente.');
     }
 
-    /** DELETE /api/inventario/materias-primas/{id} */
     public function eliminarMateriaPrima(string $id): void
     {
         $materia = MateriaPrima::obtenerPorId((int) $id);
@@ -378,16 +277,6 @@ class InventarioController
         }
     }
 
-    /**
-     * ajustarStockMateria($id)
-     * POST /api/inventario/materias-primas/{id}/ajustar-stock
-     * Body: { "tipo": "aumentar"|"descontar", "cantidad": 5 }
-     *
-     * Además de ajustar el stock, implementa la parte "activa" del
-     * CU019: si tras el ajuste el insumo queda en stock bajo, se
-     * genera automáticamente una AlertaStock. Si el stock se recupera,
-     * se desactivan las alertas previas.
-     */
     public function ajustarStockMateria(string $id): void
     {
         $materia = MateriaPrima::obtenerPorId((int) $id);
@@ -412,15 +301,15 @@ class InventarioController
                 $materia->descontarStock($cantidad);
             }
 
-            // --- EL DISPARADOR INTELIGENTE ---
+            
             if ($materia->tieneStockBajo()) {
-                // Si el stock quedó bajo, enciende la alerta
+                
                 AlertaStock::generarSiAplica($materia);
             } else {
-                // Si el stock es seguro, usamos la función que creamos para apagar alertas
+                
                 AlertaStock::desactivarPorMateria($materia->idMateria);
             }
-            // ---------------------------------
+            
 
             Response::exito($this->serializarMateria($materia), 'Stock de materia prima actualizado exitosamente.');
         } catch (Exception $e) {
@@ -439,12 +328,7 @@ class InventarioController
             'stock_bajo'    => $m->tieneStockBajo(),
         ];
     }
-
-    // =================================================================
-    //  RECETAS (vínculo Producto <-> MateriaPrima, soporte del CU008)
-    // =================================================================
-
-    /** GET /api/inventario/productos/{id}/receta */
+  
     public function verRecetaDeProducto(string $idProducto): void
     {
         $lineas = Receta::obtenerPorProducto((int) $idProducto);
@@ -453,20 +337,13 @@ class InventarioController
             'id_receta'      => $r->idReceta,
             'id_materia'     => $r->idMateria,
             'cantidad'       => $r->cantidad,
-            'nombre_materia' => $r->nombreMateria, // Agregamos el nombre
-            'unidad_medida'  => $r->unidadMedida   // Agregamos la unidad
+            'nombre_materia' => $r->nombreMateria, 
+            'unidad_medida'  => $r->unidadMedida   
         ], $lineas);
 
         Response::exito($datos, 'Receta obtenida correctamente.');
     }
-    /**
-     * agregarLineaReceta()
-     * POST /api/inventario/recetas
-     * Body: { "id_producto": 3, "id_materia": 1, "cantidad": 0.5 }
-     * Define cuánta materia prima consume 1 unidad del producto. Esta
-     * tabla es la que usará VentaController::finalizar() (CU008) para
-     * saber qué insumos descontar cuando se vende ese producto.
-     */
+ 
     public function agregarLineaReceta(): void
     {
         $datos = Request::jsonBody();
@@ -492,8 +369,7 @@ class InventarioController
 
         Response::exito(['id_receta' => $receta->idReceta], 'Línea de receta agregada exitosamente.', 201);
     }
-
-    /** DELETE /api/inventario/recetas/{id} */
+ 
     public function eliminarLineaReceta(string $id): void
     {
         $receta = Receta::obtenerPorId((int) $id);
@@ -505,12 +381,7 @@ class InventarioController
         $receta->eliminar();
         Response::exito([], 'Línea de receta eliminada exitosamente.');
     }
-
-    // =================================================================
-    //  ALERTAS DE STOCK (parte visible del CU019)
-    // =================================================================
-
-    /** GET /api/inventario/alertas */
+ 
     public function listarAlertas(): void
     {
         $alertas = AlertaStock::listarActivas();
@@ -529,7 +400,7 @@ class InventarioController
         Response::exito($datos, 'Alertas activas obtenidas correctamente.');
     }
 
-    /** POST /api/inventario/alertas/{id}/atender */
+    
     public function atenderAlerta(string $id): void
     {
         $alerta = AlertaStock::obtenerPorId((int) $id);

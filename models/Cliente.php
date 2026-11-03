@@ -1,29 +1,12 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
 
-/**
- * ==========================================================================
- *  Cliente.php
- * ==========================================================================
- *  Mapea la tabla `cliente`. Corresponde a la clase "Cliente" del
- *  Diagrama de Clases.
- *
- *  NOTA IMPORTANTE SOBRE SEGURIDAD:
- *  En esta Fase 1 (solo Modelos) los métodos registrarse() e
- *  iniciarSesion() manejan directamente la contraseña. El HASHING
- *  real con bcrypt (password_hash / password_verify) y el manejo de
- *  sesiones ($_SESSION) se implementará formalmente en la FASE 2
- *  (AuthController), que es donde vive la lógica de autenticación
- *  del sistema. Aun así, dejamos aquí ya el uso de password_hash()
- *  para que el modelo nunca guarde contraseñas en texto plano.
- * ==========================================================================
- */
 class Cliente
 {
     public ?int $idCliente;
     public string $nombre;
     public string $correo;
-    public string $contrasena; // Al leer de BD, aquí llega el HASH, nunca la contraseña real.
+    public string $contrasena; 
     public ?string $telefono;
     public ?string $direccionEntrega;
     public bool $activo;
@@ -49,20 +32,9 @@ class Cliente
         $this->tokenExpiracion    = $datos['token_expiracion']   ?? null;
     }
 
-    // =================================================================
-    //  MÉTODOS DE NEGOCIO (Diagrama de Clases)
-    // =================================================================
-
-    /**
-     * registrarse()
-     * ------------------------------------------------------------
-     * Inserta este cliente como una fila nueva en `cliente`, guardando
-     * la contraseña de forma segura con password_hash() (bcrypt).
-     * Devuelve false si el correo ya existe (columna UNIQUE en la BD). angelgei
-     */
     public function registrarse(): bool
     {
-        // Nunca se guarda la contraseña "cruda": siempre se hashea antes.
+        
         $hash = password_hash($this->contrasena, PASSWORD_BCRYPT);
 
         $sql = "INSERT INTO cliente (nombre, correo, contraseña, telefono, direccion_entrega, activo)
@@ -81,7 +53,7 @@ class Cliente
             $this->activo = true;
             return true;
         } catch (PDOException $e) {
-            // Código 23000 = violación de restricción única (correo duplicado).
+            
             if ($e->getCode() === '23000') {
                 return false;
             }
@@ -89,17 +61,6 @@ class Cliente
         }
     }
 
-    /**
-     * iniciarSesion($correo, $contrasenaPlano)
-     * ------------------------------------------------------------
-     * Busca al cliente por correo y compara la contraseña ingresada
-     * con el hash guardado en la BD usando password_verify().
-     * Devuelve el objeto Cliente si las credenciales son correctas,
-     * o null si no lo son.
-     *
-     * (El manejo completo de sesión con $_SESSION se hará en la Fase 2,
-     * dentro de AuthController; aquí solo se valida la identidad).
-     */
     public static function iniciarSesion(string $correo, string $contrasenaPlano): ?Cliente
     {
         $pdo = Database::getConnection();
@@ -109,28 +70,19 @@ class Cliente
 
         $fila = $stmt->fetch();
         if (!$fila) {
-            return null; // No existe ese correo o el cliente está inactivo.
+            return null; 
         }
 
         if (!password_verify($contrasenaPlano, $fila['contraseña'])) {
-            return null; // Contraseña incorrecta.
+            return null; 
         }
 
         return new Cliente($fila);
     }
 
-    /**
-     * recuperarContrasena()
-     * ------------------------------------------------------------
-     * Genera un token aleatorio y seguro, lo guarda en la BD junto
-     * con su fecha de expiración (1 hora), para poder enviarlo luego
-     * por correo (esto se conectará con Notificacion.php en la Fase 4).
-     *
-     * @return string El token generado (para incluirlo en el link del correo).
-     */
     public function recuperarContrasena(): string
     {
-        $token = bin2hex(random_bytes(32)); // 64 caracteres hexadecimales, seguros.
+        $token = bin2hex(random_bytes(32)); 
         $expiracion = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
         $sql = "UPDATE cliente SET token_recuperacion = :token, token_expiracion = :expira WHERE id_cliente = :id";
@@ -146,12 +98,6 @@ class Cliente
         return $token;
     }
 
-    /**
-     * restablecerContrasena($token, $nuevaContrasena)
-     * Complemento lógico de recuperarContrasena(): valida el token
-     * (que exista y no haya expirado) y, si es válido, guarda la
-     * nueva contraseña ya hasheada.
-     */
     public static function restablecerContrasena(string $token, string $nuevaContrasena): bool
     {
         $pdo = Database::getConnection();
@@ -161,7 +107,7 @@ class Cliente
 
         $fila = $stmt->fetch();
         if (!$fila) {
-            return false; // Token inválido o expirado.
+            return false; 
         }
 
         $hash = password_hash($nuevaContrasena, PASSWORD_BCRYPT);
@@ -172,23 +118,13 @@ class Cliente
         return $update->execute();
     }
 
-    /**
-     * consultarPedidos()
-     * ------------------------------------------------------------
-     * Devuelve todos los pedidos hechos por este cliente. Se apoya
-     * en el modelo Pedido (definido en Pedido.php) para no repetir
-     * la consulta SQL aquí.
-     */
     public function consultarPedidos(): array
     {
         require_once __DIR__ . '/Pedido.php';
         return Pedido::obtenerPorCliente($this->idCliente);
     }
 
-    // =================================================================
-    //  CRUD adicional
-    // =================================================================
-
+    
     public function actualizar(): bool
     {
         $sql = "UPDATE cliente SET nombre = :nombre, telefono = :telefono, direccion_entrega = :direccion
@@ -201,12 +137,6 @@ class Cliente
         return $stmt->execute();
     }
 
-    /**
-     * desactivar()
-     * En vez de borrar físicamente al cliente (lo cual rompería el
-     * historial de pedidos por las llaves foráneas), se le pone
-     * activo = 0. Esto es "borrado lógico" (soft delete).
-     */
     public function desactivar(): bool
     {
         $sql = "UPDATE cliente SET activo = 0 WHERE id_cliente = :id";
@@ -228,14 +158,6 @@ class Cliente
         return $fila ? new Cliente($fila) : null;
     }
 
-    /**
-     * obtenerPorCorreo($correo)
-     * ------------------------------------------------------------
-     * Añadido en la Fase 2: lo usa AuthController::recuperar() para
-     * ubicar la cuenta del cliente por su correo de forma directa
-     * (con una consulta indexada, ya que `correo` es UNIQUE en la BD),
-     * en vez de recorrer todos los clientes uno por uno.
-     */
     public static function obtenerPorCorreo(string $correo): ?Cliente
     {
         $pdo = Database::getConnection();
@@ -254,13 +176,6 @@ class Cliente
         return array_map(fn($fila) => new Cliente($fila), $stmt->fetchAll());
     }
 
-    /**
-     * activar()
-     * ------------------------------------------------------------
-     * Complemento lógico de desactivar(): vuelve a marcar activo = 1.
-     * Se usa desde el panel de Administrador (CU003, gestión de
-     * usuarios) para reactivar una cuenta que se había desactivado.
-     */
     public function activar(): bool
     {
         $sql = "UPDATE cliente SET activo = 1 WHERE id_cliente = :id";
@@ -271,15 +186,6 @@ class Cliente
         return $ok;
     }
 
-    /**
-     * obtenerDatos()
-     * ------------------------------------------------------------
-     * Devuelve las propiedades del cliente como arreglo asociativo,
-     * listo para convertir a JSON en un controlador (mismo patrón que
-     * Producto::obtenerDatos()). NUNCA incluye la contraseña ni los
-     * tokens de recuperación: esos datos jamás deben salir hacia el
-     * frontend.
-     */
     public function obtenerDatos(): array
     {
         return [

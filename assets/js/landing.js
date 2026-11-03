@@ -1,11 +1,3 @@
-/**
- * ============================================================================
- *  landing.js — Lógica exclusiva de index.html
- * ============================================================================
- *  Trae los productos del catálogo público y muestra los primeros 8 como
- *  "Destacados" en la Landing Page.
- * ============================================================================
- */
 
 async function cargarDestacados() {
   const grilla = document.getElementById('grilla-destacados');

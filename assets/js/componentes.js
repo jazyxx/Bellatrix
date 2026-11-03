@@ -1,22 +1,4 @@
-/**
- * ============================================================================
- *  componentes.js — Piezas de interfaz que se repiten en varias páginas
- * ============================================================================
- *  Dos responsabilidades:
- *    1. Pintar el header según haya o no sesión activa (Iniciar sesión vs.
- *       Mi cuenta / Cerrar sesión), y actualizar el contador del carrito.
- *    2. Generar el HTML de una tarjeta de producto, usado tanto en la
- *       Landing (destacados) como en el Catálogo completo.
- * ============================================================================
- */
 
-/**
- * inicializarHeader()
- * ------------------------------------------------------------
- * Se llama una vez, al cargar cualquier página que tenga el header
- * de Ambrosía. Revisa la sesión y actualiza la zona de acciones del
- * header (#zona-cuenta) y el contador del carrito (#contador-carrito).
- */
 async function inicializarHeader() {
   const zonaCuenta = document.getElementById('zona-cuenta');
   if (!zonaCuenta) return;
@@ -32,7 +14,6 @@ async function inicializarHeader() {
       `;
       await actualizarContadorCarrito();
     } else if (usuario.tipo === 'empleado') {
-      // Enlace dinámico según rol
       const linkLabel = usuario.rol === 'Administrador' ? 'Administrar' : 'Dashboard';
       zonaCuenta.innerHTML = `
         <span class="me-3 d-none d-md-inline" style="font-weight:700;">${escaparHtml(usuario.rol)}: ${escaparHtml(primerNombre(usuario.nombre))}</span>
@@ -42,7 +23,6 @@ async function inicializarHeader() {
     }
     document.getElementById('boton-cerrar-sesion').addEventListener('click', cerrarSesion);
   } else {
-    // Sin sesión
     zonaCuenta.innerHTML = `
       <a href="login_empleado.html" class="btn-sm me-3 text-muted text-decoration-none" style="font-weight:700; font-size: 0.9rem;">Portal Empleados</a>
       <a href="login.html" class="btn-ambrosia-outline btn-sm me-2">Iniciar sesión</a>
@@ -51,11 +31,6 @@ async function inicializarHeader() {
   }
 }
 
-/**
- * actualizarContadorCarrito()
- * Consulta el carrito real del cliente (si hay sesión) y actualiza
- * la burbuja numérica del ícono de carrito en el header.
- */
 async function actualizarContadorCarrito() {
   const contador = document.getElementById('contador-carrito');
   if (!contador) return;
@@ -68,30 +43,15 @@ async function actualizarContadorCarrito() {
   contador.style.display = totalItems > 0 ? 'flex' : 'none';
 }
 
-/**
- * cerrarSesion()
- * Cierra la sesión en el backend y recarga la página actual.
- */
 async function cerrarSesion() {
   await apiFetch('api/auth/logout', { method: 'POST' });
   window.location.href = 'index.html';
 }
 
-/**
- * tarjetaProductoHTML(producto)
- * ------------------------------------------------------------
- * Recibe un producto (tal como lo devuelve GET /api/catalogo/productos)
- * y devuelve el HTML de su tarjeta, lista para insertar en una grilla.
- * Se usa tanto en index.html (destacados) como en catalogo.html.
- */
 function tarjetaProductoHTML(producto) {
   const claseBadge = producto.unidad_negocio === 'Pastelería' ? 'badge-pasteleria' : 'badge-heladeria';
   const inicial = producto.nombre ? producto.nombre.charAt(0).toUpperCase() : '?';
 
-  // Si el producto tiene una foto guardada, se muestra la imagen real
-  // (servida como binario por InventarioController::fotoProducto, sin
-  // necesidad de sesión). Si no, se conserva el placeholder con la
-  // inicial del nombre, igual que antes.
   const imagen = producto.tiene_foto
     ? `<img src="api/inventario/productos/${producto.id_producto}/foto" alt="${escaparHtml(producto.nombre)}" class="tarjeta-producto__imagen" loading="lazy">`
     : `<div class="tarjeta-producto__imagen" aria-hidden="true">${escaparHtml(inicial)}</div>`;
@@ -119,25 +79,12 @@ function tarjetaProductoHTML(producto) {
   `;
 }
 
-/**
- * activarBotonesAgregarCarrito(contenedor)
- * ------------------------------------------------------------
- * Le conecta el comportamiento de "Agregar al carrito" a todos los
- * botones .boton-agregar-carrito dentro de un contenedor (llamar
- * DESPUÉS de insertar las tarjetas en el DOM).
- *
- * ESTE ES EL PUNTO DONDE SE EXIGE AUTENTICACIÓN: si no hay sesión de
- * Cliente activa, en vez de agregar el producto, se redirige a
- * login.html — tal como pide la Fase 5 ("flujo de checkout que exige
- * autenticación").
- */
 function activarBotonesAgregarCarrito(contenedor) {
   contenedor.querySelectorAll('.boton-agregar-carrito').forEach((boton) => {
     boton.addEventListener('click', async () => {
       const usuario = await obtenerSesionActual();
 
       if (!usuario || usuario.tipo !== 'cliente') {
-        // Guardamos a dónde volver después de iniciar sesión.
         sessionStorage.setItem('ambrosia_redirigir_despues_login', window.location.href);
         window.location.href = 'login.html?motivo=carrito';
         return;
@@ -169,7 +116,6 @@ function activarBotonesAgregarCarrito(contenedor) {
   });
 }
 
-/** Utilidades pequeñas, usadas por varias páginas. */
 function escaparHtml(texto) {
   const div = document.createElement('div');
   div.textContent = texto ?? '';

@@ -1,39 +1,29 @@
-/**
- * assets/js/admin_pos.js
- * Lógica del Punto de Venta (POS) para Administradores y Cajeros.
- */
 
 let todosLosProductos = [];
 let carritoLocal = [];
 let categoriaActiva = 'todos';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Guardia de sesión
   const usuario = await obtenerSesionActual();
   if (!usuario || (usuario.rol !== 'Administrador' && usuario.rol !== 'Cajero')) {
     window.location.href = 'login_empleado.html';
     return;
   }
 
-  // 2. Inyectar Layout del Dashboard
   const activeTabId = usuario.rol === 'Administrador' ? 'admin_pos' : 'cajero_pos';
   await injectDashboardLayout(usuario.rol, activeTabId);
 
-  // 3. Inicializar Listeners
   inicializarListeners();
 
-  // 4. Cargar catálogo de productos del POS
   await cargarProductosPOS();
 });
 
 function inicializarListeners() {
-  // Búsqueda en tiempo real
   const buscarInput = document.getElementById('pos-buscar-input');
   if (buscarInput) {
     buscarInput.addEventListener('input', filtrarProductos);
   }
 
-  // Filtrado por categoría
   const catBtns = document.querySelectorAll('.pos-category-btn');
   catBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -44,13 +34,11 @@ function inicializarListeners() {
     });
   });
 
-  // Cálculo de cambio de dinero en tiempo real
   const recibidoInput = document.getElementById('pos-recibido');
   if (recibidoInput) {
     recibidoInput.addEventListener('input', calcularCambio);
   }
 
-  // Registrar y finalizar venta
   const btnFinalizar = document.getElementById('pos-btn-finalizar');
   if (btnFinalizar) {
     btnFinalizar.addEventListener('click', finalizarVentaPOS);
@@ -110,12 +98,10 @@ function filtrarProductos() {
   const query = document.getElementById('pos-buscar-input').value.toLowerCase().trim();
   let filtrados = todosLosProductos;
 
-  // Filtrado por categoría
   if (categoriaActiva !== 'todos') {
     filtrados = filtrados.filter(p => p.tipo === categoriaActiva);
   }
 
-  // Filtrado por texto de búsqueda
   if (query) {
     filtrados = filtrados.filter(p => p.nombre.toLowerCase().includes(query) || (p.tipo && p.tipo.toLowerCase().includes(query)));
   }
@@ -210,9 +196,8 @@ function actualizarCarritoDOM() {
     </div>
   `).join('');
 
-  // Totales
   const subtotal = carritoLocal.reduce((s, i) => s + (i.precio * i.cantidad), 0);
-  const tax = Math.round(subtotal * 0.19); // simulando el IVA ya incluido
+  const tax = Math.round(subtotal * 0.19); 
 
   document.getElementById('cart-subtotal').textContent = formatearPrecioCOP(subtotal);
   document.getElementById('cart-tax').textContent = formatearPrecioCOP(tax);
@@ -226,8 +211,8 @@ function calcularCambio() {
   const totalStr = document.getElementById('cart-total').textContent.replace(/[^\d]/g, '');
   const total = Number(totalStr) || 0;
   const recibido = Number(document.getElementById('pos-recibido').value) || 0;
-  
-  const cambio = recibido > total ? recibido - total : 0;
+
+    const cambio = recibido > total ? recibido - total : 0;
   document.getElementById('pos-cambio').textContent = formatearPrecioCOP(cambio);
 }
 
@@ -242,7 +227,6 @@ async function finalizarVentaPOS() {
     btn.textContent = 'Procesando venta…';
 
     try {
-      // 1. Abrir Venta
       const respVenta = await apiFetch('api/ventas', {
         method: 'POST',
         body: { canal: 'Presencial', unidad_negocio: unidadNegocio }
@@ -257,7 +241,6 @@ async function finalizarVentaPOS() {
 
       const idVenta = respVenta.datos.id_venta;
 
-      // 2. Agregar cada producto de forma secuencial (para evitar colisiones de stock)
       for (const prod of carritoLocal) {
         const respItem = await apiFetch(`api/ventas/${idVenta}/productos`, {
           method: 'POST',
@@ -272,7 +255,6 @@ async function finalizarVentaPOS() {
         }
       }
 
-      // 3. Finalizar Venta (esto descuenta inventario, materia prima y mete saldo a la caja)
       const respFinalizar = await apiFetch(`api/ventas/${idVenta}/finalizar`, {
         method: 'POST'
       });
@@ -284,27 +266,20 @@ async function finalizarVentaPOS() {
         return;
       }
 
-      // Éxito completo
       showDashboardAlert(`¡Venta #${idVenta} finalizada con éxito! Total: ${document.getElementById('cart-total').textContent}`, 'success');
-      
-      // --- NUEVA LÓGICA DE REMISIÓN ---
-      // Buscamos si hay alguna torta personalizada en el carrito actual
+
       const tieneTortaPersonalizada = carritoLocal.some(item => 
         item.nombre.toLowerCase().includes("torta personalizada")
       );
 
       if (tieneTortaPersonalizada) {
-        // Abrimos el formato físico de remisión en una ventana nueva
         window.open(`imprimir_remision.html?id=${idVenta}`, '_blank', 'width=800,height=600');
       }
-      // --------------------------------
 
-      // Reset POS
       carritoLocal = [];
       document.getElementById('pos-recibido').value = '';
       actualizarCarritoDOM();
-      
-      // Recargar catálogo para ver el stock actualizado
+
       await cargarProductosPOS();
 
     } catch (e) {

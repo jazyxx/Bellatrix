@@ -4,19 +4,6 @@ require_once __DIR__ . '/DetallePedido.php';
 require_once __DIR__ . '/Venta.php';
 require_once __DIR__ . '/CarritoDeCompras.php';
 
-/**
- * ==========================================================================
- *  Pedido.php
- * ==========================================================================
- *  Mapea la tabla `pedido`. Corresponde a la clase "Pedido" del
- *  Diagrama de Clases. Un Pedido nace cuando el Cliente confirma su
- *  CarritoDeCompras (CU013), y su ciclo de vida completo está definido
- *  por la columna ENUM `estado`:
- *
- *   'Pendiente de pago' -> 'Confirmado' -> 'En preparación'
- *      -> 'Listo para recoger' -> 'Entregado'   (o 'Cancelado' en cualquier punto)
- * ==========================================================================
- */
 class Pedido
 {
     public ?int $idPedido;
@@ -27,17 +14,17 @@ class Pedido
     public ?string $fechaCreacion;
     public ?string $fechaActualizacion;
     public ?int $idEmpleadoGestion;
-    
-    // NUEVO: Propiedades para almacenar los datos del cliente traídos del JOIN
+
+        
     public ?string $nombreCliente;
     public ?string $telefonoCliente;
 
-    /** @var DetallePedido[] */
+    
     public array $productos = [];
 
     private PDO $pdo;
 
-    /** Estados válidos, en el mismo orden que el ENUM de la base de datos. */
+    
     public const ESTADOS_VALIDOS = [
         'Pendiente de pago', 'Confirmado', 'En preparación',
         'Listo para recoger', 'Entregado', 'Cancelado',
@@ -59,7 +46,7 @@ class Pedido
         $this->fechaActualizacion = $datos['fecha_actualizacion']  ?? null;
         $this->idEmpleadoGestion  = $datos['id_empleado_gestion']  ?? null;
 
-        // NUEVO: Mapear los datos del cliente
+        
         $this->nombreCliente   = $datos['nombre_cliente'] ?? null;
         $this->telefonoCliente = $datos['telefono_cliente'] ?? null;
 
@@ -68,23 +55,7 @@ class Pedido
         }
     }
 
-    // =================================================================
-    //  MÉTODOS DE NEGOCIO (Diagrama de Clases)
-    // =================================================================
-
-    /**
-     * confirmar()
-     * ------------------------------------------------------------
-     * Implementa el núcleo del CU013 (Realizar Pedido en Línea):
-     * convierte un CarritoDeCompras en un Pedido formal.
-     *   1. Crea la fila en `pedido`.
-     *   2. Copia cada línea del carrito a `detalle_pedido`.
-     *   3. Vacía el carrito de origen.
-     * Todo dentro de una transacción: o se hace completo, o no se hace nada.
-     *
-     * @param CarritoDeCompras $carrito El carrito que se va a confirmar.
-     * @return bool true si el pedido se creó correctamente.
-     */
+    
     public function confirmar(CarritoDeCompras $carrito): bool
     {
         if (empty($carrito->items)) {
@@ -106,7 +77,7 @@ class Pedido
             $this->total = $carrito->subtotal;
             $this->estado = 'Pendiente de pago';
 
-            // Se copia cada línea del carrito al detalle_pedido.
+            
             foreach ($carrito->items as $item) {
                 $detalle = new DetallePedido([
                     'id_pedido'       => $this->idPedido,
@@ -118,7 +89,7 @@ class Pedido
                 $this->productos[] = $detalle;
             }
 
-            // El carrito ya se convirtió en pedido, se vacía.
+            
             $carrito->vaciarCarrito();
 
             $this->pdo->commit();
@@ -129,13 +100,6 @@ class Pedido
         }
     }
 
-    /**
-     * cambiarEstado($nuevoEstado)
-     * ------------------------------------------------------------
-     * Avanza el pedido en su ciclo de vida (usado por CU015 y CU017).
-     * Valida que el estado sea uno de los permitidos por el ENUM y,
-     * al cambiarlo, dispara automáticamente notificarCliente().
-     */
     public function cambiarEstado(string $nuevoEstado): bool
     {
         if (!in_array($nuevoEstado, self::ESTADOS_VALIDOS, true)) {
@@ -147,7 +111,7 @@ class Pedido
             throw new Exception("Un pedido cancelado no puede reactivarse.");
         }
 
-        // Issue #37: el cambio de estado y sus efectos contables van juntos.
+        
         $propia = !$this->pdo->inTransaction();
         if ($propia) {
             $this->pdo->beginTransaction();
@@ -162,15 +126,11 @@ class Pedido
 
             if ($ok) {
                 if (!in_array($nuevoEstado, ['Pendiente de pago', 'Cancelado'], true)) {
-                    // Pedido pagado/confirmado -> venta + stock + ingreso en caja.
-                    // Issue #38: se intenta en CUALQUIER avance (no solo al salir de
-                    // 'Pendiente de pago'). registrarDesdePedido() es idempotente: si el
-                    // pedido ya tiene venta no hace nada, y si es un pedido que se pagó
-                    // antes de existir esta lógica (sin venta), se regulariza aquí.
+                  
                     Venta::registrarDesdePedido($this, $this->idEmpleadoGestion !== null ? (int)$this->idEmpleadoGestion : null);
                 } elseif ($nuevoEstado === 'Cancelado'
                     && !in_array($estadoAnterior, ['Pendiente de pago', 'Cancelado'], true)) {
-                    // Pedido ya pagado que se cancela -> se revierte todo.
+                    
                     Venta::anularDesdePedido($this, $estadoAnterior);
                 }
             }
@@ -186,9 +146,9 @@ class Pedido
 
         if ($ok) {
             $this->estado = $nuevoEstado;
-            // CU016: cada cambio de estado genera una notificación automática
-            // (registro en BD + correo al cliente). Si el estado no cambió
-            // realmente, no se vuelve a avisar al cliente.
+            
+            
+            
             if ($estadoAnterior !== $nuevoEstado) {
                 $this->notificarCliente();
             }
@@ -197,18 +157,7 @@ class Pedido
         return $ok;
     }
 
-    /**
-     * notificarCliente()
-     * ------------------------------------------------------------
-     * Crea el registro de Notificación correspondiente al estado
-     * actual del pedido Y envía el correo al cliente (CU016).
-     *
-     * El envío nunca rompe el flujo: si el correo falla, queda el
-     * registro con enviado = 0 y el error en el log del servidor.
-     * Si hay una transacción abierta (ej. confirmación de pago), el
-     * correo se encola y sale cuando quien abrió la transacción haga
-     * commit y llame a Notificacion::despacharPendientes().
-     */
+    
     public function notificarCliente(): bool
     {
         require_once __DIR__ . '/Notificacion.php';
@@ -231,14 +180,14 @@ class Pedido
         $notificacion->mensaje = $mensaje;
         $notificacion->crear();
 
-        // --- Envío del correo al cliente ---
+        
         $cliente = Cliente::obtenerPorId($this->idCliente);
         if ($cliente === null || !filter_var($cliente->correo, FILTER_VALIDATE_EMAIL)) {
             error_log("[NOTIFICACIÓN] Pedido #{$this->idPedido}: el cliente no tiene un correo válido; no se envió el aviso.");
             return true;
         }
 
-        // El pedido puede venir sin nombres de producto si se construyó a mano.
+        
         if (empty($this->productos) && $this->idPedido !== null) {
             $this->productos = DetallePedido::listarPorPedido($this->idPedido);
         }
@@ -253,10 +202,7 @@ class Pedido
 
         return true;
     }
-
-    // =================================================================
-    //  Consultas
-    // =================================================================
+ 
 
     public static function obtenerPorId(int $id): ?Pedido
     {
@@ -269,7 +215,7 @@ class Pedido
         return $fila ? new Pedido($fila) : null;
     }
 
-    /** consultarPedidos() del Cliente usa este método. */
+    
     public static function obtenerPorCliente(int $idCliente): array
     {
         $pdo = Database::getConnection();
@@ -280,11 +226,11 @@ class Pedido
         return array_map(fn($fila) => new Pedido($fila), $stmt->fetchAll());
     }
 
-    /** Para el panel de Administrador/Cajero (CU017): pedidos pendientes de gestión. */
+    
     public static function listarPorEstado(string $estado): array
     {
         $pdo = Database::getConnection();
-        // Cambiamos el SELECT * genérico por un JOIN con la tabla de usuarios
+        
         $sql = "
             SELECT p.*, u.nombre AS nombre_cliente, u.telefono AS telefono_cliente 
             FROM pedido p
@@ -292,10 +238,7 @@ class Pedido
             WHERE p.estado = :estado 
             ORDER BY p.fecha_creacion ASC
         ";
-        
-        /* Nota: Si tu tabla de usuarios se llama diferente (ej: 'usuario' o 'clientes') 
-           o su ID es diferente (ej: solo 'id'), ajusta la línea del LEFT JOIN arriba. */
-           
+
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':estado', $estado);
         $stmt->execute();

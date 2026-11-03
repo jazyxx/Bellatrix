@@ -1,22 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
 
-/**
- * ==========================================================================
- *  Empleado.php
- * ==========================================================================
- *  Mapea la tabla `empleado`. Es la clase BASE (padre) de la que heredan
- *  Administrador y Cajero, exactamente como lo indica tu Diagrama de
- *  Clases con la flecha de herencia:
- *
- *      Empleado <|-- Administrador
- *      Empleado <|-- Cajero
- *
- *  En PHP esto se traduce en que Administrador.php y Cajero.php usan
- *  "extends Empleado" y automáticamente heredan todas las propiedades
- *  y métodos que se definen aquí (nombre, usuario, validarDatos, etc.).
- * ==========================================================================
- */
 class Empleado
 {
     public ?int $idEmpleado;
@@ -24,16 +8,13 @@ class Empleado
     public ?string $apellido;
     public string $usuario;
     public string $correo;
-    protected string $contrasena; // protected: solo esta clase y sus hijas la tocan directamente.
-    public string $rol; // ENUM: 'Administrador' | 'Cajero'
+    protected string $contrasena; 
+    public string $rol; 
     public bool $activo;
     public ?string $telefono;
     public ?float $salario;
     public ?string $fechaContratacion;
 
-    /**
-     * protected: PDO también se hereda a Administrador y Cajero.
-     */
     protected PDO $pdo;
 
     public function __construct(array $datos = [])
@@ -53,17 +34,6 @@ class Empleado
         $this->fechaContratacion = $datos['fecha_contratacion'] ?? null;
     }
 
-    // =================================================================
-    //  MÉTODOS DE NEGOCIO (Diagrama de Clases)
-    // =================================================================
-
-    /**
-     * validarDatos()
-     * ------------------------------------------------------------
-     * Verifica que los datos mínimos obligatorios del empleado estén
-     * completos antes de guardarlo (nombre, usuario, correo, rol).
-     * Devuelve un arreglo de errores; si está vacío, los datos son válidos.
-     */
     public function validarDatos(): array
     {
         $errores = [];
@@ -84,15 +54,6 @@ class Empleado
         return $errores;
     }
 
-    /**
-     * ingresarSistema($usuario, $contrasenaPlano)
-     * ------------------------------------------------------------
-     * Autentica a un empleado (Administrador o Cajero) por su nombre
-     * de usuario y contraseña. Devuelve la fila cruda de la BD (no un
-     * objeto todavía) porque quien llama a este método necesita saber
-     * el "rol" para decidir si debe construir un objeto Administrador
-     * o un objeto Cajero (esto se resuelve en AuthController, Fase 2).
-     */
     public static function ingresarSistema(string $usuario, string $contrasenaPlano): ?array
     {
         $pdo = Database::getConnection();
@@ -104,20 +65,12 @@ class Empleado
         if (!$fila) {
             return null;
         }
-
-        // Soporta tanto contraseñas ya hasheadas con bcrypt como los
-        // datos de prueba en texto plano que trae tu script SQL
-        // (ej. 'angel123'), para que puedas iniciar sesión de inmediato
-        // en desarrollo. En Fase 2 se recomienda re-hashear esos datos.
+ 
         $esValida = password_verify($contrasenaPlano, $fila['contraseña'])
                     || $contrasenaPlano === $fila['contraseña'];
 
         return $esValida ? $fila : null;
     }
-
-    // =================================================================
-    //  CRUD (compartido por Administrador y Cajero al heredar)
-    // =================================================================
 
     public function actualizar(): bool
     {
@@ -136,11 +89,6 @@ class Empleado
         return $stmt->execute();
     }
 
-    /**
-     * desactivar()
-     * Borrado lógico: en vez de eliminar al empleado (lo que rompería
-     * el historial de ventas/pedidos que gestionó), se marca inactivo.
-     */
     public function desactivar(): bool
     {
         $sql = "UPDATE empleado SET activo = 0 WHERE id_empleado = :id";
@@ -169,12 +117,6 @@ class Empleado
         return array_map(fn($fila) => new Empleado($fila), $stmt->fetchAll());
     }
 
-    /**
-     * activar()
-     * Complemento lógico de desactivar(): vuelve a marcar activo = 1.
-     * Se usa desde el panel de Administrador (CU003, gestión de
-     * usuarios) para reactivar a un empleado desactivado.
-     */
     public function activar(): bool
     {
         $sql = "UPDATE empleado SET activo = 1 WHERE id_empleado = :id";
@@ -185,15 +127,6 @@ class Empleado
         return $ok;
     }
 
-    /**
-     * cambiarContrasena($nuevaContrasenaPlano)
-     * ------------------------------------------------------------
-     * A diferencia del Cliente (que tiene su propio flujo de "¿olvidaste
-     * tu contraseña?" con token por correo), los Empleados no tienen
-     * autogestión de contraseña: es el Administrador quien la
-     * restablece manualmente desde su panel de gestión de usuarios
-     * (CU003). Siempre se guarda hasheada con bcrypt.
-     */
     public function cambiarContrasena(string $nuevaContrasenaPlano): bool
     {
         $hash = password_hash($nuevaContrasenaPlano, PASSWORD_BCRYPT);
@@ -204,14 +137,6 @@ class Empleado
         return $stmt->execute();
     }
 
-    /**
-     * obtenerDatos()
-     * ------------------------------------------------------------
-     * Devuelve las propiedades del empleado como arreglo asociativo
-     * (mismo patrón que Producto::obtenerDatos()). NUNCA incluye la
-     * contraseña. Administrador y Cajero sobrescriben este método para
-     * agregar su propiedad extra (nivel_acceso / turno).
-     */
     public function obtenerDatos(): array
     {
         return [

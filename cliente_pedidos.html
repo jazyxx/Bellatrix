@@ -22,9 +22,7 @@
   </div>
 
   <div class="row">
-    <!-- Historial y Tracking de Pedidos a ancho completo -->
     <div class="col-12">
-      <!-- Sección de Tracking Detallado -->
       <div id="tracking-card" class="db-card db-card--primary mb-4" style="display: none;">
         <div class="d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center gap-2">
@@ -76,7 +74,6 @@
         </div>
       </div>
 
-      <!-- Tarjeta de Confirmación de Cancelación (Oculta por defecto) -->
       <div id="cancelar-card" class="db-card border-danger mb-4" style="display: none; background-color: #fffafb;">
         <div class="d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center gap-2">
@@ -86,8 +83,8 @@
           <button class="btn btn-sm btn-close" onclick="cerrarCancelar()"></button>
         </div>
         <hr class="my-3 border-danger" style="opacity: 0.2;">
-        
-        <div class="text-center py-4">
+
+                <div class="text-center py-4">
           <h4 class="mb-2 fuente-display">¿Estás seguro de que deseas cancelar este pedido?</h4>
           <p class="text-muted mb-4 mx-auto" style="max-width: 500px;">
             Esta acción no se puede deshacer. Si el pedido ya fue pagado a través de Nequi, el proceso de reembolso puede tomar hasta 24 horas hábiles.
@@ -98,8 +95,7 @@
           </div>
         </div>
       </div>
-      
-      <!-- Tabla de Pedidos -->
+
       <div class="db-card db-card--success">
         <div class="d-flex align-items-center gap-2 mb-3">
           <span class="db-card-icono db-card-icono--success"><i class="bi bi-bag-check-fill"></i></span>

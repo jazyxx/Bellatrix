@@ -7,28 +7,13 @@ require_once __DIR__ . '/../libs/PHPMailer/src/SMTP.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 
-/**
- * ==========================================================================
- *  Notificacion.php
- * ==========================================================================
- *  Mapea la tabla `notificacion`. Corresponde a la clase "Notificacion"
- *  del Diagrama de Clases. Implementa el CU016 (Recibir Notificación).
- *
- *  IMPORTANTE: este modelo se encarga de GENERAR el texto del mensaje
- *  y de DEJAR REGISTRO en la base de datos de que la notificación
- *  existe. El envío real (conectarse a un servidor SMTP y mandar el
- *  correo, por ejemplo con PHPMailer) es responsabilidad de la Fase 4
- *  (Módulo E-Commerce y Notificaciones), para mantener este modelo
- *  enfocado solo en datos, tal como pide el patrón MVC.
- * ==========================================================================
- */
 class Notificacion
 {
     public ?int $idNotificacion;
     public int $idCliente;
     public ?int $idPedido;
-    public string $tipo; // ENUM: 'Confirmación de registro'|'Confirmación de pedido'|'Cambio de estado'|'Recuperación de contraseña'
-    public string $canalEnvio; // ENUM: 'Correo'|'Mensaje'
+    public string $tipo; 
+    public string $canalEnvio; 
     public string $mensaje;
     public bool $enviado;
     public ?string $fechaEnvio;
@@ -51,15 +36,6 @@ class Notificacion
         $this->creadoEn       = $datos['creado_en']       ?? null;
     }
 
-    // =================================================================
-    //  MÉTODOS DE NEGOCIO (Diagrama de Clases)
-    // =================================================================
-
-    /**
-     * generarMensajeConfirmacion($pedido)
-     * Arma el texto del correo/mensaje de confirmación de un pedido
-     * recién creado, incluyendo su total.
-     */
     public function generarMensajeConfirmacion(object $pedido): string
     {
         $total = number_format($pedido->total, 2);
@@ -67,10 +43,6 @@ class Notificacion
              . "Te avisaremos apenas cambie de estado. ¡Gracias por tu compra!";
     }
 
-    /**
-     * generarMensajeCambioEstado($estado)
-     * Arma el texto según el nuevo estado del pedido.
-     */
     public function generarMensajeCambioEstado(string $estado): string
     {
         $mensajes = [
@@ -84,22 +56,6 @@ class Notificacion
         return $mensajes[$estado] ?? "El estado de tu pedido cambió a: {$estado}.";
     }
 
-    /**
-     * enviarCorreo($destinatario, $cuerpo, $asunto = null, $html = null)
-     * ------------------------------------------------------------
-     * Envía el correo REAL vía SMTP usando PHPMailer, con la
-     * configuración de config/Mail.php.
-     *
-     *  - $cuerpo : texto plano (AltBody). Si no se pasa $html, también
-     *              se usa como cuerpo HTML.
-     *  - $asunto : opcional; por defecto se usa el tipo de notificación.
-     *  - $html   : opcional; cuerpo HTML ya armado (ej. plantilla del pedido).
-     *
-     * Si el envío falla (SMTP mal configurado, sin internet, etc.), NO
-     * lanza excepción hacia arriba: registra el error en el log y devuelve
-     * false, para que ningún flujo (recuperación de contraseña, cambio de
-     * estado de un pedido) se rompa por un problema de correo.
-     */
     public function enviarCorreo(string $destinatario, string $cuerpo, ?string $asunto = null, ?string $html = null): bool
     {
         $archivoConfig = __DIR__ . '/../config/Mail.php';
@@ -111,26 +67,26 @@ class Notificacion
 
         $mail = new PHPMailer(true);
         try {
-            // --- Configuración del servidor SMTP ---
+            
             $mail->isSMTP();
             $mail->Host       = $config['MAIL_HOST'];
             $mail->SMTPAuth   = true;
             $mail->Username   = $config['MAIL_USUARIO'];
             $mail->Password   = $config['MAIL_CLAVE'];
-            $mail->SMTPSecure = $config['MAIL_CIFRADO']; // 'tls' o 'ssl'
+            $mail->SMTPSecure = $config['MAIL_CIFRADO']; 
             $mail->Port       = $config['MAIL_PUERTO'];
             $mail->CharSet    = 'UTF-8';
-            $mail->Timeout    = 15; // no dejar la petición colgada si el SMTP no responde
+            $mail->Timeout    = 15; 
             $mail->SMTPDebug  = $config['MAIL_DEBUG'] ? 2 : 0;
 
-            // --- Remitente y destinatario ---
+            
             $mail->setFrom($config['MAIL_DESDE'], $config['MAIL_DESDE_NOMBRE']);
             $mail->addAddress($destinatario);
 
-            // --- Contenido del mensaje ---
+            
             $mail->Subject = $asunto ?? ($this->tipo !== '' ? $this->tipo : 'Notificación de Ambrosía');
-            $mail->Body    = $html ?? nl2br(htmlspecialchars($cuerpo));   // versión HTML
-            $mail->AltBody = $cuerpo;                                     // versión texto plano
+            $mail->Body    = $html ?? nl2br(htmlspecialchars($cuerpo));   
+            $mail->AltBody = $cuerpo;                                     
             $mail->isHTML(true);
 
             $mail->send();
@@ -144,26 +100,14 @@ class Notificacion
         }
     }
 
-    // =================================================================
-    //  COLA DE ENVÍOS (correos que esperan a que se haga commit)
-    // =================================================================
-
-    /** @var array<int, array{n: Notificacion, correo: string, asunto: string, html: string, texto: string}> */
     private static array $pendientes = [];
 
-    /**
-     * encolarCorreo()
-     * Cuando el cambio de estado ocurre DENTRO de una transacción mayor
-     * (ej. Pago::confirmarTransaccion), el correo no debe salir hasta que
-     * esa transacción haga commit: si luego hace rollback (p. ej. stock
-     * insuficiente) el cliente habría recibido un aviso falso.
-     */
     public static function encolarCorreo(Notificacion $n, string $correo, string $asunto, string $html, string $texto): void
     {
         self::$pendientes[] = ['n' => $n, 'correo' => $correo, 'asunto' => $asunto, 'html' => $html, 'texto' => $texto];
     }
 
-    /** Envía los correos en cola. Llamar DESPUÉS del commit. */
+    
     public static function despacharPendientes(): void
     {
         $cola = self::$pendientes;
@@ -173,17 +117,12 @@ class Notificacion
         }
     }
 
-    /** Descarta los correos en cola. Llamar si la transacción hizo rollback. */
+    
     public static function descartarPendientes(): void
     {
         self::$pendientes = [];
     }
 
-    // =================================================================
-    //  PLANTILLA COMÚN DE CORREOS (misma imagen para TODOS los correos)
-    // =================================================================
-
-    /** Píldora de color con el estado/título (mismo estilo que los avisos de pedido). */
     private static function etiquetaHtml(string $texto, string $color): string
     {
         return '<p style="margin:0 0 16px;"><span style="display:inline-block;background:' . $color
@@ -191,11 +130,6 @@ class Notificacion
             . htmlspecialchars($texto, ENT_QUOTES, 'UTF-8') . '</span></p>';
     }
 
-    /**
-     * plantillaBase($nombreCliente, $contenido)
-     * Marco visual compartido: encabezado de marca, saludo, contenido y pie.
-     * $contenido ya debe venir como HTML seguro (escapado por quien lo arma).
-     */
     private static function plantillaBase(string $nombreCliente, string $contenido): string
     {
         $nombre = htmlspecialchars($nombreCliente, ENT_QUOTES, 'UTF-8');
@@ -211,19 +145,6 @@ class Notificacion
             . '</td></tr></table></td></tr></table></body></html>';
     }
 
-    /**
-     * armarCorreoMarca(...)
-     * ------------------------------------------------------------
-     * Correo genérico con la misma imagen que los avisos de pedido.
-     * Sirve para registro de cuenta, recuperación de contraseña, etc.
-     *
-     * @param string      $etiqueta Texto de la píldora (ej. "¡Bienvenido(a)!").
-     * @param string      $color    Color hex de la píldora.
-     * @param string      $mensaje  Texto principal (texto plano; aquí se escapa).
-     * @param string|null $codigo   Código destacado en una caja (ej. token de recuperación).
-     * @param string|null $nota     Aviso secundario en letra pequeña.
-     * @return array{0: string, 1: string} [html, texto]
-     */
     public function armarCorreoMarca(
         string $nombreCliente,
         string $etiqueta,
@@ -256,10 +177,6 @@ class Notificacion
         return [$html, $texto];
     }
 
-    /**
-     * enviarCorreoMarca(...)
-     * Atajo: arma el correo con la plantilla común y lo envía.
-     */
     public function enviarCorreoMarca(
         string $destinatario,
         string $nombreCliente,
@@ -274,14 +191,6 @@ class Notificacion
         return $this->enviarCorreo($destinatario, $texto, $asunto, $html);
     }
 
-    /**
-     * armarCorreoPedido($pedido, $nombreCliente)
-     * ------------------------------------------------------------
-     * Arma asunto, HTML y texto plano del correo que recibe el cliente
-     * cuando su pedido se crea o cambia de estado.
-     *
-     * @return array{0: string, 1: string, 2: string} [asunto, html, texto]
-     */
     public function armarCorreoPedido(object $pedido, string $nombreCliente): array
     {
         $e      = fn(string $t): string => htmlspecialchars($t, ENT_QUOTES, 'UTF-8');
@@ -344,22 +253,14 @@ class Notificacion
         return [$asunto, $html, $texto];
     }
 
-    /**
-     * enviarMensaje($destinatario)
-     * Igual que enviarCorreo(), pero para el canal 'Mensaje' (ej. SMS
-     * o WhatsApp). También queda como stub hasta la Fase 4.
-     */
+    
     public function enviarMensaje(string $destinatario): bool
     {
-        // TODO (Fase 4): reemplazar por integración real (ej. API de WhatsApp).
+        
         error_log("[SIMULACIÓN DE MENSAJE] Para: {$destinatario} | Mensaje: {$this->mensaje}");
         return $this->registrarEnvio();
     }
 
-    /**
-     * registrarEnvio()
-     * Marca la notificación como enviada y guarda la fecha/hora exacta.
-     */
     public function registrarEnvio(): bool
     {
         $sql = "UPDATE notificacion SET enviado = 1, fecha_envio = NOW() WHERE id_notificacion = :id";
@@ -375,15 +276,7 @@ class Notificacion
         return $ok;
     }
 
-    // =================================================================
-    //  CRUD
-    // =================================================================
-
-    /**
-     * crear()
-     * Guarda el registro de la notificación en la BD (todavía sin
-     * enviar; enviado = 0 por defecto).
-     */
+    
     public function crear(): int
     {
         $sql = "INSERT INTO notificacion (id_cliente, id_pedido, tipo, canal_envio, mensaje, enviado)

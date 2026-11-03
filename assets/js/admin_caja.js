@@ -1,50 +1,34 @@
-/**
- * assets/js/admin_caja.js
- * Lógica de conciliación de cajas y reportes financieros para Administradores (y consulta Cajeros).
- */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Guardia de sesión
   const usuario = await obtenerSesionActual();
   if (!usuario || (usuario.rol !== 'Administrador' && usuario.rol !== 'Cajero')) {
     window.location.href = 'login_empleado.html';
     return;
   }
 
-  // 2. Inyectar Layout del Dashboard
   await injectDashboardLayout(usuario.rol, 'admin_caja');
 
-  // 3. Habilitar secciones según el rol (Administrador vs Cajero)
   if (usuario.rol === 'Administrador') {
     document.getElementById('admin-only-section').style.display = 'flex';
     document.getElementById('cajero-restriction-banner').style.display = 'none';
     inicializarAdminCaja();
-    // El widget del Asistente Financiero ya está en el DOM reconstruido
-    // por injectDashboardLayout() (paso 2) — recién AHORA se enganchan
-    // sus event listeners, nunca antes (ver comentario en asistente_ia.js).
     inicializarAsistenteIA();
   } else {
     document.getElementById('admin-only-section').style.display = 'none';
     document.getElementById('cajero-restriction-banner').style.display = 'block';
-    // El Asistente Financiero con IA es exclusivo de Administrador
-    // (igual que los reportes y ajustes de caja) — se oculta para
-    // Cajero, ya que el backend lo rechazaría con 403 de todas formas.
     document.getElementById('ia-widget-boton')?.remove();
     document.getElementById('ia-widget-panel')?.remove();
   }
 
-  // 4. Cargar la caja inicial del día por defecto
   consultarCajaHoy();
 });
 
 function inicializarAdminCaja() {
-  // Listener de transacciones manuales (ingresos/egresos)
   const formTrans = document.getElementById('form-transaccion-caja');
   if (formTrans) {
     formTrans.addEventListener('submit', registrarTransaccionCaja);
   }
 
-  // Setear fecha de hoy por defecto en reporte
   const repFechaIni = document.getElementById('rep-fecha-inicio');
   if (repFechaIni) {
     const hoy = new Date().toISOString().split('T')[0];
@@ -64,12 +48,11 @@ async function consultarCajaHoy() {
   }
 
   const c = respuesta.datos;
-  
-  // Pintar valores KPI
+
   document.getElementById('kpi-ventas').textContent = formatearPrecioCOP(c.total_ventas || 0);
   document.getElementById('kpi-egresos').textContent = formatearPrecioCOP(c.total_egresos || 0);
-  
-  const saldo = Number(c.saldo) || (c.total_ventas - c.total_egresos);
+
+    const saldo = Number(c.saldo) || (c.total_ventas - c.total_egresos);
   document.getElementById('kpi-saldo').textContent = formatearPrecioCOP(saldo);
 }
 
@@ -90,7 +73,6 @@ async function registrarTransaccionCaja(e) {
   btn.disabled = true;
   btn.textContent = 'Procesando movimiento…';
 
-  // Endpoint cambia según tipo
   const endpoint = tipo === 'egreso' ? 'api/cajas/egreso' : 'api/cajas/ingreso';
 
   const respuesta = await apiFetch(endpoint, {
@@ -103,23 +85,18 @@ async function registrarTransaccionCaja(e) {
   });
 
   if (!respuesta.exito) {
-    // Si excede el saldo (bloqueo 422), el backend responde success:false
-    // Mostramos la alerta de error pastel estilizada
     showDashboardAlert(respuesta.mensaje || 'El egreso no pudo registrarse por saldo insuficiente.', 'danger');
     btn.disabled = false;
     btn.innerHTML = '<i class="bi bi-send-fill me-1"></i>Procesar Movimiento';
     return;
   }
 
-  // Éxito
   showDashboardAlert(`Movimiento registrado con éxito: ${tipo.toUpperCase()} por ${formatearPrecioCOP(monto)} en Caja ${unidad} (${canal}).`, 'success');
-  
-  // Limpiar formulario y reactivar botón
+
   document.getElementById('mov-monto').value = '';
   btn.disabled = false;
   btn.innerHTML = '<i class="bi bi-send-fill me-1"></i>Procesar Movimiento';
 
-  // Sincronizar KPI de inmediato
   consultarCajaHoy();
 }
 
@@ -203,7 +180,6 @@ async function generarReporte() {
   document.getElementById('reporte-titulo-consola').textContent = `Resultado Reporte ${tipo.toUpperCase()}`;
 
   let datos = respuesta.datos;
-  // Si el backend responde con un objeto único en vez de arreglo, lo metemos en arreglo
   if (!Array.isArray(datos)) {
     datos = [datos];
   }

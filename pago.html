@@ -34,20 +34,19 @@
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-lg-5 col-md-8">
-          
-          <span class="eyebrow">Checkout seguro</span>
+
+                    <span class="eyebrow">Checkout seguro</span>
           <h1 class="fuente-display mt-1 mb-4">Pago en Línea</h1>
 
           <div class="resumen-carrito">
             <h3 class="h5 mb-3" style="color: var(--crema); font-family: var(--fuente-display);">Detalles de tu transacción</h3>
-            
-            <p class="mb-4" style="opacity: 0.9;">
+
+                        <p class="mb-4" style="opacity: 0.9;">
               Estás a un paso de completar tu <strong>Pedido #<span id="pago-id-pedido">...</span></strong>.
             </p>
 
             <form id="form-pago">
-              
-              <!-- Selector de Medio de Pago -->
+
               <label for="medio-pago" class="d-block mb-1 small fw-bold">Medio de Pago</label>
               <select class="form-select mb-3" id="medio-pago" required>
                 <option value="" disabled selected>Selecciona una opción...</option>
@@ -55,7 +54,6 @@
                 <option value="Nequi">Nequi</option>
               </select>
 
-              <!-- Campo dinámico para Nequi (Oculto por defecto) -->
               <div id="caja-celular-nequi" class="mb-4" style="display: none;">
                 <label for="celular-nequi" class="d-block mb-1 small fw-bold text-info">Número de celular (Nequi)</label>
                 <input type="tel" id="celular-nequi" class="form-control" placeholder="Ej: 3001234567" pattern="[0-9]{10}">
@@ -64,12 +62,10 @@
                 </p>
               </div>
 
-              <!-- Mensaje de error/éxito -->
               <div id="mensaje-pago" class="mensaje-formulario mensaje-formulario--error mb-3" style="display:none;"></div>
 
               <button type="submit" id="btn-pagar" class="btn-ambrosia w-100 mt-2">Pagar Ahora</button>
-              
-              <!-- NUEVO: Botón de simulación -->
+
               <button type="button" id="btn-simular-pago" class="btn btn-outline-light rounded-pill w-100 mt-3" style="opacity: 0.75;">Simular Pago Aprobado (Prueba)</button>
             </form>
             </form>
@@ -89,6 +85,6 @@
 
   <script src="assets/js/api.js"></script>
   <script src="assets/js/componentes.js"></script>
-  <script src="assets/js/pago.js"></script> <!-- Aquí conectamos el nuevo JS -->
+  <script src="assets/js/pago.js"></script> 
 </body>
 </html>

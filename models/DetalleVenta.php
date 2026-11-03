@@ -1,15 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
 
-/**
- * ==========================================================================
- *  DetalleVenta.php
- * ==========================================================================
- *  Mapea la tabla `detalle_venta`. Cada fila es un producto dentro de
- *  una venta presencial (punto de venta / POS). Corresponde a la
- *  relación "Venta incluye 1..* Producto" del Diagrama de Clases.
- * ==========================================================================
- */
 class DetalleVenta
 {
     public ?int $idDetalle;
@@ -17,7 +8,7 @@ class DetalleVenta
     public ?int $idProducto;
     public int $cantidad;
     public float $precioUnitario;
-    public ?string $nombreProducto;   // viene del JOIN con `productos`
+    public ?string $nombreProducto;   
 
     private PDO $pdo;
 

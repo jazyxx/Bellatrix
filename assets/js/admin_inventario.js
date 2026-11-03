@@ -1,14 +1,9 @@
-/**
- * assets/js/admin_inventario.js
- * Lógica EXCLUSIVA para gestión de stock de productos terminados (Vitrina).
- */
 
 let todosProductosVitrina = [];
 let modalProductoBs = null;
 let esAdministrador = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Guardia de sesión
   const usuario = await obtenerSesionActual();
   if (!usuario || (usuario.rol !== 'Administrador' && usuario.rol !== 'Cajero')) {
     window.location.href = 'login_empleado.html';
@@ -17,17 +12,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   esAdministrador = usuario.rol === 'Administrador';
 
-  // 2. Inyectar Layout del Dashboard (Activa el botón "Inventario")
   await injectDashboardLayout(usuario.rol, 'admin_inventario');
 
-  // 3. Inicializar instancias de modales Bootstrap
   modalProductoBs = new bootstrap.Modal(document.getElementById('modal-producto'));
 
-  // 4. Inicializar listeners
   document.getElementById('form-modal-producto').addEventListener('submit', guardarProducto);
   document.getElementById('prod-foto').addEventListener('change', manejarSeleccionDeFoto);
 
-  // 5. Cargar datos iniciales de vitrina
   await cargarProductosVitrina();
 });
 
@@ -137,8 +128,6 @@ async function abrirEditarProducto(idProducto) {
 
   resetearFotoModal();
   if (p.tiene_foto) {
-    // Muestra la foto que ya está guardada (sin necesidad de que el
-    // Administrador la vuelva a subir si no quiere cambiarla).
     mostrarVistaPreviaFoto(`api/inventario/productos/${p.id_producto}/foto`);
   }
 
@@ -147,16 +136,6 @@ async function abrirEditarProducto(idProducto) {
   modalProductoBs.show();
 }
 
-/**
- * ------------------------------------------------------------
- * Manejo de la foto del producto (subir + vista previa)
- * ------------------------------------------------------------
- * fotoBase64Seleccionada guarda el resultado de FileReader como un
- * "data URL" (data:image/png;base64,XXXX). Se manda tal cual en el
- * body de guardarProducto() SOLO si el Administrador eligió un
- * archivo nuevo — si no, no se manda el campo, y el backend conserva
- * la foto que ya existía (ver Producto::actualizar()).
- */
 let fotoBase64Seleccionada = null;
 
 function resetearFotoModal() {
@@ -185,7 +164,7 @@ function manejarSeleccionDeFoto(e) {
 
   const lector = new FileReader();
   lector.onload = () => {
-    fotoBase64Seleccionada = lector.result; // "data:image/png;base64,...."
+    fotoBase64Seleccionada = lector.result; 
     mostrarVistaPreviaFoto(fotoBase64Seleccionada);
   };
   lector.readAsDataURL(archivo);

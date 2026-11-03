@@ -4,35 +4,9 @@ require_once __DIR__ . '/../core/Request.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../core/Sesion.php';
 
-/**
- * ==========================================================================
- *  CajaController.php
- * ==========================================================================
- *  Implementa el CU018: "Gestionar Cajas por Unidad" y su regla más
- *  importante, "Bloqueo de egresos si superan el saldo disponible en
- *  la caja de la unidad seleccionada".
- *
- *  RECORDATORIO CLAVE (ya explicado en la Fase 1, GestorVentas.php):
- *  cada combinación de (canal, unidad_negocio, fecha) es una CAJA
- *  independiente. Esto es lo que garantiza que el dinero de Pastelería
- *  nunca se mezcle con el de Heladería, ni el de ventas Presenciales
- *  con las de En línea, tal como pediste.
- *
- *  Los INGRESOS por ventas se registran automáticamente desde
- *  VentaController::finalizar() (CU008). Este controlador se encarga
- *  de: consultar el estado de una caja, registrar EGRESOS (con el
- *  bloqueo de saldo), ingresos manuales (ajustes), y los reportes.
- * ==========================================================================
- */
 class CajaController
 {
-    /**
-     * hoy()
-     * ------------------------------------------------------------
-     * GET /api/cajas/hoy?canal=Presencial&unidad=Pastelería
-     * Devuelve (o crea en 0 si es la primera consulta del día) la
-     * caja de HOY para la combinación canal + unidad indicada.
-     */
+
     public function hoy(): void
     {
         [$canal, $unidad, $error] = $this->leerCanalYUnidad();
@@ -45,19 +19,6 @@ class CajaController
         Response::exito($this->serializarCaja($caja));
     }
 
-    /**
-     * registrarEgreso()
-     * ------------------------------------------------------------
-     * POST /api/cajas/egreso
-     * Body: { "canal", "unidad_negocio", "monto", "fecha"? }
-     *
-     * IMPLEMENTA LA REGLA CENTRAL DEL CU018: el egreso se RECHAZA
-     * automáticamente si supera el saldo disponible en esa caja
-     * específica. Esta validación en realidad ya vive dentro de
-     * GestorVentas::registrarEgreso() (Fase 1) — aquí solo se traduce
-     * la excepción que lanza ese método en una respuesta HTTP 422
-     * clara para el frontend.
-     */
     public function registrarEgreso(): void
     {
         $datos = Request::jsonBody();
@@ -81,24 +42,13 @@ class CajaController
             $caja->registrarEgreso((float) $monto);
             Response::exito($this->serializarCaja($caja), 'Egreso registrado exitosamente.');
         } catch (Exception $e) {
-            // Este es EXACTAMENTE el caso del CU018: el egreso superó
-            // el saldo disponible. GestorVentas::registrarEgreso() ya
-            // armó un mensaje claro indicando el monto y el saldo real.
+            
+            
+            
             Response::error($e->getMessage(), 422);
         }
     }
 
-    /**
-     * registrarIngresoManual()
-     * ------------------------------------------------------------
-     * POST /api/cajas/ingreso
-     * Body: { "canal", "unidad_negocio", "monto", "fecha"? }
-     *
-     * Los ingresos por ventas se registran SOLOS (ver VentaController::
-     * finalizar()). Este endpoint es para ajustes manuales excepcionales
-     * que el Administrador necesite hacer (ej. un ingreso que no vino
-     * de una venta registrada en el sistema, como un abono externo).
-     */
     public function registrarIngresoManual(): void
     {
         $datos = Request::jsonBody();
@@ -121,12 +71,6 @@ class CajaController
         Response::exito($this->serializarCaja($caja), 'Ingreso manual registrado exitosamente.');
     }
 
-    /**
-     * porUnidad($unidad)
-     * GET /api/cajas/unidad/{unidad}
-     * Implementa GestorVentas::separarPorUnidad() del Diagrama de Clases:
-     * historial completo de cajas de UNA unidad de negocio.
-     */
     public function porUnidad(string $unidad): void
     {
         if (!in_array($unidad, ['Pastelería', 'Heladería'], true)) {
@@ -139,11 +83,6 @@ class CajaController
         Response::exito($datos);
     }
 
-    /**
-     * porCanal($canal)
-     * GET /api/cajas/canal/{canal}
-     * Implementa GestorVentas::separarPorCanal().
-     */
     public function porCanal(string $canal): void
     {
         if (!in_array($canal, ['Presencial', 'En línea'], true)) {
@@ -156,7 +95,7 @@ class CajaController
         Response::exito($datos);
     }
 
-    /** GET /api/cajas/reportes/diario?fecha=2026-07-29 */
+    
     public function reporteDiario(): void
     {
         $fecha = Request::query('fecha', date('Y-m-d'));
@@ -164,7 +103,7 @@ class CajaController
         Response::exito(array_map(fn(GestorVentas $c) => $this->serializarCaja($c), $cajas));
     }
 
-    /** GET /api/cajas/reportes/semanal?inicio=2026-07-27 */
+    
     public function reporteSemanal(): void
     {
         $inicio = Request::query('inicio');
@@ -177,7 +116,7 @@ class CajaController
         Response::exito(array_map(fn(GestorVentas $c) => $this->serializarCaja($c), $cajas));
     }
 
-    /** GET /api/cajas/reportes/mensual?anio=2026&mes=7 */
+    
     public function reporteMensual(): void
     {
         $anio = Request::query('anio');
@@ -191,7 +130,6 @@ class CajaController
         Response::exito(array_map(fn(GestorVentas $c) => $this->serializarCaja($c), $cajas));
     }
 
-    /** GET /api/cajas/reportes/rango?inicio=2026-07-01&fin=2026-07-29 */
     public function reporteRango(): void
     {
         $inicio = Request::query('inicio');
@@ -205,15 +143,6 @@ class CajaController
         Response::exito(array_map(fn(GestorVentas $c) => $this->serializarCaja($c), $cajas));
     }
 
-    /**
-     * leerCanalYUnidad()
-     * ------------------------------------------------------------
-     * Método auxiliar privado: lee y valida 'canal' y 'unidad_negocio',
-     * ya sea desde el query string (GET) o desde el body JSON (POST),
-     * según cuál venga disponible. Devuelve [canal, unidad, error].
-     * Si $error es distinto de null, los otros dos valores deben
-     * ignorarse porque la validación falló.
-     */
     private function leerCanalYUnidad(?array $datosBody = null): array
     {
         $canal = $datosBody['canal'] ?? Request::query('canal');

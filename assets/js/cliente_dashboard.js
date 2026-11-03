@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Asegúrate de definir el ID correcto para que se ilumine en la barra lateral
   await injectDashboardLayout('Cliente', 'cliente_dashboard');
 
   document.getElementById('perfil-nombre').textContent = usuario.nombre || 'Cliente';
@@ -24,8 +23,8 @@ function inicializarEditarPerfil() {
     modalEditar.addEventListener('show.bs.modal', () => {
       document.getElementById('input-perfil-nombre').value = document.getElementById('perfil-nombre').textContent.trim();
       document.getElementById('input-perfil-correo').value = document.getElementById('perfil-correo').textContent.trim();
-      
-      const telElem = document.getElementById('perfil-telefono');
+
+            const telElem = document.getElementById('perfil-telefono');
       const telActual = telElem ? telElem.textContent.trim() : '';
       document.getElementById('input-perfil-telefono').value = (telActual === '-') ? '' : telActual;
 

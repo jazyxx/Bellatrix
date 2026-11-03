@@ -1,39 +1,28 @@
-/* ============================================================================
-   assets/css/dashboard.css — Sistema de Diseño de Paneles Privados (Fase 6)
-   ============================================================================ */
 
 :root {
-  /* Paleta Pastel Premium */
-  --db-primary: #A3C4F3;       /* Azul/Violeta pastel suave */
-  --db-primary-dark: #7CA8E8;  /* Tono para hover/foco */
-  --db-success: #B9FBC0;       /* Verde pastel */
+  --db-primary: #A3C4F3;       
+  --db-primary-dark: #7CA8E8;  
+  --db-success: #B9FBC0;       
   --db-success-dark: #8DECA2;
-  --db-warning: #FBF8CC;       /* Amarillo pastel */
-  --db-danger: #FFCFD2;        /* Rojo/Rosa pastel */
+  --db-warning: #FBF8CC;       
+  --db-danger: #FFCFD2;        
   --db-danger-dark: #FF9AA2;
-  
-  /* Fondos y Neutros */
-  --db-bg-warm: #FAF3DD;       /* Crema cálido */
-  --db-bg-light: #F8F9FA;      /* Gris muy claro */
+
+  --db-bg-warm: #FAF3DD;       
+  --db-bg-light: #F8F9FA;      
   --db-white: #FFFFFF;
-  --db-espresso: #3B2A26;      /* Texto principal */
-  --db-espresso-suave: #8A7770;/* Texto secundario */
+  --db-espresso: #3B2A26;      
+  --db-espresso-suave: #8A7770;
   --db-border: #E8E1D9;
 
-  /* Acentos de marca (los mismos tonos de la tienda: EDAFB8 / F3CFDC /
-     D2EECF / B0C4B1), usados aquí para el fondo, el banner de bienvenida
-     y detalles — así el panel se siente parte de Ambrosía, no un admin
-     genérico pegado encima. */
   --brand-rosa: #E2899B;
   --brand-rosa-medio: #F3CFDC;
   --brand-menta: #6FAE8C;
   --brand-salvia: #B0C4B1;
-  
-  /* Tipografía */
+
   --fuente-display: 'Fraunces', Georgia, serif;
   --fuente-cuerpo: 'Nunito Sans', 'Segoe UI', sans-serif;
 
-  /* Bordes, Sombras y Transiciones */
   --db-radius: 12px;
   --db-radius-sm: 8px;
   --db-shadow: 0 1px 2px rgba(59,42,38,0.04), 0 4px 15px rgba(59,42,38,0.05);
@@ -42,7 +31,6 @@
   --db-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* Base resets */
 body {
   background:
     radial-gradient(at 92% 0%, rgba(243, 207, 220, 0.28) 0%, transparent 40%),
@@ -60,7 +48,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   font-weight: 600;
 }
 
-/* Layout de Dashboard con Sidebar Persistente */
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
@@ -156,11 +143,8 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   font-weight: 700;
 }
 
-/* Main Content Wrapper */
 .dashboard-main {
   flex-grow: 1;
-  /* Sin esto, un ítem flex no baja de su ancho mínimo de contenido: una tabla ancha
-     estira todo el main más allá de la ventana y se recorta en vez de hacer scroll. */
   min-width: 0;
   margin-left: 260px;
   padding: 2rem;
@@ -181,7 +165,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   }
 }
 
-/* Tarjetas y Contenedores */
 .db-card {
   background-color: var(--db-white);
   border-radius: var(--db-radius);
@@ -205,7 +188,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   .db-card { animation: none; }
 }
 
-/* Indicadores Rápidos (Kpi) */
 .kpi-card {
   display: flex;
   align-items: center;
@@ -237,8 +219,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   letter-spacing: 0.03em;
 }
 
-/* Pequeño ícono circular junto a los títulos de tarjeta — reemplaza el
-   emoji "suelto" pegado al texto por una insignia con peso visual propio. */
 .db-card-icono {
   width: 34px;
   height: 34px;
@@ -257,9 +237,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 .db-card-icono i { font-size: 1rem; }
 
 
-/* ============================================================
-   Banner de bienvenida — reemplaza el h1+p plano de arriba del panel
-   ============================================================ */
 .db-welcome-banner {
   display: flex;
   align-items: center;
@@ -289,7 +266,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 .db-welcome-banner h1 { color: #FFF9F6; margin-bottom: 0.15rem; font-size: 1.5rem; }
 .db-welcome-banner p { color: rgba(255,249,246,0.78); margin-bottom: 0; }
 
-/* Avatar circular para la tarjeta de datos personales */
 .db-avatar {
   width: 46px;
   height: 46px;
@@ -304,11 +280,9 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   flex-shrink: 0;
 }
 
-/* Barra de acento de color arriba de cada tarjeta — rompe el "caja
-   blanca plana" sin sobrecargar el contenido interno. */
 .db-card { 
   position: relative; 
-  overflow: visible;          /* ← permite que los dropdowns salgan del card */
+  overflow: visible;          
 }
 .db-card::before {
   content: "";
@@ -316,7 +290,7 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   top: 0; left: 0; right: 0;
   height: 4px;
   background: var(--db-border);
-  border-radius: var(--db-radius) var(--db-radius) 0 0;  /* ← mantiene las esquinas redondeadas de la barra */
+  border-radius: var(--db-radius) var(--db-radius) 0 0;  
   z-index: 1;
 }
 .db-card--primary::before { background: linear-gradient(90deg, var(--db-primary), var(--db-primary-dark)); }
@@ -324,9 +298,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 .db-card--warning::before { background: linear-gradient(90deg, #F3EFA0, #E6DC78); }
 .db-card--rosa::before    { background: linear-gradient(90deg, var(--brand-rosa-medio), var(--brand-rosa)); }
 
-/* Notificaciones: tarjetitas con acento de color a la izquierda, en vez
-   de una simple línea inferior — sin tocar el JS, solo estructura ya
-   existente (#lista-notificaciones > div generado por cliente_dashboard.js) */
 #lista-notificaciones > div {
   background: var(--db-bg-light);
   border: 1px solid var(--db-border) !important;
@@ -337,7 +308,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 }
 #lista-notificaciones > div:hover { transform: translateX(2px); box-shadow: var(--db-shadow); }
 
-/* Botones con estilo Ambrosía Pastel */
 .btn-db-primary {
   background: linear-gradient(155deg, var(--db-primary) 0%, var(--db-primary-dark) 100%);
   color: var(--db-espresso);
@@ -389,7 +359,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 .btn-db-outline:hover { background-color: var(--db-bg-light); border-color: var(--db-espresso-suave); transform: translateY(-1px); }
 .btn-db-outline:active { transform: translateY(0) scale(0.97); }
 
-/* Badges Pastel */
 .badge-pastel {
   padding: 0.35em 0.65em;
   font-size: 0.75rem;
@@ -424,7 +393,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   border: 1px solid rgba(255, 154, 162, 0.45);
 }
 
-/* Tablas Estilizadas */
 .db-table {
   width: 100%;
   border-collapse: separate;
@@ -460,7 +428,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   background-color: rgba(163, 196, 243, 0.08);
 }
 
-/* Form controls */
 .form-db {
   border: 1.5px solid var(--db-border);
   border-radius: var(--db-radius-sm);
@@ -476,13 +443,11 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   outline: none;
 }
 
-/* Evita que la flecha del select se superponga al texto */
 .form-select.form-db {
-  padding-right: 2.2rem;   /* espacio suficiente para la flecha nativa */
+  padding-right: 2.2rem;   
   background-position: right 0.6rem center;
 }
 
-/* POS Specific layouts */
 .pos-layout {
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -559,7 +524,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   background-color: var(--db-bg-light);
 }
 
-/* Steps Tracking for Client */
 .tracking-steps {
   display: flex;
   justify-content: space-between;
@@ -628,7 +592,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   color: var(--db-espresso);
 }
 
-/* Hamburger mobile toggle */
 .menu-toggle {
   display: none;
   background: none;
@@ -644,9 +607,6 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 }
 
 
-/* ============================================================
-   16. ASISTENTE FINANCIERO IA — widget flotante (admin_caja.html)
-   ============================================================ */
 .ia-widget-boton {
   position: fixed;
   right: 24px;
@@ -826,22 +786,13 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
 }
 
 
-/* ============================================================
-   17. MODALES DE FORMULARIO ("db-modal")
-   ============================================================
-   Aplica a cualquier modal de Bootstrap del panel que agregue la
-   clase .db-modal-content en su .modal-content — así un modal de
-   edición se ve parte del mismo sistema (no el Bootstrap genérico
-   gris con botones azul/gris de fábrica).
-   ============================================================ */
 .db-modal-content {
   border: none;
   border-radius: var(--db-radius);
-  overflow: hidden; /* recorta el header de color a las esquinas redondeadas */
+  overflow: hidden; 
   box-shadow: var(--db-shadow-hover);
 }
 
-/* Encabezado con acento de marca en vez del blanco plano de Bootstrap */
 .db-modal-header {
   border: none;
   padding: 1.4rem 1.5rem 1.1rem;
@@ -889,64 +840,56 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   padding: 1rem 1.5rem;
 }
 
-/* El fade nativo de Bootstrap solo mueve opacidad; se le suma una
-   ligera entrada de escala para que se sienta menos "seco" al abrir. */
 .modal.fade .db-modal-content { transition: transform 0.2s var(--db-ease-out), opacity 0.2s var(--db-ease-out); transform: scale(0.97); }
 .modal.show .db-modal-content { transform: scale(1); }
 @media (prefers-reduced-motion: reduce) {
   .modal.fade .db-modal-content, .modal.show .db-modal-content { transition: none; transform: none; }
 }
 
-/* Este ajuste SOLO afecta a la tabla de Historial de Ventas */
 #tabla-ventas-historial td,
 .db-card:has(#tabla-ventas-historial) th {
   padding: 0.5rem 0.35rem !important;
   font-size: 0.85rem;
 }
 
-/* Contenedor con scroll */
 .contenedor-tabla-scroll {
   max-height: 520px;
   overflow-y: auto;
-  padding-right: 8px; /* Le da espacio de respiración a los botones para que no peguen con la barra */
-  
-  /* Compatibilidad con Firefox */
+  padding-right: 8px; 
+
   scrollbar-width: thin;
   scrollbar-color: #e2d5cb transparent;
 }
 
-/* Personalización para Chrome, Edge y Safari */
 .contenedor-tabla-scroll::-webkit-scrollbar {
-  width: 5px; /* Ancho ultra delgado */
+  width: 5px; 
 }
 
 .contenedor-tabla-scroll::-webkit-scrollbar-track {
-  background: transparent; /* Fondo invisible para que no ocupe espacio visual */
+  background: transparent; 
 }
 
 .contenedor-tabla-scroll::-webkit-scrollbar-thumb {
-  background-color: #e2d5cb; /* Tono suave pastel en armonía con el diseño */
-  border-radius: 10px;        /* Bordes completamente redondeados tipo píldora */
+  background-color: #e2d5cb; 
+  border-radius: 10px;        
 }
 
 .contenedor-tabla-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: #d4beae; /* Oscurece sutilmente al pasar el cursor */
+  background-color: #d4beae; 
 }
-/* Fija el encabezado de las columnas al hacer scroll */
 .contenedor-tabla-scroll thead th {
   position: sticky;
   top: 0;
   background-color: #ffffff; 
   z-index: 10;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Agrega una pequeña sombra para separarlo visualmente de las filas que suben */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
 }
 
-/* Estilo minimalista y compacto para el botón de filtro */
 .filtro-select-custom {
   width: auto;
   min-width: 145px;
-  max-width: 195px;              /* permite textos un poco más largos sin desbordar */
-  padding: 0.35rem 0.6rem 0.35rem 0.6rem;  /* más espacio a la derecha para la flecha */
+  max-width: 195px;              
+  padding: 0.35rem 0.6rem 0.35rem 0.6rem;  
   background-color: #faf8f5;
   border: 1px solid #e5d8cd;
   border-radius: 8px;
@@ -956,35 +899,30 @@ h1, h2, h3, h4, h5, h6, .fuente-display {
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 
-  /* Truncar el texto si es demasiado largo */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Hover suave */
 .filtro-select-custom:hover {
   background-color: #ffffff;
   border-color: #d4beae;
 }
 
-/* Estado activo/focus */
 .filtro-select-custom:focus {
   border-color: #c9a892;
   box-shadow: 0 0 0 0.2rem rgba(201, 168, 146, 0.25);
   outline: none;
 }
 
-/* Ahora puedes aplicar exactamente los colores de la marca de Ambrosía */
 .dropdown-menu .opcion-canal:hover,
 .dropdown-menu .opcion-canal:focus {
-  background-color: #f8e8e1; /* Cambia esto por tu color deseado */
+  background-color: #f8e8e1; 
   color: #333;  
 }
 
-/* Opcional: Para que el botón se vea más como un select de formulario */
 #btnCanales {
   text-align: left;
   background-color: #fff;
-  border-color: #ced4da; /* Borde estándar de Bootstrap inputs */
+  border-color: #ced4da; 
 }

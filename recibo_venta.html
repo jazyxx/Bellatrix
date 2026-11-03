@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!r.exito || !r.datos) return alerta('danger', 'Error al cargar la información de la venta.');
     const v = r.datos;
 
-    // Una venta anulada no debe generar comprobante
     if (/anulad/i.test(v.estado || '')) {
       return alerta('warning', `<h4 class="alert-heading text-danger"><i class="bi bi-shield-lock"></i> Recibo no disponible</h4>
         <p class="mb-0">La venta #${esc(v.id_venta ?? id)} está <strong>${esc(v.estado)}</strong>; no se puede emitir comprobante.</p>`);

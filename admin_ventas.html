@@ -13,7 +13,6 @@
 </head>
 <body>
 
-  <!-- Contenido principal -->
   <div class="row">
     <div class="col-12 mb-4 d-flex align-items-center gap-2">
       <span class="db-card-icono db-card-icono--success"><i class="bi bi-graph-up-arrow"></i></span>
@@ -25,7 +24,6 @@
   </div>
 
   <div class="row">
-    <!-- Tabla de Ventas -->
     <div class="col-lg-8">
       <div class="db-card">
         <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
@@ -35,7 +33,6 @@
           </div>
 
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <!-- Filtro de Canal (existente) -->
             <div class="dropdown">
               <button class="btn filtro-select-custom dropdown-toggle d-flex align-items-center justify-content-between gap-2" 
         type="button" id="btnCanales" data-bs-toggle="dropdown" 
@@ -48,7 +45,6 @@
               </ul>
             </div>
 
-            <!-- NUEVO: Filtro de Periodo -->
             <div class="dropdown">
               <button class="btn filtro-select-custom dropdown-toggle d-flex align-items-center justify-content-between gap-2" type="button" id="btnPeriodo" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false">Todos los periodos</button>
               <input type="hidden" id="ventas-filtro-periodo" value="todos">
@@ -63,7 +59,6 @@
          </div>
         </div>
 
-        <!-- NUEVO: Controles de rango personalizado (ocultos por defecto) -->
         <div id="filtro-rango-personalizado" class="d-none mb-3">
           <div class="d-flex align-items-center gap-2 flex-wrap">
             <label class="small text-muted mb-0">Desde:</label>
@@ -97,15 +92,14 @@
       </div>
     </div>
 
-    <!-- Visor de Detalle de Venta -->
     <div class="col-lg-4">
       <div id="venta-detalle-card" class="db-card" style="display: none;">
         <h3 class="h5 mb-3 fuente-display border-bottom pb-2 d-flex align-items-center justify-content-between">
           <span id="detalle-id-titulo"><i class="bi bi-file-earmark-text-fill me-1" style="color: var(--db-primary-dark);"></i>Detalle de Venta #</span>
           <button class="btn btn-sm btn-close" onclick="cerrarDetalleVenta()"></button>
         </h3>
-        
-        <div class="mb-3">
+
+                <div class="mb-3">
           <label class="small text-muted d-block">Fecha y Hora:</label>
           <strong id="detalle-fecha">-</strong>
         </div>
@@ -127,11 +121,10 @@
         </div>
 
         <hr class="my-2 dashed">
-        
-        <div class="mb-3">
+
+                <div class="mb-3">
           <label class="small text-muted">Productos Vendidos:</label>
           <ul id="detalle-productos-lista" class="list-unstyled mb-0 pl-0 mt-1">
-            <!-- Items -->
           </ul>
         </div>
 
@@ -141,11 +134,9 @@
           <span class="fw-bold">TOTAL VENTA:</span>
           <strong class="text-success" id="detalle-total" style="font-size: 1.3rem;">-</strong>
         </div>
-        <!-- Botón imprimir recibo (Issue #30) -->
         <button class="btn btn-outline-secondary w-100 py-2 mb-2" id="btn-imprimir-recibo" style="display: none;">
           <i class="bi bi-printer-fill me-1"></i>Imprimir Recibo
         </button>
-        <!-- Botón para anular transacción (CU008) -->
         <button class="btn btn-db-danger w-100 py-2 font-weight-bold" id="btn-anular-venta" style="display: none;">
           <i class="bi bi-x-octagon-fill me-1"></i>Anular Transacción
         </button>

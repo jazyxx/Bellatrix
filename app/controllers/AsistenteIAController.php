@@ -5,39 +5,39 @@ require_once __DIR__ . '/../core/Request.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../core/Sesion.php';
 
-/**
- * ==========================================================================
- *  AsistenteIAController.php
- * ==========================================================================
- *  Asistente Financiero con IA para el módulo de Caja (admin_caja.html).
- *  Ayuda al Administrador a interpretar los reportes de `gestor_ventas`
- *  y a tomar mejores decisiones financieras (qué unidad de negocio o
- *  canal rinde mejor, alertas de egresos altos, tendencias) conversando
- *  en lenguaje natural.
- *
- *  SEGURIDAD:
- *  - Estas 3 rutas SIEMPRE pasan por Middleware::rol(['Administrador'])
- *    (ver routes.php) antes de llegar aquí, así que ya sabemos que hay
- *    una sesión activa de un Administrador — igual se vuelve a validar
- *    aquí dentro por robustez (defensa en profundidad).
- *  - La API key del proveedor de IA NUNCA se expone al navegador: vive
- *    solo en config/IA.php, del lado del servidor. Este controlador es
- *    el ÚNICO intermediario autorizado entre el frontend y la API
- *    externa — el JavaScript del cliente nunca habla directo con
- *    OpenAI.
- *  - Todo mensaje entrante se sanitiza (strip_tags + límite de
- *    longitud) antes de guardarse en la BD o reenviarse a la IA.
- * ==========================================================================
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class AsistenteIAController
 {
-    /**
-     * historial()
-     * ------------------------------------------------------------
-     * GET /api/asistente-ia/historial
-     * Devuelve la conversación previa del Administrador en sesión,
-     * para repintar el widget si recarga la página o la vuelve a abrir.
-     */
+    
+
+
+
+
+
+
     public function historial(): void
     {
         $idEmpleado = Sesion::obtenerId();
@@ -57,20 +57,20 @@ class AsistenteIAController
         Response::exito($datos);
     }
 
-    /**
-     * mensaje()
-     * ------------------------------------------------------------
-     * POST /api/asistente-ia/mensaje
-     * Body: { "mensaje": "¿Qué unidad de negocio vendió más este mes?" }
-     *
-     * 1) Sanitiza y guarda la pregunta del Administrador.
-     * 2) Arma un resumen REAL de los últimos 30 días de gestor_ventas
-     *    como contexto (para que la IA responda con datos reales del
-     *    negocio, no cifras inventadas).
-     * 3) Llama al proveedor de IA vía cURL, incluyendo el historial
-     *    reciente de la conversación.
-     * 4) Guarda la respuesta del asistente y la devuelve al frontend.
-     */
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function mensaje(): void
     {
         $idEmpleado = Sesion::obtenerId();
@@ -81,10 +81,10 @@ class AsistenteIAController
 
         $datos = Request::jsonBody();
 
-        // --- Sanitización de la entrada ---
-        // strip_tags() evita que se guarde o reenvíe HTML/scripts, y
-        // mb_substr() limita el tamaño para no gastar de más en la API
-        // de IA ni permitir mensajes desproporcionados.
+        
+        
+        
+        
         $mensajeUsuario = trim(strip_tags((string) ($datos['mensaje'] ?? '')));
         $mensajeUsuario = mb_substr($mensajeUsuario, 0, 1000);
 
@@ -93,7 +93,7 @@ class AsistenteIAController
             return;
         }
 
-        // 1) Guardar el mensaje del usuario.
+        
         $interaccionUsuario = new InteraccionIA([
             'id_empleado' => $idEmpleado,
             'rol_mensaje' => 'usuario',
@@ -101,7 +101,7 @@ class AsistenteIAController
         ]);
         $interaccionUsuario->crear();
 
-        // 2) Contexto financiero real + historial reciente de la conversación.
+        
         $contexto  = $this->construirContextoFinanciero();
         $historial = InteraccionIA::listarPorEmpleado($idEmpleado, 10);
 
@@ -124,7 +124,7 @@ class AsistenteIAController
             ];
         }
 
-        // 3) Consultar al proveedor de IA.
+        
         [$respuestaIA, $errorIA] = $this->consultarProveedorIA($mensajesParaIA);
 
         if ($respuestaIA === null) {
@@ -132,7 +132,7 @@ class AsistenteIAController
             return;
         }
 
-        // 4) Guardar la respuesta del asistente y responder al frontend.
+        
         $interaccionAsistente = new InteraccionIA([
             'id_empleado' => $idEmpleado,
             'rol_mensaje' => 'asistente',
@@ -143,13 +143,13 @@ class AsistenteIAController
         Response::exito(['mensaje' => $respuestaIA], 'Respuesta generada correctamente.');
     }
 
-    /**
-     * limpiarHistorial()
-     * ------------------------------------------------------------
-     * DELETE /api/asistente-ia/historial
-     * Borra la conversación guardada de este Administrador (botón
-     * "Nueva conversación" del widget) y reinicia el contexto.
-     */
+    
+
+
+
+
+
+
     public function limpiarHistorial(): void
     {
         $idEmpleado = Sesion::obtenerId();
@@ -162,14 +162,14 @@ class AsistenteIAController
         Response::exito([], 'Conversación reiniciada.');
     }
 
-    /**
-     * construirContextoFinanciero()
-     * ------------------------------------------------------------
-     * Arma un resumen en texto plano de los últimos 30 días de
-     * `gestor_ventas`, reutilizando GestorVentas::generarReportePorRango()
-     * (ya existente desde el módulo de Caja) — así el contexto que
-     * recibe la IA son datos reales del negocio, no una simulación.
-     */
+    
+
+
+
+
+
+
+
     private function construirContextoFinanciero(): string
     {
         $hoy = date('Y-m-d');
@@ -206,16 +206,16 @@ class AsistenteIAController
         return $resumen;
     }
 
-    /**
-     * consultarProveedorIA($mensajes)
-     * ------------------------------------------------------------
-     * Único punto del sistema que habla, vía cURL, con la API externa
-     * de IA (config/IA.php). Devuelve [texto_respuesta, null] si todo
-     * salió bien, o [null, mensaje_de_error] si algo falló (red,
-     * credenciales, respuesta inesperada) — nunca lanza una excepción
-     * hacia afuera, para que mensaje() pueda responder un error
-     * controlado (HTTP 502) en vez de un error fatal de PHP.
-     */
+    
+
+
+
+
+
+
+
+
+
     private function consultarProveedorIA(array $mensajes): array
     {
         $config = require __DIR__ . '/../../config/IA.php';

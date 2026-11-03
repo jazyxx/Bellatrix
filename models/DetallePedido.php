@@ -1,16 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
 
-/**
- * ==========================================================================
- *  DetallePedido.php
- * ==========================================================================
- *  Mapea la tabla `detalle_pedido`. Cada fila es un producto dentro de
- *  un pedido ya confirmado (a diferencia de carrito_items, que es
- *  mientras el cliente TODAVÍA está comprando).
- *  Corresponde a la lista "productos" de la clase Pedido en el Diagrama.
- * ==========================================================================
- */
 class DetallePedido
 {
     public ?int $idDetallePedido;
@@ -18,8 +8,7 @@ class DetallePedido
     public int $idProducto;
     public int $cantidad;
     public float $precioUnitario;
-    
-    // Propiedad para guardar el nombre del producto
+  
     public ?string $nombreProducto;
 
     private PDO $pdo;
@@ -33,8 +22,8 @@ class DetallePedido
         $this->idProducto      = $datos['id_producto']       ?? 0;
         $this->cantidad        = isset($datos['cantidad']) ? (int)$datos['cantidad'] : 1;
         $this->precioUnitario  = isset($datos['precio_unitario']) ? (float)$datos['precio_unitario'] : 0.0;
-        
-        // Recibe el nombre del producto que vendrá del JOIN
+
+                
         $this->nombreProducto  = $datos['nombre_producto'] ?? null;
     }
 
@@ -61,15 +50,15 @@ class DetallePedido
     public static function listarPorPedido(int $idPedido): array
     {
         $pdo = Database::getConnection();
-        
-        $sql = "
+
+                $sql = "
             SELECT d.*, p.nombre AS nombre_producto
             FROM detalle_pedido d
             LEFT JOIN productos p ON d.id_producto = p.id_producto
             WHERE d.id_pedido = :pedido
         ";
-        
-        $stmt = $pdo->prepare($sql);
+
+                $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':pedido', $idPedido, PDO::PARAM_INT);
         $stmt->execute();
 

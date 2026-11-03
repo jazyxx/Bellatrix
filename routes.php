@@ -1,20 +1,5 @@
 <?php
 
-/**
- * ==========================================================================
- *  routes.php
- * ==========================================================================
- *  Registro central de TODAS las rutas de la API. index.php crea el
- *  objeto $router y luego incluye este archivo, así que aquí ya existe
- *  la variable $router lista para usarse.
- *
- *  Convención de protección por rol usada en este archivo:
- *    - Sin tercer argumento               -> ruta PÚBLICA (sin sesión).
- *    - [Middleware::class,'autenticado']  -> exige sesión, cualquier rol.
- *    - Middleware::rol([...])             -> exige sesión Y uno de esos roles.
- * ==========================================================================
- */
-
 require_once __DIR__ . '/app/controllers/AuthController.php';
 require_once __DIR__ . '/app/controllers/InventarioController.php';
 require_once __DIR__ . '/app/controllers/VentaController.php';
@@ -27,12 +12,6 @@ require_once __DIR__ . '/app/controllers/NotificacionController.php';
 require_once __DIR__ . '/app/controllers/AsistenteIAController.php';
 require_once __DIR__ . '/app/core/Middleware.php';
 
-/** @var Router $router Viene definido en index.php antes de incluir este archivo. */
-
-// ==========================================================================
-//  CU001 / CU010 — Autenticación (Fase 2, rutas PÚBLICAS)
-// ==========================================================================
-
 $router->post('/api/auth/login',       [AuthController::class, 'login']);
 $router->post('/api/auth/registro',    [AuthController::class, 'registro']);
 $router->post('/api/auth/recuperar',   [AuthController::class, 'recuperar']);
@@ -43,32 +22,23 @@ $router->get('/api/auth/me', [AuthController::class, 'me'], [
     [Middleware::class, 'autenticado'],
 ]);
 
-// ==========================================================================
-//  CU002 / CU009 / CU019 — Inventario, Materias Primas y Alertas (Fase 3)
-//  Administrador y Cajero pueden gestionar productos (según el CU002);
-//  la gestión de MATERIAS PRIMAS y ALERTAS queda restringida solo a
-//  Administrador (es una operación más delicada de control de insumos).
-// ==========================================================================
-
 $rolInventarioProductos = Middleware::rol(['Administrador', 'Cajero']);
 $rolSoloAdmin            = Middleware::rol(['Administrador']);
 
-// -- Productos --
+
 $router->get('/api/inventario/productos',                    [InventarioController::class, 'listarProductos'],      [$rolInventarioProductos]);
 $router->get('/api/inventario/productos/{id}',                [InventarioController::class, 'verProducto'],          [$rolInventarioProductos]);
-// PÚBLICA a propósito (sin middleware de rol): el catálogo de la tienda
-// en línea (index.html / catalogo.html) también necesita mostrar estas
-// imágenes sin que el visitante haya iniciado sesión.
+
 $router->get('/api/inventario/productos/{id}/foto',           [InventarioController::class, 'fotoProducto']);
 $router->post('/api/inventario/productos',                    [InventarioController::class, 'crearProducto'],        [$rolInventarioProductos]);
 $router->put('/api/inventario/productos/{id}',                 [InventarioController::class, 'actualizarProducto'],   [$rolInventarioProductos]);
 $router->post('/api/inventario/productos/{id}/ajustar-stock',  [InventarioController::class, 'ajustarStockProducto'], [$rolInventarioProductos]);
 $router->delete('/api/inventario/productos/{id}',              [InventarioController::class, 'eliminarProducto'],     [$rolSoloAdmin]);
 
-// -- Receta de un producto --
+
 $router->get('/api/inventario/productos/{id}/receta', [InventarioController::class, 'verRecetaDeProducto'], [$rolSoloAdmin]);
 
-// -- Materias primas --
+
 $router->get('/api/inventario/materias-primas',                    [InventarioController::class, 'listarMateriasPrimas'],   [$rolSoloAdmin]);
 $router->get('/api/inventario/materias-primas/bajo-stock',          [InventarioController::class, 'listarMateriasBajoStock'], [$rolSoloAdmin]);
 $router->post('/api/inventario/materias-primas',                    [InventarioController::class, 'crearMateriaPrima'],      [$rolSoloAdmin]);
@@ -76,18 +46,13 @@ $router->put('/api/inventario/materias-primas/{id}',                 [Inventario
 $router->post('/api/inventario/materias-primas/{id}/ajustar-stock',  [InventarioController::class, 'ajustarStockMateria'],    [$rolSoloAdmin]);
 $router->delete('/api/inventario/materias-primas/{id}',              [InventarioController::class, 'eliminarMateriaPrima'],   [$rolSoloAdmin]);
 
-// -- Recetas (líneas individuales producto <-> materia prima) --
+
 $router->post('/api/inventario/recetas',        [InventarioController::class, 'agregarLineaReceta'],  [$rolSoloAdmin]);
 $router->delete('/api/inventario/recetas/{id}',  [InventarioController::class, 'eliminarLineaReceta'], [$rolSoloAdmin]);
 
-// -- Alertas de stock --
+
 $router->get('/api/inventario/alertas',               [InventarioController::class, 'listarAlertas'], [$rolSoloAdmin]);
 $router->post('/api/inventario/alertas/{id}/atender', [InventarioController::class, 'atenderAlerta'], [$rolSoloAdmin]);
-
-// ==========================================================================
-//  CU005 / CU006 / CU007 / CU008 — Punto de Venta presencial (Fase 3)
-//  Administrador y Cajero pueden operar el punto de venta.
-// ==========================================================================
 
 $rolVentas = Middleware::rol(['Administrador', 'Cajero']);
 
@@ -97,13 +62,6 @@ $router->get('/api/ventas/{id}',             [VentaController::class, 'ver'],   
 $router->post('/api/ventas/{id}/productos',  [VentaController::class, 'agregarProducto'], [$rolVentas]);
 $router->post('/api/ventas/{id}/finalizar',  [VentaController::class, 'finalizar'],       [$rolVentas]);
 $router->post('/api/ventas/{id}/anular',     [VentaController::class, 'anular'],          [$rolVentas]);
-
-// ==========================================================================
-//  CU018 — Gestión de Cajas por Unidad y Bloqueo de Egresos (Fase 3)
-//  Consultar el estado de la caja de HOY: Administrador y Cajero.
-//  Registrar egresos/ingresos manuales y ver reportes históricos:
-//  solo Administrador (control financiero centralizado).
-// ==========================================================================
 
 $router->get('/api/cajas/hoy', [CajaController::class, 'hoy'], [$rolVentas]);
 
@@ -118,26 +76,12 @@ $router->get('/api/cajas/reportes/semanal', [CajaController::class, 'reporteSema
 $router->get('/api/cajas/reportes/mensual', [CajaController::class, 'reporteMensual'], [$rolSoloAdmin]);
 $router->get('/api/cajas/reportes/rango',   [CajaController::class, 'reporteRango'],   [$rolSoloAdmin]);
 
-// ==========================================================================
-//  Asistente Financiero con IA — módulo de Caja (admin_caja.html).
-//  Exclusivo Administrador, igual que los reportes y ajustes de caja:
-//  es información financiera sensible del negocio.
-// ==========================================================================
-
 $router->get('/api/asistente-ia/historial',    [AsistenteIAController::class, 'historial'],       [$rolSoloAdmin]);
 $router->post('/api/asistente-ia/mensaje',     [AsistenteIAController::class, 'mensaje'],         [$rolSoloAdmin]);
 $router->delete('/api/asistente-ia/historial', [AsistenteIAController::class, 'limpiarHistorial'],[$rolSoloAdmin]);
 
-// ==========================================================================
-//  CU011 — Catálogo de Productos (Fase 4, rutas PÚBLICAS, sin sesión)
-// ==========================================================================
-
 $router->get('/api/catalogo/productos',      [CatalogoController::class, 'listar']);
 $router->get('/api/catalogo/productos/{id}', [CatalogoController::class, 'ver']);
-
-// ==========================================================================
-//  CU012 — Carrito de Compras (Fase 4, exclusivo del rol Cliente)
-// ==========================================================================
 
 $rolCliente = Middleware::rol(['Cliente']);
 
@@ -146,14 +90,6 @@ $router->post('/api/carrito/productos',                [CarritoController::class
 $router->put('/api/carrito/productos/{idProducto}',     [CarritoController::class, 'modificarCantidad'], [$rolCliente]);
 $router->delete('/api/carrito/productos/{idProducto}',  [CarritoController::class, 'eliminarProducto'],  [$rolCliente]);
 $router->delete('/api/carrito',                        [CarritoController::class, 'vaciar'],           [$rolCliente]);
-
-// ==========================================================================
-//  CU013 / CU015 / CU017 — Pedidos en Línea (Fase 4)
-//  Confirmar pedido y ver "mis pedidos": exclusivo del Cliente.
-//  Gestionar pedidos (bandeja de trabajo + cambiar estado): Admin/Cajero.
-//  Ver el detalle de un pedido puntual: cualquiera autenticado (el
-//  propio controlador valida que un Cliente solo vea LOS SUYOS).
-// ==========================================================================
 
 $router->post('/api/pedidos', [PedidoController::class, 'confirmar'], [$rolCliente]);
 $router->get('/api/pedidos',  [PedidoController::class, 'misPedidos'], [$rolCliente]);
@@ -166,10 +102,6 @@ $router->get('/api/pedidos/{id}', [PedidoController::class, 'ver'], [
     [Middleware::class, 'autenticado'],
 ]);
 
-// ==========================================================================
-//  CU014 — Pago en Línea (Fase 4, pasarela SIMULADA, exclusivo del Cliente)
-// ==========================================================================
-
 $router->post('/api/pagos',                 [PagoController::class, 'iniciar'],   [$rolCliente]);
 $router->post('/api/pagos/{id}/confirmar',  [PagoController::class, 'confirmar'], [$rolCliente]);
 $router->post('/api/pagos/webhook-nequi',   [PagoController::class, 'webhookNequi']);
@@ -181,32 +113,18 @@ $router->get('/api/pagos/{id}/comprobante', [PagoController::class, 'comprobante
     [Middleware::class, 'autenticado'],
 ]);
 
-// ==========================================================================
-//  CU016 — Historial de Notificaciones (Fase 4, exclusivo del Cliente)
-// ==========================================================================
-
 $router->get('/api/notificaciones', [NotificacionController::class, 'misNotificaciones'], [$rolCliente]);
-
-// ==========================================================================
-//  Perfil de Cliente — Actualizar Datos
-// ==========================================================================
 
 $router->post('/api/actualizar-perfil', [AuthController::class, 'actualizarPerfil'], [$rolCliente]);
 
-// ==========================================================================
-//  CU003 — Gestión de Usuarios (Clientes y Empleados) — Solo Administrador
-// ==========================================================================
-
 require_once __DIR__ . '/app/controllers/UsuarioController.php';
 
-// -- Clientes --
 $router->get('/api/usuarios/clientes',               [UsuarioController::class, 'listarClientes'],    [$rolSoloAdmin]);
 $router->get('/api/usuarios/clientes/{id}',           [UsuarioController::class, 'verCliente'],        [$rolSoloAdmin]);
 $router->put('/api/usuarios/clientes/{id}',            [UsuarioController::class, 'actualizarCliente'], [$rolSoloAdmin]);
 $router->post('/api/usuarios/clientes/{id}/activar',   [UsuarioController::class, 'activarCliente'],    [$rolSoloAdmin]);
 $router->delete('/api/usuarios/clientes/{id}',         [UsuarioController::class, 'desactivarCliente'], [$rolSoloAdmin]);
 
-// -- Empleados (Administrador / Cajero) --
 $router->get('/api/usuarios/empleados',                 [UsuarioController::class, 'listarEmpleados'],          [$rolSoloAdmin]);
 $router->get('/api/usuarios/empleados/{id}',             [UsuarioController::class, 'verEmpleado'],              [$rolSoloAdmin]);
 $router->post('/api/usuarios/empleados',                 [UsuarioController::class, 'crearEmpleado'],            [$rolSoloAdmin]);

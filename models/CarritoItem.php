@@ -1,20 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
 
-/**
- * ==========================================================================
- *  CarritoItem.php
- * ==========================================================================
- *  Mapea la tabla `carrito_items`. Cada fila es UN producto dentro de UN
- *  carrito, con su cantidad y el precio unitario "congelado" en el
- *  momento en que se agregó (así, si el precio del producto cambia
- *  después, el carrito no se ve afectado retroactivamente).
- *
- *  En el Diagrama de Clases, esto corresponde a la lista "items" que
- *  tiene la clase CarritoDeCompras. Se modela como una clase aparte
- *  porque en la base de datos es una tabla independiente.
- * ==========================================================================
- */
 class CarritoItem
 {
     public ?int $idItem;
@@ -22,7 +8,7 @@ class CarritoItem
     public int $idProducto;
     public int $cantidad;
     public float $precioUnitario;
-    public ?string $nombreProducto; // Se llena al hacer JOIN con la tabla de productos
+    public ?string $nombreProducto; 
 
     private PDO $pdo;
 
@@ -38,7 +24,7 @@ class CarritoItem
         $this->nombreProducto = $datos['nombre_producto'] ?? null;
     }
 
-    /** Subtotal de esta línea = cantidad * precio unitario. */
+    
     public function subtotal(): float
     {
         return $this->cantidad * $this->precioUnitario;
@@ -78,12 +64,6 @@ class CarritoItem
         return $stmt->execute();
     }
 
-    /**
-     * obtenerPorCarritoYProducto()
-     * Como la tabla tiene una restricción UNIQUE (id_carrito, id_producto),
-     * este método sirve para saber si un producto YA está en el carrito
-     * antes de decidir si se inserta una fila nueva o se actualiza la cantidad.
-     */
     public static function obtenerPorCarritoYProducto(int $idCarrito, int $idProducto): ?CarritoItem
     {
         $pdo = Database::getConnection();
@@ -99,15 +79,15 @@ class CarritoItem
     public static function listarPorCarrito(int $idCarrito): array
     {
         $pdo = Database::getConnection();
+
+                
         
-        // Modificamos el SQL para hacer un JOIN con la tabla 'productos' 
-        // y traer la columna del nombre del producto (asumiendo que se llama 'nombre')
         $sql = "SELECT ci.*, p.nombre AS nombre_producto 
                 FROM carrito_items ci
                 INNER JOIN productos p ON ci.id_producto = p.id_producto
                 WHERE ci.id_carrito = :carrito";
-                
-        $stmt = $pdo->prepare($sql);
+
+                        $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':carrito', $idCarrito, PDO::PARAM_INT);
         $stmt->execute();
 

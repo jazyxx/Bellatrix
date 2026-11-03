@@ -1,12 +1,3 @@
-/**
- * ============================================================================
- *  recuperar.js — Lógica exclusiva de recuperar.html (CU010, mitad "olvidé
- *  mi contraseña"): pedir el código por correo, y luego usarlo junto con
- *  una nueva contraseña. Consume las rutas ya existentes:
- *    POST /api/auth/recuperar    { correo }
- *    POST /api/auth/restablecer  { token, nueva_contrasena }
- * ============================================================================
- */
 
 document.addEventListener('DOMContentLoaded', () => {
   const pasoSolicitar   = document.getElementById('paso-solicitar');
@@ -28,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     pasoRestablecer.style.display = esSolicitar ? 'none' : 'block';
   }
 
-  // Enlaces para saltar manualmente entre los dos pasos.
   document.getElementById('link-ya-tengo-codigo').addEventListener('click', (e) => {
     e.preventDefault();
     mostrarPaso('restablecer');
@@ -38,9 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarPaso('solicitar');
   });
 
-  // ============================================================
-  // PASO 1 — Solicitar el código
-  // ============================================================
   formSolicitar.addEventListener('submit', async (evento) => {
     evento.preventDefault();
     errorSolicitar.style.display = 'none';
@@ -62,18 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Por seguridad el backend siempre responde el mismo mensaje genérico,
-    // exista o no ese correo en el sistema (así nadie puede usar este
-    // formulario para averiguar qué correos están registrados).
     exitoSolicitar.textContent = respuesta.mensaje || 'Si el correo está registrado, te llegará un código.';
     exitoSolicitar.style.display = 'block';
 
     setTimeout(() => mostrarPaso('restablecer'), 1200);
   });
 
-  // ============================================================
-  // PASO 2 — Restablecer con el código
-  // ============================================================
   formRestablecer.addEventListener('submit', async (evento) => {
     evento.preventDefault();
     errorRestablecer.style.display = 'none';

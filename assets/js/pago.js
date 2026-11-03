@@ -1,20 +1,9 @@
-/**
- * ============================================================================
- *  pago.js — Lógica exclusiva de pago.html (CU014)
- * ============================================================================
- *  Maneja la vista de checkout final. Al igual que el carrito, exige que
- *  exista una sesión activa de rol Cliente. Captura el ID del pedido
- *  desde la URL (ej: pago.html?id_pedido=15) y envía la petición a la
- *  pasarela (simulada/Nequi).
- * ============================================================================
- */
 
 let idPedidoActual = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const usuario = await obtenerSesionActual();
 
-  // Validación estricta de sesión, igual que en carrito.js
   if (!usuario || usuario.tipo !== 'cliente') {
     sessionStorage.setItem('ambrosia_redirigir_despues_login', window.location.href);
     window.location.href = 'login.html?motivo=pago';
@@ -25,39 +14,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   inicializarVistaPago();
 });
 
-/**
- * inicializarVistaPago()
- * Captura el ID del pedido de los parámetros de la URL, configura
- * los textos en pantalla y activa los listeners del formulario.
- */
 function inicializarVistaPago() {
   const params = new URLSearchParams(window.location.search);
   idPedidoActual = params.get('id_pedido');
 
   if (!idPedidoActual) {
-    // Si entran a pago.html sin un pedido en la URL, los devolvemos al catálogo
     window.location.href = 'catalogo.html';
     return;
   }
 
   document.getElementById('pago-id-pedido').textContent = idPedidoActual;
 
-  // Listeners del formulario
   document.getElementById('medio-pago').addEventListener('change', manejarCambioMedioPago);
   document.getElementById('form-pago').addEventListener('submit', procesarPago);
 
-  // NUEVO: Listener para el botón de simulación
   const btnSimular = document.getElementById('btn-simular-pago');
   if (btnSimular) {
     btnSimular.addEventListener('click', simularPago);
   }
 }
 
-/**
- * manejarCambioMedioPago(e)
- * Escucha el select. Si eligen Nequi, muestra la caja del celular
- * y vuelve el input obligatorio. Si no, lo oculta y lo limpia.
- */
 function manejarCambioMedioPago(e) {
   const cajaNequi = document.getElementById('caja-celular-nequi');
   const inputCelular = document.getElementById('celular-nequi');
@@ -72,12 +48,6 @@ function manejarCambioMedioPago(e) {
   }
 }
 
-/**
- * procesarPago(e)
- * ------------------------------------------------------------
- * Implementa el CU014: Envía los datos a POST /api/pagos.
- * Si es Nequi, incluye el celular para el Webhook.
- */
 async function procesarPago(e) {
   e.preventDefault();
 
@@ -90,7 +60,6 @@ async function procesarPago(e) {
   boton.disabled = true;
   boton.textContent = 'Procesando...';
 
-  // Armamos el cuerpo de la petición
   const payload = {
     id_pedido: Number(idPedidoActual),
     medio_pago: medioPago
@@ -113,13 +82,9 @@ async function procesarPago(e) {
     return;
   }
 
-  // Si fue exitoso, transformamos la caja en un mensaje de éxito
   mostrarPantallaExito(medioPago);
 }
 
-/**
- * Ejecuta el flujo completo saltándose la pasarela real.
- */
 async function simularPago(e) {
   e.preventDefault();
 
@@ -132,7 +97,6 @@ async function simularPago(e) {
   botonSimular.disabled = true;
   botonSimular.textContent = 'Simulando...';
 
-  // 1. Iniciamos el pago con medio 'Otro'
   const resInicio = await apiFetch('api/pagos', {
     method: 'POST',
     body: { id_pedido: Number(idPedidoActual), medio_pago: 'Otro' },
@@ -147,7 +111,6 @@ async function simularPago(e) {
     return;
   }
 
-  // 2. Confirmamos el pago simulando la respuesta del banco
   const resConfirmar = await apiFetch(`api/pagos/${resInicio.datos.id_pago}/confirmar`, {
     method: 'POST',
     body: { 
@@ -165,15 +128,9 @@ async function simularPago(e) {
     return;
   }
 
-  // 3. Mostrar pantalla
   mostrarPantallaExito('Simulación');
 }
 
-/**
- * mostrarPantallaExito()
- * Reemplaza el formulario con un mensaje de estado vacío (similar
- * a la confirmación en carrito.js) informando los siguientes pasos.
- */
 function mostrarPantallaExito(medioPago) {
   const contenedor = document.querySelector('.resumen-carrito');
   let textoSecundario = 'Tu pago se ha confirmado exitosamente.';

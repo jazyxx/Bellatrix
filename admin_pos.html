@@ -80,9 +80,7 @@
 </head>
 <body>
 
-  <!-- Contenido principal que inyecta injectDashboardLayout -->
   <div class="row">
-    <!-- Catálogo de productos -->
     <div class="col-lg-7">
       <div class="db-card p-3">
         <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
@@ -91,7 +89,6 @@
             <h2 class="h4 mb-0 fuente-display">Punto de Venta</h2>
           </div>
           <div class="d-flex align-items-center gap-2">
-            <!-- Selector de Unidad de Negocio para Venta -->
             <select class="form-select form-db form-select-sm" id="pos-unidad-vender" style="width: 150px;">
               <option value="Pastelería">Pastelería</option>
               <option value="Heladería">Heladería</option>
@@ -104,7 +101,6 @@
           <input type="text" class="form-control form-db border-start-0" id="pos-buscar-input" placeholder="Buscar por nombre de producto..." style="padding-left: 0.25rem;">
         </div>
 
-        <!-- Categorías de Filtrado rápido -->
         <div class="pos-categories" id="pos-categories-container">
           <div class="pos-category-btn active" data-categoria="todos">Todos</div>
           <div class="pos-category-btn" data-categoria="Tortas">Tortas</div>
@@ -113,14 +109,12 @@
           <div class="pos-category-btn" data-categoria="Bebidas">Bebidas</div>
         </div>
 
-        <!-- Grilla de productos interactiva -->
         <div class="row g-2 pos-product-grid" id="pos-product-grid">
           <div class="col-12 text-center text-muted py-5">Cargando productos del POS…</div>
         </div>
       </div>
     </div>
 
-    <!-- Carrito Lateral y Cálculo de totales -->
     <div class="col-lg-5">
       <div class="pos-cart pos-cart-container p-3">
         <h3 class="h5 mb-3 fuente-display border-bottom pb-2 d-flex align-items-center justify-content-between">
@@ -128,7 +122,6 @@
           <span class="badge bg-secondary rounded-pill" id="cart-count-badge" style="font-size: 0.75rem;">0 items</span>
         </h3>
 
-        <!-- Lista de items agregados -->
         <div class="cart-items" id="pos-cart-items">
           <div class="text-center text-muted my-5 py-4">
             <div class="pos-icono-vacio"><i class="bi bi-basket3"></i></div>
@@ -136,7 +129,6 @@
           </div>
         </div>
 
-        <!-- Resumen de Totales -->
         <div class="cart-summary rounded p-3 mb-3">
           <div class="d-flex align-items-center justify-content-between mb-2">
             <span class="small text-muted">Subtotal:</span>
@@ -152,7 +144,6 @@
             <span class="fw-extrabold text-success" id="cart-total" style="font-size: 1.4rem;">$ 0</span>
           </div>
 
-          <!-- Cálculo de Cambio -->
           <div class="row g-2 align-items-center mb-3">
             <div class="col-sm-6">
               <label class="small text-muted d-block mb-1">Recibido:</label>

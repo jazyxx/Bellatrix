@@ -25,14 +25,11 @@ async function cargarPedidos() {
     if (p.estado === 'Confirmado' || p.estado === 'En preparación' || p.estado === 'Listo para recoger') badgeClass = 'badge-pastel-primary';
     if (p.estado === 'Cancelado') badgeClass = 'badge-pastel-danger';
 
-    // Construimos los botones dinámicamente según el estado
     let botonesAccion = '';
 
     if (p.estado === 'Cancelado') {
-      // Si está cancelado, mostramos un texto tenue en lugar de botones
       botonesAccion = `<span class="text-muted small">Cancelado</span>`;
     } else {
-      // Botón de Pago
       let botonPago = '';
       if (p.estado === 'Pendiente de pago') {
         botonPago = `<a href="pago.html?id_pedido=${p.id_pedido}" class="btn btn-sm btn-success py-1 mb-1 ms-1" title="Pagar ahora">
@@ -40,7 +37,6 @@ async function cargarPedidos() {
                      </a>`;
       }
 
-      // Botón de Cancelar
       let botonCancelar = '';
       if (p.estado === 'Pendiente de pago' || p.estado === 'Confirmado') {
         botonCancelar = `<button class="btn btn-sm btn-outline-danger py-1 px-2 mb-1 ms-1" onclick="verCancelar(${p.id_pedido})" title="Cancelar Pedido">
@@ -48,13 +44,11 @@ async function cargarPedidos() {
                          </button>`;
       }
 
-      // NUEVO: Botón de Recibo (Solo aparece si YA se pagó)
       let botonRecibo = '';
       if (p.estado !== 'Pendiente de pago') {
         botonRecibo = `<button class="btn btn-sm btn-outline-secondary py-1 px-2 mb-1 ms-1" onclick="abrirReciboVirtual(${p.id_pedido})" title="Imprimir Recibo"><i class="bi bi-receipt"></i></button>`;
       }
 
-      // Ensamblamos los botones
       botonesAccion = `
         <button class="btn btn-sm btn-db-primary py-1 mb-1" onclick="verTracking(${p.id_pedido})"><i class="bi bi-eye-fill me-1"></i>Rastrear</button>
         ${botonPago}
@@ -89,8 +83,8 @@ async function verTracking(idPedido) {
   const p = respuesta.datos;
   const card = document.getElementById('tracking-card');
   card.style.display = 'block';
-  
-  document.getElementById('tracking-titulo').textContent = `Seguimiento de Pedido #${p.id_pedido}`;
+
+    document.getElementById('tracking-titulo').textContent = `Seguimiento de Pedido #${p.id_pedido}`;
   document.getElementById('tracking-direccion').textContent = p.direccion_entrega || 'Recoge en Tienda';
   document.getElementById('tracking-total').textContent = formatearPrecioCOP(p.total);
 
@@ -145,21 +139,17 @@ function abrirReciboVirtual(idPedido) {
   window.open(`recibo_pedido.html?id=${idPedido}`, '_blank', 'width=800,height=700');
 }
 
-// =========================================================
-// NUEVAS FUNCIONES PARA CANCELAR PEDIDO
-// =========================================================
 
 function verCancelar(idPedido) {
-  cerrarTracking(); // Ocultamos el tracking si estaba abierto
+  cerrarTracking(); 
   const card = document.getElementById('cancelar-card');
-  
-  document.getElementById('cancelar-titulo').textContent = `Cancelar Pedido #${idPedido}`;
-  
-  // Le asignamos el ID al botón de confirmación
+
+    document.getElementById('cancelar-titulo').textContent = `Cancelar Pedido #${idPedido}`;
+
   const btnConfirmar = document.getElementById('btn-confirmar-cancelar');
   btnConfirmar.onclick = () => procesarCancelacion(idPedido);
-  
-  card.style.display = 'block';
+
+    card.style.display = 'block';
   card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -172,7 +162,6 @@ async function procesarCancelacion(idPedido) {
   btn.disabled = true;
   btn.textContent = 'Cancelando...';
 
-  // AQUÍ LLAMAMOS AL BACKEND PARA CAMBIAR EL ESTADO
   const respuesta = await apiFetch(`api/pedidos/${idPedido}/cancelar`, {
     method: 'PUT',
     body: { estado: 'Cancelado' }
@@ -183,9 +172,8 @@ async function procesarCancelacion(idPedido) {
 
   if (respuesta.exito) {
     cerrarCancelar();
-    cargarPedidos(); // Recargamos la tabla para ver el nuevo estado
-    
-    // Si tienes implementado el sistema de alertas del dashboard:
+    cargarPedidos(); 
+
     if (typeof showDashboardAlert === 'function') {
       showDashboardAlert(`El pedido #${idPedido} fue cancelado exitosamente.`, 'success');
     } else {

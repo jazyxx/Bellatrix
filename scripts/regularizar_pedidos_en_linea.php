@@ -1,18 +1,5 @@
 <?php
-/**
- * Issue #38 — Regulariza pedidos en línea que ya estaban pagados ANTES de que
- * existiera el registro automático de ventas: no tienen venta, no descontaron
- * stock y no suman en caja.
- *
- * Uso (solo consola):
- *   php scripts/regularizar_pedidos_en_linea.php            # simulación, no cambia nada
- *   php scripts/regularizar_pedidos_en_linea.php --aplicar  # registra las ventas
- *
- * OJO: al aplicar, se descuenta el stock del producto terminado y el ingreso se
- * suma a la caja 'En línea' de HOY (no de la fecha original del pedido). Si ya
- * ajustaste el stock a mano por estos pedidos, se descontaría dos veces:
- * revisa primero la simulación. Es idempotente (no duplica ventas).
- */
+
 if (PHP_SAPI !== 'cli') {
     http_response_code(403);
     exit('Solo se puede ejecutar desde la consola.');

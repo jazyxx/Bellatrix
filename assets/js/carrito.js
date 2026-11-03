@@ -1,15 +1,3 @@
-/**
- * ============================================================================
- *  carrito.js — Lógica exclusiva de carrito.html (CU012 + CU013)
- * ============================================================================
- *  ESTE ARCHIVO ES DONDE SE APLICA, DE FORMA MÁS ESTRICTA, LA REGLA DE
- *  "el checkout exige autenticación": apenas carga la página, se verifica
- *  la sesión ANTES de mostrar nada del carrito. Si no hay sesión de
- *  Cliente, se redirige de inmediato a login.html — a diferencia del
- *  catálogo (donde se puede mirar libremente y solo se exige sesión al
- *  intentar agregar un producto), aquí ni siquiera se muestra el carrito.
- * ============================================================================
- */
 
 document.addEventListener('DOMContentLoaded', async () => {
   const usuario = await obtenerSesionActual();
@@ -20,17 +8,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Ya sabemos que hay sesión: ahora sí pintamos el header normalmente.
   await inicializarHeader();
   await cargarCarrito();
 
   document.getElementById('boton-confirmar-pedido').addEventListener('click', confirmarPedido);
 });
 
-/**
- * cargarCarrito()
- * Pide el carrito actual (GET /api/carrito) y pinta cada línea.
- */
 async function cargarCarrito() {
   const respuesta = await apiFetch('api/carrito');
   document.getElementById('carrito-cargando').style.display = 'none';
@@ -51,11 +34,6 @@ async function cargarCarrito() {
   pintarItems(carrito);
 }
 
-/**
- * pintarItems(carrito)
- * Genera el HTML de cada línea del carrito con sus controles de
- * cantidad (+/-) y el botón de eliminar.
- */
 function pintarItems(carrito) {
   const lista = document.getElementById('lista-items');
   lista.innerHTML = carrito.items.map((item) => `
@@ -81,13 +59,6 @@ function pintarItems(carrito) {
   activarControlesDeLinea();
 }
 
-/**
- * activarControlesDeLinea()
- * Conecta los botones +/- y "Eliminar" de cada fila con la API.
- * Después de cualquier cambio, se vuelve a cargar todo el carrito
- * para mantener el subtotal siempre exacto (viene calculado por el
- * backend, nunca lo calculamos nosotros en el navegador).
- */
 function activarControlesDeLinea() {
   document.querySelectorAll('.fila-carrito').forEach((fila) => {
     const idProducto = fila.dataset.idProducto;
@@ -140,14 +111,6 @@ async function eliminarProducto(idProducto) {
   await actualizarContadorCarrito();
 }
 
-/**
- * confirmarPedido()
- * ------------------------------------------------------------
- * Implementa el CU013: confirma el carrito como Pedido formal.
- * Requiere una dirección de entrega. El pago (CU014) se hace en un
- * paso posterior, una vez el pedido ya quedó registrado — por ahora
- * solo mostramos la confirmación del pedido y su número.
- */
 async function confirmarPedido() {
   const direccion = document.getElementById('direccion-entrega').value.trim();
   const mensaje = document.getElementById('mensaje-pedido');

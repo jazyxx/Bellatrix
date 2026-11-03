@@ -1,44 +1,33 @@
-/**
- * assets/js/admin_insumos.js
- * Lógica EXCLUSIVA para gestión de materias primas, alertas y recetas.
- */
 
 let todasMateriasPrimas = [];
 let modalMateriaBs = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Guardia de sesión: EXCLUSIVO ADMINISTRADOR
   const usuario = await obtenerSesionActual();
   if (!usuario || usuario.rol !== 'Administrador') {
     window.location.href = 'login_empleado.html';
     return;
   }
 
-  // 2. Inyectar Layout del Dashboard (Activa el botón "Insumos" si existe)
   await injectDashboardLayout(usuario.rol, 'admin_insumos');
 
-  // 3. Inicializar instancias de modales Bootstrap
   modalMateriaBs = new bootstrap.Modal(document.getElementById('modal-materia'));
 
-  // 4. Activar visualización de componentes (ya no necesitan if esAdministrador)
   document.getElementById('form-agregar-receta-linea').style.display = 'flex';
-  
-  // 5. Inicializar listeners
+
   document.getElementById('form-modal-materia').addEventListener('submit', guardarMateriaPrima);
   document.getElementById('form-agregar-receta-linea').addEventListener('submit', agregarLineaReceta);
-  
-  // 6. Cargar datos iniciales
-  await cargarSelectoresProductos(); // Carga productos para el select de la receta
+
+  await cargarSelectoresProductos(); 
   await cargarAlertasAbastecimiento();
   await cargarMateriasPrimas();
 });
 
-// Función nueva para llenar el <select> de recetas sin tener la vitrina
 async function cargarSelectoresProductos() {
   const respuesta = await apiFetch('api/inventario/productos');
   if (!respuesta.exito || !respuesta.datos) return;
-  
-  const selector = document.getElementById('receta-producto-selector');
+
+    const selector = document.getElementById('receta-producto-selector');
   if (selector) {
     selector.innerHTML = `<option value="">Selecciona un Producto</option>` + 
       respuesta.datos.map(p => `<option value="${p.id_producto}">${escaparHtml(p.nombre)}</option>`).join('');
@@ -142,9 +131,6 @@ async function eliminarMateriaPrima(idMateria) {
   }
 }
 
-/* =================================================================
-   Recetas 
-   ================================================================= */
 async function cargarRecetaDeProducto() {
   const idProducto = document.getElementById('receta-producto-selector').value;
   const tbody = document.getElementById('tabla-lineas-receta');
@@ -214,9 +200,6 @@ async function eliminarLineaReceta(idReceta) {
   }
 }
 
-/* =================================================================
-   Alertas de Abastecimiento 
-   ================================================================= */
 async function cargarAlertasAbastecimiento() {
   const resp = await apiFetch('api/inventario/alertas');
   const tbody = document.getElementById('tabla-alertas-activas');

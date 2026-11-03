@@ -1,8 +1,3 @@
-/**
- * assets/js/dashboard_components.js
- * Inyecta dinámicamente el sidebar y el layout base unificado en las páginas de panel.
- * Diseñado con variables de diseño pastel y adaptable según el rol.
- */
 
 async function injectDashboardLayout(rol, activeTabId) {
   const sidebarLinks = {
@@ -34,11 +29,9 @@ async function injectDashboardLayout(rol, activeTabId) {
   const links = sidebarLinks[rol] || [];
   const usuario = await obtenerSesionActual();
   const userName = usuario ? usuario.nombre : 'Usuario';
-  
-  // Guarda el contenido actual del body
+
   const currentContent = document.body.innerHTML;
-  
-  // Reemplaza el body con la estructura de layout
+
   document.body.innerHTML = `
     <div class="dashboard-layout">
       <!-- Sidebar -->
@@ -97,17 +90,17 @@ async function cerrarSesionDashboard() {
 function showDashboardAlert(mensaje, tipo = 'success') {
   const container = document.getElementById('alert-container-dashboard');
   if (!container) return;
-  
-  const classMap = {
+
+    const classMap = {
     'success': 'badge-pastel-success',
     'danger': 'badge-pastel-danger',
     'warning': 'badge-pastel-warning',
     'primary': 'badge-pastel-primary'
   };
-  
-  const classAlert = tipo === 'danger' ? 'danger' : (tipo === 'warning' ? 'warning' : 'success');
-  
-  container.innerHTML = `
+
+    const classAlert = tipo === 'danger' ? 'danger' : (tipo === 'warning' ? 'warning' : 'success');
+
+    container.innerHTML = `
     <div class="alert alert-${classAlert} d-flex align-items-center justify-content-between p-3 border-0 rounded-3 mb-4 shadow-sm" style="background-color: var(--db-${tipo === 'danger' ? 'danger' : (tipo === 'warning' ? 'warning' : 'success')}); color: var(--db-espresso);">
       <div>
         <span class="badge-pastel ${classMap[tipo]} me-2">${tipo.toUpperCase()}</span>

@@ -5,52 +5,19 @@ require_once __DIR__ . '/../core/Request.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../core/Sesion.php';
 
-/**
- * ==========================================================================
- *  PagoController.php
- * ==========================================================================
- *  Implementa el CU014: "Realizar Pago en Línea". Conecta con una
- *  pasarela de pagos (PSE, tarjetas, Nequi) para procesar la
- *  transacción y confirmar el pedido.
- *
- *  ⚠️ IMPORTANTE — ALCANCE DE ESTA FASE:
- *  Tal como se dejó documentado desde la Fase 1 (en Pago.php) y lo
- *  pedía tu plan de trabajo para esta fase ("simulación/integración
- *  de Pasarela de Pagos"), aquí se construye una PASARELA SIMULADA:
- *  no hay ninguna llamada HTTP real a PSE/Nequi/etc. El endpoint
- *  confirmarPago() reemplaza, por ahora, al "webhook" que en un
- *  sistema en producción llegaría directamente desde la pasarela real.
- *
- *  Esto te permite tener el flujo de compra COMPLETO y funcional
- *  para hacer pruebas y para las Vistas (Fase 5/6), sin necesitar
- *  todavía credenciales reales de una pasarela de pagos. Cuando
- *  tengas esas credenciales, solo hay que reemplazar el CUERPO de
- *  confirmarPago() por la llamada real — la firma del método y todo
- *  lo que depende de él (Pago.php, Pedido.php) no cambia.
- * ==========================================================================
- */
 class PagoController
 {
-    /**
-     * iniciar()
-     * ------------------------------------------------------------
-     * POST /api/pagos  (rol: Cliente)
-     * Body: { "id_pedido": 7, "medio_pago": "PSE" }
-     *
-     * Crea el registro de intento de pago (estado 'Pendiente') por el
-     * monto exacto del pedido, usando Pago::procesarPago() (Fase 1).
-     */
-    // --- NUEVO: CONFIGURACIÓN NEQUI ---
+    
     private $apiUrlNequi = "https://api.sandbox.nequi.com";
     private $apiKeyNequi = "TU_API_KEY_AQUI"; 
     private $codigoComercioNequi = "NIT_900_AMBROSIA";
-    // ----------------------------------
+    
     public function iniciar(): void
     {
         $datos = Request::jsonBody();
         $idPedido = $datos['id_pedido'] ?? null;
         $medioPago = $datos['medio_pago'] ?? '';
-        $celular = $datos['celular'] ?? null; // NUEVO: Requerido para el Push de Nequi
+        $celular = $datos['celular'] ?? null; 
 
         $mediosValidos = ['PSE', 'Tarjeta crédito', 'Tarjeta débito', 'Nequi', 'Otro'];
         if (!is_numeric($idPedido)) {
@@ -82,7 +49,7 @@ class PagoController
             'medio_pago' => $medioPago,
         ]);
         $pago->procesarPago();
-        // --- NUEVO: INTEGRACIÓN REAL CON NEQUI ---
+        
         if ($medioPago === 'Nequi') {
             if (empty($celular)) {
                 Response::error("Para pagar con Nequi debes proporcionar el número de celular.", 400);
@@ -101,7 +68,7 @@ class PagoController
                 return;
             }
         }
-        // -----------------------------------------
+        
 
         Response::exito([
             'id_pago'    => $pago->idPago,
@@ -111,18 +78,6 @@ class PagoController
         ], 'Pago iniciado. Referencia generada; confirma la transacción para completar tu pedido.', 201);
     }
 
-    /**
-     * confirmar($id)
-     * ------------------------------------------------------------
-     * POST /api/pagos/{id}/confirmar  (rol: Cliente)
-     * Body: { "aprobado": true, "referencia_pasarela"?: "..." }
-     *
-     * SIMULA la respuesta que en producción vendría directamente de
-     * la pasarela real (PSE/Nequi/etc). Usa Pago::confirmarTransaccion()
-     * (Fase 1), que además — si el pago fue aprobado — avanza
-     * automáticamente el Pedido a estado 'Confirmado', lo cual a su
-     * vez dispara la notificación al cliente (CU016).
-     */
     public function confirmar(string $id): void
     {
         $pago = Pago::obtenerPorId((int) $id);
@@ -148,7 +103,7 @@ class PagoController
         try {
             $pago->confirmarTransaccion($aprobado, $referenciaPasarela);
         } catch (Exception $e) {
-            // Ej.: stock insuficiente al confirmar el pedido.
+            
             Response::error('No se pudo confirmar el pago: ' . $e->getMessage(), 422);
             return;
         }
@@ -164,12 +119,6 @@ class PagoController
         ], $mensaje);
     }
 
-    /**
-     * porPedido($idPedido)
-     * GET /api/pagos/pedido/{idPedido}  (rol: cualquiera autenticado)
-     * Lista los intentos de pago de un pedido (útil si el primer
-     * intento fue rechazado y el cliente tuvo que intentar de nuevo).
-     */
     public function porPedido(string $idPedido): void
     {
         $pedido = Pedido::obtenerPorId((int) $idPedido);
@@ -195,14 +144,6 @@ class PagoController
         Response::exito($datos);
     }
 
-    /**
-     * comprobante($id)
-     * GET /api/pagos/{id}/comprobante  (rol: cualquiera autenticado)
-     * Devuelve los datos estructurados del comprobante (Pago::
-     * generarComprobante(), Fase 1). La generación del PDF real del
-     * comprobante se deja para una fase posterior con la librería de
-     * PDFs adecuada; por ahora el frontend puede renderizarlo con estos datos.
-     */
     public function comprobante(string $id): void
     {
         $pago = Pago::obtenerPorId((int) $id);
@@ -219,15 +160,7 @@ class PagoController
 
         Response::exito($pago->generarComprobante());
     }
-    // =========================================================================
-    // NUEVOS MÉTODOS PARA INTEGRACIÓN NEQUI
-    // =========================================================================
-
-    /**
-     * webhookNequi()
-     * POST /api/pagos/webhook-nequi
-     * Endpoint público que recibe la respuesta asíncrona de Nequi.
-     */
+    
     public function webhookNequi(): void
     {
         $payloadRaw = file_get_contents('php://input');
@@ -243,8 +176,8 @@ class PagoController
         $referenciaNuestra = $datosWebhook['ResponseMessage']['ResponseBody']['any']['reference1'] ?? null;
 
         $pago = Pago::obtenerPorReferencia($referenciaNuestra); 
-        
-        if ($pago) {
+
+                if ($pago) {
             $aprobado = (strtoupper($estadoNequi) === 'APPROVED');
             try {
                 $pago->confirmarTransaccion($aprobado, $referenciaPasarela);
@@ -257,9 +190,6 @@ class PagoController
         echo json_encode(["status" => "success"]);
     }
 
-    /**
-     * Método privado para enviar la petición Push a Nequi
-     */
     private function enviarPushNequi($celular, $monto, $referenciaPedido, $tokenAcceso)
     {
         $endpoint = $this->apiUrlNequi . "/payments/v2/-services-paymentservice-unregisteredpayment";
@@ -309,15 +239,12 @@ class PagoController
         ];
     }
 
-    /**
-     * Método privado para generar el Token OAuth2
-     */
     private function generarTokenNequi()
     {
         $clientId = "TU_CLIENT_ID";
         $clientSecret = "TU_CLIENT_SECRET";
-        
-        $authUrl = "https://oauth.sandbox.nequi.com/oauth2/token?grant_type=client_credentials";
+
+                $authUrl = "https://oauth.sandbox.nequi.com/oauth2/token?grant_type=client_credentials";
         $credencialesBase64 = base64_encode($clientId . ":" . $clientSecret);
 
         $headers = [

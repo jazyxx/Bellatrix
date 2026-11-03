@@ -1,7 +1,3 @@
-/**
- * assets/js/login_empleado.js
- * Lógica exclusiva de login_empleado.html para ingreso de Administradores/Cajeros.
- */
 
 function mostrarError(mensaje) {
   const caja = document.getElementById('mensaje-error');
@@ -45,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Redirige al POS, el cual gestionará el ruteo interno de acuerdo al rol (Admin/Cajero)
     window.location.href = 'admin_pos.html';
   });
 });

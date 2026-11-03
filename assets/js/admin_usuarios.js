@@ -1,9 +1,3 @@
-/**
- * assets/js/admin_usuarios.js
- * Lógica de gestión de usuarios (CU003): CRUD de Empleados
- * (Administrador/Cajero) y gestión de Clientes desde el panel de
- * Administrador. Exclusivo del rol Administrador.
- */
 
 let todosLosEmpleados = [];
 let todosLosClientes = [];
@@ -12,34 +6,26 @@ let modalClienteBs = null;
 let modalContrasenaBs = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Guardia de sesión — exclusivo Administrador.
   const usuario = await obtenerSesionActual();
   if (!usuario || usuario.rol !== 'Administrador') {
     window.location.href = 'login_empleado.html';
     return;
   }
 
-  // 2. Inyectar Layout del Dashboard
   await injectDashboardLayout('Administrador', 'admin_usuarios');
 
-  // 3. Inicializar instancias de modales Bootstrap
   modalEmpleadoBs = new bootstrap.Modal(document.getElementById('modal-empleado'));
   modalClienteBs = new bootstrap.Modal(document.getElementById('modal-cliente'));
   modalContrasenaBs = new bootstrap.Modal(document.getElementById('modal-contrasena'));
 
-  // 4. Listeners de formularios
   document.getElementById('form-modal-empleado').addEventListener('submit', guardarEmpleado);
   document.getElementById('form-modal-cliente').addEventListener('submit', guardarCliente);
   document.getElementById('form-modal-contrasena').addEventListener('submit', guardarContrasenaEmpleado);
 
-  // 5. Cargar datos iniciales
   await cargarEmpleados();
   await cargarClientes();
 });
 
-/* =================================================================
-   EMPLEADOS (Administrador / Cajero)
-   ================================================================= */
 
 async function cargarEmpleados() {
   const resp = await apiFetch('api/usuarios/empleados');
@@ -142,10 +128,8 @@ async function abrirEditarEmpleado(idEmpleado) {
   document.getElementById('emp-nivel-acceso').value = e.nivel_acceso || 1;
   document.getElementById('emp-turno').value = e.turno || '';
 
-  // El rol no se puede editar (ver UsuarioController::actualizarEmpleado).
   document.getElementById('emp-rol').disabled = true;
 
-  // La contraseña se cambia solo desde "Restablecer contraseña".
   document.getElementById('emp-contrasena-container').style.display = 'none';
   document.getElementById('emp-contrasena').required = false;
 
@@ -245,9 +229,6 @@ async function guardarContrasenaEmpleado(evento) {
   showDashboardAlert('Contraseña actualizada correctamente.', 'success');
 }
 
-/* =================================================================
-   CLIENTES
-   ================================================================= */
 
 async function cargarClientes() {
   const resp = await apiFetch('api/usuarios/clientes');

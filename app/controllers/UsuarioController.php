@@ -7,38 +7,9 @@ require_once BASE_PATH . '/app/core/Request.php';
 require_once BASE_PATH . '/app/core/Response.php';
 require_once BASE_PATH . '/app/core/Sesion.php';
 
-/**
- * ==========================================================================
- *  UsuarioController.php
- * ==========================================================================
- *  Implementa el CU003 (Gestión de Usuarios) desde el panel de
- *  Administrador: listar, ver, crear, actualizar, restablecer contraseña
- *  y activar/desactivar (borrado lógico) tanto de Clientes como de
- *  Empleados (Administrador/Cajero).
- *
- *  Este controlador NO reinventa lógica de negocio: reutiliza los
- *  modelos Cliente, Empleado, Administrador y Cajero construidos en la
- *  Fase 1 (registrarse/crear, actualizar, desactivar/activar) y solo se
- *  encarga de leer el Request, validar los datos mínimos y traducir el
- *  resultado a una Response — el mismo rol que cumplen el resto de
- *  controladores del sistema (ver InventarioController, por ejemplo).
- *
- *  Todas las rutas de este controlador están protegidas en routes.php
- *  con Middleware::rol(['Administrador']): la gestión de cuentas de
- *  acceso al sistema es información sensible, exclusiva del rol con
- *  mayor nivel de confianza.
- * ==========================================================================
- */
 class UsuarioController
 {
-    // =================================================================
-    //  CLIENTES
-    // =================================================================
-
-    /**
-     * listarClientes()
-     * GET /api/usuarios/clientes
-     */
+ 
     public function listarClientes(): void
     {
         $clientes = Cliente::listarTodos();
@@ -46,10 +17,6 @@ class UsuarioController
         Response::exito($datos, 'Clientes obtenidos correctamente.');
     }
 
-    /**
-     * verCliente($id)
-     * GET /api/usuarios/clientes/{id}
-     */
     public function verCliente(string $id): void
     {
         $cliente = Cliente::obtenerPorId((int) $id);
@@ -60,16 +27,6 @@ class UsuarioController
         Response::exito($cliente->obtenerDatos());
     }
 
-    /**
-     * actualizarCliente($id)
-     * PUT /api/usuarios/clientes/{id}
-     * Body: { nombre?, telefono?, direccion_entrega? }
-     *
-     * El correo NUNCA se edita desde aquí, tampoco por el Administrador:
-     * es el identificador de acceso del cliente al sistema (misma regla
-     * que aplica en AuthController::actualizarPerfil(), la autogestión
-     * del propio cliente).
-     */
     public function actualizarCliente(string $id): void
     {
         $cliente = Cliente::obtenerPorId((int) $id);
@@ -101,10 +58,6 @@ class UsuarioController
         Response::exito($cliente->obtenerDatos(), 'Cliente actualizado correctamente.');
     }
 
-    /**
-     * activarCliente($id)
-     * POST /api/usuarios/clientes/{id}/activar
-     */
     public function activarCliente(string $id): void
     {
         $cliente = Cliente::obtenerPorId((int) $id);
@@ -116,13 +69,6 @@ class UsuarioController
         Response::exito($cliente->obtenerDatos(), 'Cliente activado correctamente.');
     }
 
-    /**
-     * desactivarCliente($id)
-     * DELETE /api/usuarios/clientes/{id}
-     * Borrado LÓGICO (activo = 0), igual que en el resto del sistema:
-     * eliminar físicamente al cliente rompería sus pedidos/pagos
-     * históricos relacionados por llave foránea.
-     */
     public function desactivarCliente(string $id): void
     {
         $cliente = Cliente::obtenerPorId((int) $id);
@@ -134,14 +80,6 @@ class UsuarioController
         Response::exito([], 'Cliente desactivado correctamente.');
     }
 
-    // =================================================================
-    //  EMPLEADOS (Administrador / Cajero)
-    // =================================================================
-
-    /**
-     * listarEmpleados()
-     * GET /api/usuarios/empleados
-     */
     public function listarEmpleados(): void
     {
         $empleados = Empleado::listarTodos();
@@ -149,12 +87,6 @@ class UsuarioController
         Response::exito($datos, 'Empleados obtenidos correctamente.');
     }
 
-    /**
-     * verEmpleado($id)
-     * GET /api/usuarios/empleados/{id}
-     * Se recarga como Administrador o Cajero (según su rol) para incluir
-     * en la respuesta el campo extra de su subtipo (nivel_acceso / turno).
-     */
     public function verEmpleado(string $id): void
     {
         $empleado = Empleado::obtenerPorId((int) $id);
@@ -170,20 +102,6 @@ class UsuarioController
         Response::exito(($completo ?? $empleado)->obtenerDatos());
     }
 
-    /**
-     * crearEmpleado()
-     * POST /api/usuarios/empleados
-     * Body: { nombre, apellido?, usuario, correo, contrasena, rol,
-     *         telefono?, salario?, fecha_contratacion?,
-     *         nivel_acceso? (si rol = 'Administrador'),
-     *         turno? (si rol = 'Cajero') }
-     *
-     * A diferencia del Cliente (que se registra solo desde la tienda),
-     * los empleados los da de alta el Administrador desde este panel —
-     * tal como estaba previsto desde la Fase 1 en el diagrama de clases,
-     * pero sin ruta expuesta todavía (ver CONTEXTO_PROYECTO_BELLATRIX.md,
-     * sección "Pendientes explícitos").
-     */
     public function crearEmpleado(): void
     {
         $datos = Request::jsonBody();
@@ -203,7 +121,7 @@ class UsuarioController
 
             Response::exito($empleado->obtenerDatos(), 'Empleado creado exitosamente.', 201);
         } catch (PDOException $e) {
-            // Código 23000 = violación de restricción única (usuario o correo duplicado).
+            
             if ($e->getCode() === '23000') {
                 Response::error('Ya existe un empleado con ese usuario o correo electrónico.', 409);
                 return;
@@ -214,18 +132,6 @@ class UsuarioController
         }
     }
 
-    /**
-     * actualizarEmpleado($id)
-     * PUT /api/usuarios/empleados/{id}
-     * Body: { nombre?, apellido?, usuario?, correo?, telefono?, salario? }
-     *
-     * El rol NO se puede cambiar desde aquí: un Cajero y un Administrador
-     * viven en tablas distintas relacionadas 1 a 1 con `empleado`, así que
-     * "cambiar de rol" implicaría mover la fila entre tablas. Si se
-     * necesita, la forma correcta es desactivar este empleado y crear uno
-     * nuevo con el rol correcto (mismo criterio que ya usa el sistema
-     * para clientes/empleados con el borrado lógico).
-     */
     public function actualizarEmpleado(string $id): void
     {
         $empleado = Empleado::obtenerPorId((int) $id);
@@ -278,16 +184,6 @@ class UsuarioController
         Response::exito($empleado->obtenerDatos(), 'Empleado actualizado correctamente.');
     }
 
-    /**
-     * cambiarContrasenaEmpleado($id)
-     * PUT /api/usuarios/empleados/{id}/contrasena
-     * Body: { nueva_contrasena }
-     *
-     * Los empleados no tienen flujo de "olvidé mi contraseña" (ese es
-     * exclusivo del Cliente, ver AuthController::recuperar()/restablecer()):
-     * es el Administrador quien restablece su contraseña manualmente
-     * desde aquí cuando lo necesiten.
-     */
     public function cambiarContrasenaEmpleado(string $id): void
     {
         $empleado = Empleado::obtenerPorId((int) $id);
@@ -311,10 +207,6 @@ class UsuarioController
         Response::exito([], 'Contraseña del empleado actualizada correctamente.');
     }
 
-    /**
-     * activarEmpleado($id)
-     * POST /api/usuarios/empleados/{id}/activar
-     */
     public function activarEmpleado(string $id): void
     {
         $empleado = Empleado::obtenerPorId((int) $id);
@@ -326,13 +218,6 @@ class UsuarioController
         Response::exito($empleado->obtenerDatos(), 'Empleado activado correctamente.');
     }
 
-    /**
-     * desactivarEmpleado($id)
-     * DELETE /api/usuarios/empleados/{id}
-     * Borrado LÓGICO (activo = 0), igual que en el resto del sistema:
-     * eliminar físicamente al empleado rompería el historial de
-     * ventas/pedidos que gestionó.
-     */
     public function desactivarEmpleado(string $id): void
     {
         $empleado = Empleado::obtenerPorId((int) $id);
@@ -340,9 +225,7 @@ class UsuarioController
             Response::error('El empleado solicitado no existe.', 404);
             return;
         }
-
-        // Un Administrador no puede desactivar su propia cuenta desde
-        // aquí (evita que se quede sin acceso al panel accidentalmente).
+     
         if ((int) $empleado->idEmpleado === (int) Sesion::obtenerId()) {
             Response::error('No puedes desactivar tu propia cuenta de administrador.', 422);
             return;
@@ -351,10 +234,6 @@ class UsuarioController
         $empleado->desactivar();
         Response::exito([], 'Empleado desactivado correctamente.');
     }
-
-    // =================================================================
-    //  VALIDACIONES
-    // =================================================================
 
     private function validarDatosEmpleado(array $datos, bool $esCreacion): array
     {
